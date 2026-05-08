@@ -163,8 +163,8 @@ void PacketGet (void)
     int			i;
     int			c;
     struct sockaddr_in	fromaddress;
-    int			fromlen;
-    doomdata_t		sw;
+    socklen_t       fromlen;
+    doomdata_t      sw;
 				
     fromlen = sizeof(fromaddress);
     c = recvfrom (insocket, &sw, sizeof(sw), 0
