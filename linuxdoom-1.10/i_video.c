@@ -3,6 +3,8 @@
 #include <stdarg.h>
 #include <errno.h>
 
+#include "raylib.h"
+
 #include "doomstat.h"
 #include "i_system.h"
 #include "v_video.h" // extern byte *screens[5]
@@ -12,10 +14,13 @@
 
 void I_ShutdownGraphics(void) {
     // called from I_Quit also I_Error in i_system.c
+    CloseWindow();
 }
 
 void I_StartFrame (void) {
     // called from d_main
+
+    if (WindowShouldClose()) I_Quit();
 }
 
 void I_GetEvent(void) {
@@ -37,6 +42,9 @@ void I_FinishUpdate (void) {
     // called from d_main
     // copied image data from screens[0] into some shm image and synced
     // optionally expanding the picture 2x 3x ...
+
+    BeginDrawing();
+    EndDrawing();
 }
 
 void I_ReadScreen (byte* scr) {
@@ -55,6 +63,8 @@ void I_InitGraphics(void) {
     // set up video backend and possibly override screen[0]
     // which is where rendering ultimately writes to
     // before FinishUpdate presents it, whatever is in screen[0]
+
+    InitWindow(320, 240, "DOOM");
 
     /*
     if (multiply == 1)
