@@ -82,9 +82,11 @@ all:	 $(O)/linuxxdoom
 clean:
 	rm -f *.o *~ *.flc
 	rm -f linux/*
+	rm -f linux/libraylib.a
+	rm -f raylib.h
 
-$(O)/linuxxdoom:	$(OBJS) $(O)/i_main.o
-	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) $(O)/i_main.o \
+$(O)/linuxxdoom:	$(OBJS) $(O)/i_main.o $(O)/libraylib.a
+	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) $(O)/i_main.o $(O)/libraylib.a \
 	-o $(O)/linuxxdoom $(LIBS)
 
 $(O)/%.o:	%.c
@@ -93,3 +95,14 @@ $(O)/%.o:	%.c
 #############################################################
 #
 #############################################################
+
+RAYLIB_VERSION = 6.0
+RAYLIB_URL = https://github.com/raysan5/raylib.git
+
+raylib :
+	git clone --depth=1 --branch=$(RAYLIB_VERSION) $(RAYLIB_URL) raylib
+
+$(O)/libraylib.a : raylib
+	$(MAKE) -C raylib/src
+	cp raylib/src/libraylib.a $(O)/
+	cp raylib/src/raylib.h .
