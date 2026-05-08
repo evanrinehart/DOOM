@@ -504,7 +504,7 @@ void D_AdvanceDemo (void)
 	    if ( gamemode == retail )
 	      pagename = "CREDIT";
 	    else
-	      pagename = "HELP2"; // causes ultimate doom to bail out
+	      pagename = "HELP2";
 	}
 	break;
       case 5:
