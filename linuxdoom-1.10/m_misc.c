@@ -209,12 +209,6 @@ extern int	showMessages;
 extern	int	numChannels;
 
 
-// UNIX hack, to be removed.
-#ifdef SNDSERV
-extern char*	sndserver_filename;
-extern int	mb_used;
-#endif
-
 #ifdef LINUX
 char*		mousetype;
 char*		mousedev;
@@ -254,13 +248,6 @@ default_t	defaults[] =
     {"key_use",&key_use, ' '},
     {"key_strafe",&key_strafe, KEY_RALT},
     {"key_speed",&key_speed, KEY_RSHIFT},
-
-// UNIX hack, to be removed. 
-#ifdef SNDSERV
-    {"sndserver", &sndserver_filename, (intptr_t)"sndserver", 0, 0, 'S'},
-    {"mb_used", &mb_used, 2},
-#endif
-    
 #endif
 
 #ifdef LINUX

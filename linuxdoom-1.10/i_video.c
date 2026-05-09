@@ -27,7 +27,6 @@ static int window_h;
 static int offset_x;
 
 static long frame_num = 0;
-static long tic = 0;
 
 void I_ShutdownGraphics(void) {
     // called from I_Quit also I_Error in i_system.c

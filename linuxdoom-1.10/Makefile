@@ -93,6 +93,7 @@ $(O)/%.o:	%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(O)/i_video.o : i_video.c raylib.h
+$(O)/i_sound.o : i_sound.c raylib.h
 
 #############################################################
 #
