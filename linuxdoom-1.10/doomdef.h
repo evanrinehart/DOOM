@@ -105,14 +105,7 @@ typedef enum
 #define	SCREEN_MUL		1
 #define	INV_ASPECT_RATIO	0.625 // 0.75, ideally
 
-// Defines suck. C sucks.
-// C++ might sucks for OOP, but it sure is a better C.
-// So there.
-#define SCREENWIDTH  320
-//SCREEN_MUL*BASE_WIDTH //320
-#define SCREENHEIGHT 200
-//(int)(SCREEN_MUL*BASE_WIDTH*INV_ASPECT_RATIO) //200
-
+#include "common.h"
 
 
 
@@ -242,43 +235,44 @@ typedef enum
 
 
 
+#include "doomkeys.h"
 
 //
 // DOOM keyboard definition.
 // This is the stuff configured by Setup.Exe.
 // Most key data are simple ascii (uppercased).
 //
-#define KEY_RIGHTARROW	0xae
-#define KEY_LEFTARROW	0xac
-#define KEY_UPARROW	0xad
-#define KEY_DOWNARROW	0xaf
-#define KEY_ESCAPE	27
-#define KEY_ENTER	13
-#define KEY_TAB		9
-#define KEY_F1		(0x80+0x3b)
-#define KEY_F2		(0x80+0x3c)
-#define KEY_F3		(0x80+0x3d)
-#define KEY_F4		(0x80+0x3e)
-#define KEY_F5		(0x80+0x3f)
-#define KEY_F6		(0x80+0x40)
-#define KEY_F7		(0x80+0x41)
-#define KEY_F8		(0x80+0x42)
-#define KEY_F9		(0x80+0x43)
-#define KEY_F10		(0x80+0x44)
-#define KEY_F11		(0x80+0x57)
-#define KEY_F12		(0x80+0x58)
+#define KEY_RIGHTARROW	DOOM_KEY_RIGHTARROW
+#define KEY_LEFTARROW	DOOM_KEY_LEFTARROW
+#define KEY_UPARROW	    DOOM_KEY_UPARROW
+#define KEY_DOWNARROW	DOOM_KEY_DOWNARROW
+#define KEY_ESCAPE	    DOOM_KEY_ESCAPE
+#define KEY_ENTER	    DOOM_KEY_ENTER
+#define KEY_TAB		    DOOM_KEY_TAB
+#define KEY_F1		    DOOM_KEY_F1
+#define KEY_F2		    DOOM_KEY_F2
+#define KEY_F3		    DOOM_KEY_F3
+#define KEY_F4		    DOOM_KEY_F4
+#define KEY_F5		    DOOM_KEY_F5
+#define KEY_F6		    DOOM_KEY_F6
+#define KEY_F7		    DOOM_KEY_F7
+#define KEY_F8		    DOOM_KEY_F8
+#define KEY_F9		    DOOM_KEY_F9
+#define KEY_F10		    DOOM_KEY_F10
+#define KEY_F11		    DOOM_KEY_F11
+#define KEY_F12		    DOOM_KEY_F12
 
-#define KEY_BACKSPACE	127
-#define KEY_PAUSE	0xff
+#define KEY_BACKSPACE	DOOM_KEY_BACKSPACE
+#define KEY_PAUSE	    DOOM_KEY_PAUSE
 
-#define KEY_EQUALS	0x3d
-#define KEY_MINUS	0x2d
+#define KEY_EQUALS	    DOOM_KEY_EQUALS
+#define KEY_MINUS	    DOOM_KEY_MINUS
 
-#define KEY_RSHIFT	(0x80+0x36)
-#define KEY_RCTRL	(0x80+0x1d)
-#define KEY_RALT	(0x80+0x38)
+#define KEY_RSHIFT	    DOOM_KEY_RSHIFT
+#define KEY_RCTRL	    DOOM_KEY_RCTRL
+#define KEY_RALT	    DOOM_KEY_RALT
 
-#define KEY_LALT	KEY_RALT
+#define KEY_LALT	    DOOM_KEY_LALT
 
 
 
