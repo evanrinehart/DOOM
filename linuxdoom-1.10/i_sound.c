@@ -72,9 +72,9 @@ void audio_callback(void *bufferData, unsigned int num_frames) {
     format.containerSize = sizeof (int16_t);
     format.sampleOffset = sizeof (int16_t) * 2;
 
-    int num_samples = num_frames * 2; // stereo;
+    unsigned num_samples = num_frames * 2; // stereo;
 
-    for (int i = 0; i < num_samples; i++) {
+    for (unsigned i = 0; i < num_samples; i++) {
         short *s = bufferData + 2*i;
         *s = 0;
     }
@@ -86,7 +86,7 @@ void audio_callback(void *bufferData, unsigned int num_frames) {
 
     if (!music_playing) return; // a nicer cutoff would be nicer
 
-    int n = adl_playFormat(midi_player, num_samples, bufferData, bufferData + 2, &format);
+    int n = adl_playFormat(midi_player, (int)num_samples, bufferData, bufferData + 2, &format);
     if (n == 0) {
         // end of song
     }
@@ -94,7 +94,7 @@ void audio_callback(void *bufferData, unsigned int num_frames) {
         printf("audio_callback: adl_playFormat error\n");
     }
 
-    for (int i = 0; i < num_samples; i++) {
+    for (unsigned i = 0; i < num_samples; i++) {
         short *s = bufferData + 2*i;
         float value = *s;
         value *= boost;
@@ -148,8 +148,6 @@ I_StartSound
   int		pitch,
   int		priority )
 {
-    //sfxinfo_t *info = &S_sfx[id];
-    //printf("I_StartSound name=%s vol=%d sep=%d pitch=%d priority=%d\n", info->name, vol, sep, pitch, priority);
 
     int handle = -1;
     for (int i = 1; i < 64; i++) {
@@ -174,7 +172,6 @@ I_StartSound
 }
 
 void I_StopSound (int handle) {
-    //printf("I_StopSound(%d)\n", handle);
     if (!sound_slot_full[handle]) return;
     StopSound(sound_slot[handle]);
     UnloadSoundAlias(sound_slot[handle]);
@@ -182,12 +179,10 @@ void I_StopSound (int handle) {
 }
 
 int I_SoundIsPlaying(int handle) {
-    //printf("I_SoundIsPlaying(%d)\n", handle);
     if (!sound_slot_full[handle]) return 0;
     if (!IsSoundPlaying(sound_slot[handle])) {
         UnloadSoundAlias(sound_slot[handle]);
         sound_slot_full[handle] = false;
-        //printf("retiring sound with handle %d\n", handle);
         return 0;
     }
     else {
@@ -253,15 +248,30 @@ Wave load_sound_from_wad(char *name) {
     int srate = *((short*)(data + 2));
     int num_samples = *((int*)(data + 4)) - 32;
 
+    Wave w = {0,0,0,0,NULL};
+    if (format != 3) {
+        printf("bad format in sfx lump header\n");
+        return w;
+    }
+
+    if (num_samples < 0) {
+        printf("bad number of samples in sfx lump header\n");
+        return w;
+    }
+
+    if (srate < 0) {
+        printf("bad sample rate in sfx lump header\n");
+        return w;
+    }
+
     unsigned char *samples = Z_Malloc(num_samples, PU_STATIC, 0);
 
     //printf("%s %d %d %d %p\n", name, format, srate, num_samples, samples);
-    memcpy(samples, data + 24, num_samples);
+    memcpy(samples, data + 24, (size_t)num_samples);
     Z_Free(data);
 
-    Wave w;
-    w.frameCount = num_samples;
-    w.sampleRate = srate;
+    w.frameCount = (unsigned) num_samples;
+    w.sampleRate = (unsigned) srate;
     w.sampleSize = 8;
     w.channels = 1;
     w.data = samples;
@@ -340,6 +350,8 @@ void I_ShutdownMusic(void)	{
     while (callback_should_end < 2) {
         usleep(1000);
     }
+
+    if (registered_song.data) free(registered_song.data);
 
     //PauseAudioStream(main_stream);
     UnloadAudioStream(main_stream);
