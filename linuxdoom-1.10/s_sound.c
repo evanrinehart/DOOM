@@ -364,7 +364,7 @@ S_StartSoundAtVolume
   if (sfx->lumpnum < 0)
     sfx->lumpnum = I_GetSfxLumpNum(sfx);
 
-#ifndef SNDSRV
+#ifndef SNDSERV
   // cache data if necessary
   if (!sfx->data)
   {
@@ -630,6 +630,7 @@ void S_SetMusicVolume(int volume)
 
 void S_SetSfxVolume(int volume)
 {
+    printf("S_SetSfxVolume(%d)\n", volume);
 
     if (volume < 0 || volume > 127)
 	I_Error("Attempt to set sfx volume at %d", volume);
@@ -677,7 +678,7 @@ S_ChangeMusic
 
     // load & register it
     music->data = (void *) W_CacheLumpNum(music->lumpnum, PU_MUSIC);
-    music->handle = I_RegisterSong(music->data);
+    music->handle = I_RegisterSong(music->data, W_LumpLength(music->lumpnum));
 
     // play it
     I_PlaySong(music->handle, looping);

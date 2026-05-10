@@ -7,6 +7,8 @@
 #include <stdarg.h>
 #include <errno.h>
 
+#include <unistd.h>
+
 #include "raylib.h"
 
 #include "common.h"
@@ -160,7 +162,11 @@ void I_FinishUpdate (void) {
     Vector2 zero = {0,0};
     DrawTexturePro(screen_tex, src, dst, zero, 0.0f, WHITE);
 
+    //DrawFPS(1,1);
+
     EndDrawing();
+
+    usleep(25000);
 
     frame_num++;
 }

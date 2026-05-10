@@ -107,7 +107,7 @@ int  I_GetTime (void)
 void I_Init (void)
 {
     I_InitSound();
-    //  I_InitGraphics();
+    I_InitMusic();
 }
 
 //
@@ -131,6 +131,7 @@ void I_WaitVBL(int count)
 #ifdef SUN
     sleep(0);
 #else
+    printf("WaitVBL(%d)\n", count);
     usleep (count * (1000000/70) );                                
 #endif
 #endif

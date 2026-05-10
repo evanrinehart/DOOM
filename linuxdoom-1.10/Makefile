@@ -8,7 +8,7 @@ CC=  gcc  # gcc or g++
 
 CFLAGS=-g -Wall -Wno-unused-const-variable -Wno-unused-but-set-variable -DNORMALUNIX -DLINUX # -DUSEASM
 LDFLAGS=-L/usr/X11R6/lib
-LIBS=-lXext -lX11 -lm
+LIBS=-lXext -lX11 -lm -lstdc++
 
 # subdirectory for objects
 O=linux
@@ -81,12 +81,12 @@ all:	 $(O)/linuxxdoom
 
 clean:
 	rm -f *.o *~ *.flc
-	rm -f linux/*
+	rm -f linux/*.o
 	rm -f linux/libraylib.a
 	rm -f raylib.h
 
-$(O)/linuxxdoom:	$(OBJS) $(O)/i_main.o $(O)/libraylib.a
-	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) $(O)/i_main.o $(O)/libraylib.a \
+$(O)/linuxxdoom:	$(OBJS) $(O)/i_main.o $(O)/libraylib.a $(O)/libADLMIDI.a
+	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) $(O)/i_main.o $(O)/libraylib.a $(O)/libADLMIDI.a \
 	-o $(O)/linuxxdoom $(LIBS)
 
 $(O)/%.o:	%.c
@@ -111,3 +111,18 @@ raylib.h : raylib
 $(O)/libraylib.a : raylib
 	$(MAKE) -C raylib/src
 	cp raylib/src/libraylib.a $(O)/
+
+ADLMIDI_VERSION = v1.6.1
+ADLMIDI_URL = https://github.com/Wohlstand/libADLMIDI
+
+adlmidi :
+	git clone --depth=1 --branch=$(ADLMIDI_VERSION) $(ADLMIDI_URL) adlmidi
+
+adlmidi.h : adlmidi
+	cp adlmidi/include/adlmidi.h .
+
+$(O)/libADLMIDI.a : adlmidi
+	mkdir -p adlmidi/build
+	cd adlmidi/build && cmake -DCMAKE_BUILD_TYPE=Release .. && make
+	cp adlmidi/include/adlmidi.h .
+	cp adlmidi/build/libADLMIDI.a linux/
