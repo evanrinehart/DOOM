@@ -30,6 +30,8 @@ static int offset_x;
 
 static long frame_num = 0;
 
+static bool mouse_captured = 0;
+
 void I_ShutdownGraphics(void) {
     // called from I_Quit also I_Error in i_system.c
 
@@ -121,13 +123,16 @@ void I_GetEvent(void) {
         IsMouseButtonReleased(1) ||
         IsMouseButtonReleased(2);
 
-    if (button || motion) {
+    if (mouse_captured && (button || motion)) {
         ev.type = ev_mouse;
         ev.data1 = IsMouseButtonDown(0) | (IsMouseButtonDown(1) ? 2 : 0) | (IsMouseButtonDown(2) ? 4 : 0);
         ev.data2 = delta.x;
         ev.data3 = -delta.y;
         D_PostEvent(&ev);
     }
+
+    if (IsKeyDown(KEY_GRAVE)) { EnableCursor(); mouse_captured = false; }
+    if (IsMouseButtonDown(1)) { DisableCursor(); mouse_captured = true; }
 
 }
 
@@ -212,6 +217,8 @@ void I_InitGraphics(void) {
         if (M_CheckParm("-2")) multiply = 2;
         if (M_CheckParm("-3")) multiply = 3;
         if (M_CheckParm("-4")) multiply = 4;
+        if (M_CheckParm("-5")) multiply = 5;
+        if (M_CheckParm("-10")) multiply = 10;
 
         window_w = 320 * multiply;
         window_h = 240 * multiply;
@@ -224,7 +231,5 @@ void I_InitGraphics(void) {
     screen_tex = LoadTextureFromImage(screen_img);
 
     SetExitKey(KEY_HOME);
-
-    DisableCursor();
 
 }
