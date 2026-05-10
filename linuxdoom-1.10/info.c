@@ -134,7 +134,7 @@ void A_BrainExplode();
 
 state_t	states[NUMSTATES] = {
     {SPR_TROO,0,-1,{NULL},S_NULL,0,0},	// S_NULL
-    {SPR_SHTG,4,0,{A_Light0},S_NULL,0,0},	// S_LIGHTDONE
+    {SPR_SHTG,4,0,{.acv=A_Light0},S_NULL,0,0},	// S_LIGHTDONE
     {SPR_PUNG,0,1,{A_WeaponReady},S_PUNCH,0,0},	// S_PUNCH
     {SPR_PUNG,0,1,{A_Lower},S_PUNCHDOWN,0,0},	// S_PUNCHDOWN
     {SPR_PUNG,0,1,{A_Raise},S_PUNCHUP,0,0},	// S_PUNCHUP
