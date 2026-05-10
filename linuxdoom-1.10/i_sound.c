@@ -163,7 +163,7 @@ I_StartSound
 
     Sound alias = LoadSoundAlias(sound_library[id]);
     SetSoundVolume(alias, (float)vol / 15);
-    SetSoundPan(sound_slot[handle], (float)(sep - 128) / 128);
+    SetSoundPan(alias, (float)(sep - 128) / 128);
 
     sound_slot[handle] = alias;
     sound_slot_full[handle] = true;
