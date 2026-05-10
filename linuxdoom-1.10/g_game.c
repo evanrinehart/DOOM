@@ -435,6 +435,24 @@ void G_BuildTiccmd (ticcmd_t* cmd)
 	cmd->buttons = BT_SPECIAL | BTS_SAVEGAME | (savegameslot<<BTS_SAVESHIFT); 
     } 
 } 
+
+int GetSkyForMap(int gamemode, int episode, int map) {
+    if ( gamemode == commercial) {
+        if (gamemap < 12) return R_TextureNumForName ("SKY1");
+        else if (gamemap < 21) return R_TextureNumForName ("SKY2");
+        else return R_TextureNumForName ("SKY3");
+    }
+
+    switch (episode) {
+        case 1: return R_TextureNumForName ("SKY1");
+        case 2: return R_TextureNumForName ("SKY2");
+        case 3: return R_TextureNumForName ("SKY3");
+        case 4:	// Special Edition sky
+            return R_TextureNumForName ("SKY4");
+    }
+
+    return R_TextureNumForName ("SKY1");
+}
  
 
 //
@@ -455,17 +473,7 @@ void G_DoLoadLevel (void)
 
     // DOOM determines the sky texture to be used
     // depending on the current episode, and the game version.
-    if ( (gamemode == commercial)
-	 || ( gamemode == (int)pack_tnt )
-	 || ( gamemode == (int)pack_plut ) )
-    {
-	skytexture = R_TextureNumForName ("SKY3");
-	if (gamemap < 12)
-	    skytexture = R_TextureNumForName ("SKY1");
-	else
-	    if (gamemap < 21)
-		skytexture = R_TextureNumForName ("SKY2");
-    }
+    skytexture = GetSkyForMap(gamemode, gameepisode, gamemap);
 
     levelstarttic = gametic;        // for time calculation
     
@@ -1381,7 +1389,6 @@ G_InitNew
     if (skill > sk_nightmare) 
 	skill = sk_nightmare;
 
-
     // This was quite messy with SPECIAL and commented parts.
     // Supposedly hacks to make the latest edition work.
     // It might not work properly.
@@ -1454,31 +1461,7 @@ G_InitNew
     viewactive = true;
     
     // set the sky map for the episode
-    if ( gamemode == commercial)
-    {
-	skytexture = R_TextureNumForName ("SKY3");
-	if (gamemap < 12)
-	    skytexture = R_TextureNumForName ("SKY1");
-	else
-	    if (gamemap < 21)
-		skytexture = R_TextureNumForName ("SKY2");
-    }
-    else
-	switch (episode) 
-	{ 
-	  case 1: 
-	    skytexture = R_TextureNumForName ("SKY1"); 
-	    break; 
-	  case 2: 
-	    skytexture = R_TextureNumForName ("SKY2"); 
-	    break; 
-	  case 3: 
-	    skytexture = R_TextureNumForName ("SKY3"); 
-	    break; 
-	  case 4:	// Special Edition sky
-	    skytexture = R_TextureNumForName ("SKY4");
-	    break;
-	} 
+    skytexture = GetSkyForMap(gamemode, episode, map);
  
     G_DoLoadLevel (); 
 } 
