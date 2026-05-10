@@ -84,6 +84,7 @@ clean:
 	rm -f linux/*.o
 	rm -f linux/libraylib.a
 	rm -f raylib.h
+	rm -f adlmidi.h
 
 $(O)/linuxxdoom:	$(OBJS) $(O)/i_main.o $(O)/libraylib.a $(O)/libADLMIDI.a
 	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) $(O)/i_main.o $(O)/libraylib.a $(O)/libADLMIDI.a \
@@ -93,7 +94,7 @@ $(O)/%.o:	%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(O)/i_video.o : i_video.c raylib.h
-$(O)/i_sound.o : i_sound.c raylib.h
+$(O)/i_sound.o : i_sound.c raylib.h adlmidi.h
 
 #############################################################
 #
