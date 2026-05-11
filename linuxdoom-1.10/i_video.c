@@ -90,12 +90,37 @@ int translate_key(int rkey) {
 
 static bool down_keys[500];
 
+struct joystick_state {
+    int axis1;
+    int axis2;
+    int buttons;
+};
+
+struct joystick_state poll_joystick() {
+    struct joystick_state js = {0,0,0};
+    if (!IsGamepadAvailable(0)) return js;
+    float a1 = GetGamepadAxisMovement(0, 0);
+    js.axis1 = a1 < -0.1 ? -1 : (a1 > 0.1 ? 1 : 0);
+    float a2 = GetGamepadAxisMovement(0, 1);
+    js.axis2 = a2 < -0.1 ? -1 : (a2 > 0.1 ? 1 : 0);
+    js.buttons |= IsGamepadButtonDown(0, GAMEPAD_BUTTON_RIGHT_FACE_LEFT) ? 1 : 0;
+    js.buttons |= IsGamepadButtonDown(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN) ? 2 : 0;
+    js.buttons |= IsGamepadButtonDown(0, GAMEPAD_BUTTON_RIGHT_FACE_UP) ? 4 : 0;
+    js.buttons |= IsGamepadButtonDown(0, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT) ? 8 : 0;
+    return js;
+}
+
+struct joystick_state joystate = {0,0,0};
+
 void I_GetEvent(void) {
     // was called from I_StartTic
     // get events and post them with D_PostEvent
     // also updated mousemoved
 
     event_t ev;
+    ev.data1 = 0;
+    ev.data2 = 0;
+    ev.data3 = 0;
 
     for (int key = GetKeyPressed(); key; key = GetKeyPressed()) {
         ev.type = ev_keydown;
@@ -128,6 +153,20 @@ void I_GetEvent(void) {
         ev.data1 = IsMouseButtonDown(0) | (IsMouseButtonDown(1) ? 2 : 0) | (IsMouseButtonDown(2) ? 4 : 0);
         ev.data2 = delta.x;
         ev.data3 = -delta.y;
+        D_PostEvent(&ev);
+    }
+
+    struct joystick_state jcurrent = poll_joystick();
+    int jchange =
+        jcurrent.axis1 != joystate.axis1 ||
+        jcurrent.axis2 != joystate.axis2 ||
+        jcurrent.buttons != joystate.buttons;
+    if(jchange) {
+        joystate = jcurrent;
+        ev.type = ev_joystick;
+        ev.data3 = joystate.axis2;
+        ev.data2 = joystate.axis1;
+        ev.data1 = joystate.buttons;
         D_PostEvent(&ev);
     }
 
@@ -231,5 +270,9 @@ void I_InitGraphics(void) {
     screen_tex = LoadTextureFromImage(screen_img);
 
     SetExitKey(KEY_HOME);
+
+    // two obscure controllers I have
+    SetGamepadMappings("03000000790000004e95000011010000,DragonRise Inc. NGC USB Gamepad,a:b1,b:b0,dpdown:b14,dpleft:b15,dpright:b13,dpup:b12,leftshoulder:b4,lefttrigger:a3,leftx:a0,lefty:a1~,rightshoulder:b5,righttrigger:a4,rightx:a5,righty:a2~,start:b9,x:b2,y:b3,platform:Linux,");
+    SetGamepadMappings("03000000790000001100000010010000,!NNEXT Gamepad,a:b2,b:b1,x:b3,y:b0,leftshoulder:b4,rightshoulder:b5,back:b8,start:b9,leftx:a0,lefty:a1,dpup:-a1,dpdown:+a1,dpleft:-a0,dpright:+a0");
 
 }
