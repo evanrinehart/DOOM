@@ -112,12 +112,10 @@ void P_InitSwitchList(void)
 	
     episode = 1;
 
-    if (gamemode == registered)
-	episode = 2;
-    else
-	if ( gamemode == commercial )
-	    episode = 3;
-		
+    if (gamemode == retail) episode = 2;
+    if (gamemode == registered) episode = 2;
+    if (gamemode == commercial) episode = 3;
+
     for (index = 0,i = 0;i < MAXSWITCHES;i++)
     {
 	if (!alphSwitchList[i].episode)
