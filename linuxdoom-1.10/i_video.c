@@ -46,50 +46,6 @@ void I_StartFrame (void) {
     if (WindowShouldClose()) I_Quit();
 }
 
-
-int translate_key(int rkey) {
-    switch (rkey) {
-        case KEY_LEFT: return DOOM_KEY_LEFTARROW;
-        case KEY_RIGHT: return DOOM_KEY_RIGHTARROW;
-        case KEY_UP: return DOOM_KEY_UPARROW;
-        case KEY_DOWN: return DOOM_KEY_DOWNARROW;
-        case KEY_ESCAPE: return DOOM_KEY_ESCAPE;
-        case KEY_ENTER: return DOOM_KEY_ENTER;
-        case KEY_TAB: return DOOM_KEY_TAB;
-        case KEY_F1: return DOOM_KEY_F1;
-        case KEY_F2: return DOOM_KEY_F2;
-        case KEY_F3: return DOOM_KEY_F3;
-        case KEY_F4: return DOOM_KEY_F4;
-        case KEY_F5: return DOOM_KEY_F5;
-        case KEY_F6: return DOOM_KEY_F6;
-        case KEY_F7: return DOOM_KEY_F7;
-        case KEY_F8: return DOOM_KEY_F8;
-        case KEY_F9: return DOOM_KEY_F9;
-        case KEY_F10: return DOOM_KEY_F10;
-        case KEY_F11: return DOOM_KEY_F11;
-        case KEY_F12: return DOOM_KEY_F12;
-        case KEY_BACKSPACE: return DOOM_KEY_BACKSPACE;
-        case KEY_DELETE: return DOOM_KEY_BACKSPACE;
-        case KEY_PAUSE: return DOOM_KEY_PAUSE;
-        case KEY_EQUAL: return DOOM_KEY_EQUALS;
-        case KEY_KP_EQUAL: return DOOM_KEY_EQUALS;
-        case KEY_MINUS: return DOOM_KEY_MINUS;
-        case KEY_KP_SUBTRACT: return DOOM_KEY_MINUS;
-        case KEY_LEFT_SHIFT: return DOOM_KEY_RSHIFT;
-        case KEY_RIGHT_SHIFT: return DOOM_KEY_RSHIFT;
-        case KEY_LEFT_CONTROL: return DOOM_KEY_RCTRL;
-        case KEY_RIGHT_CONTROL: return DOOM_KEY_RCTRL;
-        case KEY_LEFT_ALT: return DOOM_KEY_RALT;
-        case KEY_RIGHT_ALT: return DOOM_KEY_RALT;
-        default:
-            if ('A' <= rkey && rkey <= 'Z') return rkey - 'A' + 'a';
-            if (KEY_SPACE <= rkey && rkey <= KEY_GRAVE) return rkey;
-            return 0;
-    }
-}
-
-static bool down_keys[500];
-
 struct joystick_state {
     int axis1;
     int axis2;
@@ -112,31 +68,96 @@ struct joystick_state poll_joystick() {
 
 struct joystick_state joystate = {0,0,0};
 
+struct single_key {
+    bool state;
+    int rlkey;
+    int doomkey;
+};
+
+struct single_key keyboard[256];
+int num_single_keys = 0;
+
+struct multi_key {
+    bool state;
+    int rlkey[2];
+    int doomkey;
+};
+
+struct multi_key mkctrl  = {0, {KEY_LEFT_CONTROL, KEY_RIGHT_CONTROL}, DOOM_KEY_RCTRL};
+struct multi_key mkshift = {0, {KEY_LEFT_SHIFT,   KEY_RIGHT_SHIFT},   DOOM_KEY_RSHIFT};
+struct multi_key mkalt   = {0, {KEY_LEFT_ALT,     KEY_RIGHT_ALT},     DOOM_KEY_RALT};
+struct multi_key mksub   = {0, {KEY_MINUS,        KEY_KP_SUBTRACT},   DOOM_KEY_MINUS};
+struct multi_key mkdel   = {0, {KEY_BACKSPACE,    KEY_DELETE},        DOOM_KEY_BACKSPACE};
+struct multi_key mkequal = {0, {KEY_EQUAL,        KEY_KP_EQUAL},      DOOM_KEY_EQUALS};
+
+void add_key(int rlkey, int doomkey) {
+    if (num_single_keys >= 256) I_Error("I_InitVideo: too many keyboard keys\n");
+    struct single_key *sk = &keyboard[num_single_keys++];
+    sk->state = 0;
+    sk->rlkey = rlkey;
+    sk->doomkey = doomkey;
+}
+
+void poll_single_key(bool *state, int rlkey, int doomkey) {
+    event_t ev;
+    if (IsKeyDown(rlkey) && !*state) {
+        *state = true;
+        ev.type = ev_keydown;
+        ev.data1 = doomkey;
+        D_PostEvent(&ev);
+
+        if (rlkey == 'W') {
+            ev.type = ev_keydown;
+            ev.data1 = DOOM_KEY_UPARROW;
+            D_PostEvent(&ev);
+        }
+        if (rlkey == 'S') {
+            ev.type = ev_keydown;
+            ev.data1 = DOOM_KEY_DOWNARROW;
+            D_PostEvent(&ev);
+        }
+    }
+    else if (!IsKeyDown(rlkey) && *state) {
+        *state = false;
+        ev.type = ev_keyup;
+        ev.data1 = doomkey;
+        D_PostEvent(&ev);
+
+        if (rlkey == 'W') {
+            ev.type = ev_keyup;
+            ev.data1 = DOOM_KEY_UPARROW;
+            D_PostEvent(&ev);
+        }
+        if (rlkey == 'S') {
+            ev.type = ev_keyup;
+            ev.data1 = DOOM_KEY_DOWNARROW;
+            D_PostEvent(&ev);
+        }
+    }
+}
+
+void poll_multi_key(struct multi_key *mk) {
+    event_t ev;
+    if (!mk->state && (IsKeyDown(mk->rlkey[0]) || IsKeyDown(mk->rlkey[1]))) {
+        mk->state = true;
+        ev.type = ev_keydown;
+        ev.data1 = mk->doomkey;
+        D_PostEvent(&ev);
+    }
+    else if (mk->state && !IsKeyDown(mk->rlkey[0]) && !IsKeyDown(mk->rlkey[1])) {
+        mk->state = false;
+        ev.type = ev_keyup;
+        ev.data1 = mk->doomkey;
+        D_PostEvent(&ev);
+    }
+}
+
 void I_GetEvent(void) {
     // was called from I_StartTic
     // get events and post them with D_PostEvent
     // also updated mousemoved
 
     event_t ev;
-    ev.data1 = 0;
-    ev.data2 = 0;
-    ev.data3 = 0;
-
-    for (int key = GetKeyPressed(); key; key = GetKeyPressed()) {
-        ev.type = ev_keydown;
-        ev.data1 = translate_key(key);
-        D_PostEvent(&ev);
-        down_keys[key] = 1;
-    }
-
-    for (int k = 0; k < 500; k++) {
-        if (down_keys[k] && IsKeyReleased(k)) {
-                ev.type = ev_keyup;
-                ev.data1 = translate_key(k);
-                D_PostEvent(&ev);
-                down_keys[k] = 0;
-        }
-    }
 
     Vector2 delta = GetMouseDelta();
     int motion = delta.x || delta.y;
@@ -169,6 +190,18 @@ void I_GetEvent(void) {
         ev.data1 = joystate.buttons;
         D_PostEvent(&ev);
     }
+
+    for (int i = 0; i < num_single_keys; i++) {
+        struct single_key *sk = &keyboard[i];
+        poll_single_key(&sk->state, sk->rlkey, sk->doomkey);
+    }
+
+    poll_multi_key(&mkctrl);
+    poll_multi_key(&mkshift);
+    poll_multi_key(&mkalt);
+    poll_multi_key(&mksub);
+    poll_multi_key(&mkdel);
+    poll_multi_key(&mkequal);
 
     if (IsKeyDown(KEY_GRAVE)) { EnableCursor(); mouse_captured = false; }
     if (IsMouseButtonDown(1)) { DisableCursor(); mouse_captured = true; }
@@ -270,6 +303,32 @@ void I_InitGraphics(void) {
     screen_tex = LoadTextureFromImage(screen_img);
 
     SetExitKey(KEY_HOME);
+
+    add_key(KEY_SPACE, ' ');
+
+    add_key('\'', '\'');
+    add_key(',', ',');
+    //add_key('-', '-');
+    add_key('.', '.');
+    add_key('/', '/');
+    for (int k = '0'; k <= '9'; k++) add_key(k, k);
+    add_key(';', ';');
+    //add_key('=', '=');
+    for (int k = 'A'; k <= 'Z'; k++) add_key(k, k - 'A' + 'a');
+    add_key('[', '[');
+    add_key('\\', '\\');
+    add_key(']', ']');
+    add_key('`', '`');
+    add_key(KEY_ESCAPE, DOOM_KEY_ESCAPE);
+    add_key(KEY_ENTER, DOOM_KEY_ENTER);
+    add_key(KEY_TAB, DOOM_KEY_TAB);
+    //add_key(KEY_BACKSPACE, DOOM_KEY_BACKSPACE);
+    add_key(KEY_PAUSE, DOOM_KEY_PAUSE);
+    add_key(KEY_LEFT, DOOM_KEY_LEFTARROW);
+    add_key(KEY_RIGHT, DOOM_KEY_RIGHTARROW);
+    add_key(KEY_DOWN, DOOM_KEY_DOWNARROW);
+    add_key(KEY_UP, DOOM_KEY_UPARROW);
+    for (int i = 0; i < 12; i++) add_key(KEY_F1 + i, DOOM_KEY_F1 + i);
 
     // two obscure controllers I have
     SetGamepadMappings("03000000790000004e95000011010000,DragonRise Inc. NGC USB Gamepad,a:b1,b:b0,dpdown:b14,dpleft:b15,dpright:b13,dpup:b12,leftshoulder:b4,lefttrigger:a3,leftx:a0,lefty:a1~,rightshoulder:b5,righttrigger:a4,rightx:a5,righty:a2~,start:b9,x:b2,y:b3,platform:Linux,");
