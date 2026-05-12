@@ -147,27 +147,27 @@ void F_StartFinale (void)
 	  {
 	    case 6:
 	      finaleflat = "SLIME16";
-	      finaletext = c1text;
+	      finaletext = (char *[]){c1text,t1text,p1text}[gamemission - doom2];
 	      break;
 	    case 11:
 	      finaleflat = "RROCK14";
-	      finaletext = c2text;
+	      finaletext = (char *[]){c2text,t2text,p2text}[gamemission - doom2];
 	      break;
 	    case 20:
 	      finaleflat = "RROCK07";
-	      finaletext = c3text;
+	      finaletext = (char *[]){c3text,t3text,p3text}[gamemission - doom2];
 	      break;
 	    case 30:
 	      finaleflat = "RROCK17";
-	      finaletext = c4text;
+	      finaletext = (char *[]){c4text,t4text,p4text}[gamemission - doom2];
 	      break;
 	    case 15:
 	      finaleflat = "RROCK13";
-	      finaletext = c5text;
+	      finaletext = (char *[]){c5text,t5text,p5text}[gamemission - doom2];
 	      break;
 	    case 31:
 	      finaleflat = "RROCK19";
-	      finaletext = c6text;
+	      finaletext = (char *[]){c6text,t6text,p6text}[gamemission - doom2];
 	      break;
 	    default:
 	      // Ouch.
