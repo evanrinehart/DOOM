@@ -1103,6 +1103,7 @@ void M_QuitDOOM(int choice)
     sprintf(endstring,"%s\n\n"DOSY, endmsg[0] );
   else
     sprintf(endstring,"%s\n\n"DOSY, endmsg[ (gametic%(NUM_QUITMESSAGES-2))+1 ]);
+
   
   M_StartMessage(endstring,M_QuitResponse,true);
 }
@@ -1732,6 +1733,14 @@ void M_StartControlPanel (void)
 }
 
 
+int GetMessageLine(char *buf, char *src) {
+    int n = 0;
+    while (*src && *src != '\n') { n++; *buf++ = *src++; }
+    *buf = 0;
+    return n + 1;
+}
+
+
 //
 // M_Drawer
 // Called after the view has been rendered,
@@ -1748,6 +1757,7 @@ void M_Drawer (void)
 
     inhelpscreens = false;
 
+//printf("M_Drawer messageString = [%s]\n", messageString);
     
     // Horiz. & Vertically center string and print it.
     if (messageToPrint)
@@ -1756,24 +1766,11 @@ void M_Drawer (void)
 	y = 100 - M_StringHeight(messageString)/2;
 	while(*(messageString+start))
 	{
-	    for (i = 0;i < strlen(messageString+start);i++)
-		if (*(messageString+start+i) == '\n')
-		{
-		    memset(string,0,40);
-		    strncpy(string,messageString+start,i);
-		    start += i+1;
-		    break;
-		}
-				
-	    if (i == strlen(messageString+start))
-	    {
-		strcpy(string,messageString+start);
-		start += i;
-	    }
-				
+	    start += GetMessageLine(string, messageString+start);
 	    x = 160 - M_StringWidth(string)/2;
 	    M_WriteText(x,y,string);
 	    y += SHORT(hu_font[0]->height);
+
 	}
 	return;
     }
