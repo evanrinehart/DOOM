@@ -554,6 +554,43 @@ void D_AddFile (char *file)
     wadfiles[numwadfiles] = newfile;
 }
 
+char *GetDoomWadDir() {
+#ifdef NORMALUNIX
+    char *dir = getenv("DOOMWADDIR");
+    if (!dir) return ".";
+    return dir;
+#else
+    return ".";
+#endif
+}
+
+char *GetHomeDir() {
+#ifdef NORMALUNIX
+    char *home = getenv("HOME");
+    if (!home) I_Error("Please set $HOME to your home directory");
+    return home;
+#else
+    return "";
+#endif
+}
+
+bool TryIWAD(char *name, GameMode_t mode, GameMission_t mission, Language_t lang) {
+    bool got_it = false;
+    char *doomwaddir = GetDoomWadDir();
+    char *path = malloc(strlen(doomwaddir)+1+strlen(name)+1);
+    sprintf(path, "%s/%s", doomwaddir, name);
+    if ( !access (path,R_OK) ) {
+        got_it = true;
+        gamemode = mode;
+        gamemission = mission;
+        if (lang == french) printf("French version\n");
+        language = lang;
+        D_AddFile (path);
+    }
+    free(path);
+    return got_it;
+}
+
 //
 // IdentifyVersion
 // Checks availability of IWAD files by name,
@@ -563,56 +600,8 @@ void D_AddFile (char *file)
 void IdentifyVersion (void)
 {
 
-    char*	doom1wad;
-    char*	doomwad;
-    char*	doomuwad;
-    char*	doom2wad;
-
-    char*	doom2fwad;
-    char*	plutoniawad;
-    char*	tntwad;
-
-#ifdef NORMALUNIX
-    char *home;
-    char *doomwaddir;
-    doomwaddir = getenv("DOOMWADDIR");
-    if (!doomwaddir)
-	doomwaddir = ".";
-
-    // Commercial.
-    doom2wad = malloc(strlen(doomwaddir)+1+9+1);
-    sprintf(doom2wad, "%s/doom2.wad", doomwaddir);
-
-    // Retail.
-    doomuwad = malloc(strlen(doomwaddir)+1+9+1);
-    sprintf(doomuwad, "%s/doomu.wad", doomwaddir);
-    
-    // Registered.
-    doomwad = malloc(strlen(doomwaddir)+1+8+1);
-    sprintf(doomwad, "%s/doom.wad", doomwaddir);
-    
-    // Shareware.
-    doom1wad = malloc(strlen(doomwaddir)+1+9+1);
-    sprintf(doom1wad, "%s/doom1.wad", doomwaddir);
-
-     // Bug, dear Shawn.
-    // Insufficient malloc, caused spurious realloc errors.
-    plutoniawad = malloc(strlen(doomwaddir)+1+/*9*/12+1);
-    sprintf(plutoniawad, "%s/plutonia.wad", doomwaddir);
-
-    tntwad = malloc(strlen(doomwaddir)+1+9+1);
-    sprintf(tntwad, "%s/tnt.wad", doomwaddir);
-
-
-    // French stuff.
-    doom2fwad = malloc(strlen(doomwaddir)+1+10+1);
-    sprintf(doom2fwad, "%s/doom2f.wad", doomwaddir);
-
-    home = getenv("HOME");
-    if (!home)
-      I_Error("Please set $HOME to your home directory");
+    char *home = GetHomeDir();
     sprintf(basedefault, "%s/.doomrc", home);
-#endif
 
     if (M_CheckParm ("-shdev"))
     {
@@ -655,65 +644,13 @@ void IdentifyVersion (void)
 	return;
     }
 
-    if ( !access (doom2fwad,R_OK) )
-    {
-	gamemode = commercial;
-	gamemission = doom2;
-	// C'est ridicule!
-	// Let's handle languages in config files, okay?
-	language = french;
-	printf("French version\n");
-	D_AddFile (doom2fwad);
-	return;
-    }
-
-    if ( !access (doom2wad,R_OK) )
-    {
-	gamemode = commercial;
-	gamemission = doom2;
-	D_AddFile (doom2wad);
-	return;
-    }
-
-    if ( !access (plutoniawad, R_OK ) )
-    {
-      gamemode = commercial;
-      gamemission = pack_plut;
-      D_AddFile (plutoniawad);
-      return;
-    }
-
-    if ( !access ( tntwad, R_OK ) )
-    {
-      gamemode = commercial;
-      gamemission = pack_tnt;
-      D_AddFile (tntwad);
-      return;
-    }
-
-    if ( !access (doomuwad,R_OK) )
-    {
-      gamemode = retail;
-      gamemission = doom;
-      D_AddFile (doomuwad);
-      return;
-    }
-
-    if ( !access (doomwad,R_OK) )
-    {
-      gamemode = registered;
-      gamemission = doom;
-      D_AddFile (doomwad);
-      return;
-    }
-
-    if ( !access (doom1wad,R_OK) )
-    {
-      gamemode = shareware;
-      gamemission = doom;
-      D_AddFile (doom1wad);
-      return;
-    }
+    if ( TryIWAD("doom2f.wad", commercial, doom2, french) ) return;
+    if ( TryIWAD("doom2.wad", commercial, doom2, english) ) return;
+    if ( TryIWAD("plutonia.wad", commercial, pack_plut, english) ) return;
+    if ( TryIWAD("tnt.wad", commercial, pack_tnt, english) ) return;
+    if ( TryIWAD("doomu.wad", retail, doom, english) ) return;
+    if ( TryIWAD("doom.wad", registered, doom, english) ) return;
+    if ( TryIWAD("doom1.wad", shareware, doom, english) ) return;
 
     printf("Game mode indeterminate.\n");
     gamemode = indetermined;
@@ -846,28 +783,36 @@ void D_DoomMain (void)
 		 VERSION/100,VERSION%100);
 	break;
       case commercial:
-	sprintf (title,
-		 "                         "
-		 "DOOM 2: Hell on Earth v%i.%i"
-		 "                           ",
-		 VERSION/100,VERSION%100);
-	break;
-/*FIXME
-       case pack_plut:
-	sprintf (title,
-		 "                   "
-		 "DOOM 2: Plutonia Experiment v%i.%i"
-		 "                           ",
-		 VERSION/100,VERSION%100);
-	break;
-      case pack_tnt:
-	sprintf (title,
-		 "                     "
-		 "DOOM 2: TNT - Evilution v%i.%i"
-		 "                           ",
-		 VERSION/100,VERSION%100);
-	break;
-*/
+        switch(gamemission) {
+            case doom:
+                // handled elsewhere
+                break;
+            case doom2:
+                sprintf (title,
+                "                         "
+                "DOOM 2: Hell on Earth v%i.%i"
+                "                           ",
+                VERSION/100,VERSION%100);
+                break;
+            case pack_plut:
+                sprintf (title,
+                "                   "
+                "DOOM 2: Plutonia Experiment v%i.%i"
+                "                           ",
+                VERSION/100,VERSION%100);
+                break;
+            case pack_tnt:
+                sprintf (title,
+                "                     "
+                "DOOM 2: TNT - Evilution v%i.%i"
+                "                           ",
+                VERSION/100,VERSION%100);
+                break;
+            case none:
+                // handled elsewhere
+                break;
+        }
+        break;
       default:
 	sprintf (title,
 		 "                     "
