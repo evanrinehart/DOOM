@@ -285,17 +285,26 @@ void I_InitGraphics(void) {
     }
     else {
         int multiply = 1;
+        int monitor = GetCurrentMonitor();
+        int monitor_w = GetMonitorWidth(monitor);
+        int monitor_h = GetMonitorHeight(monitor);
 
         if (M_CheckParm("-2")) multiply = 2;
-        if (M_CheckParm("-3")) multiply = 3;
-        if (M_CheckParm("-4")) multiply = 4;
-        if (M_CheckParm("-5")) multiply = 5;
-        if (M_CheckParm("-10")) multiply = 10;
+        else if (M_CheckParm("-3")) multiply = 3;
+        else if (M_CheckParm("-4")) multiply = 4;
+        else if (M_CheckParm("-5")) multiply = 5;
+        else if (M_CheckParm("-10")) multiply = 10;
+        else if (monitor_h >= 2400) multiply = 10;
+        else if (monitor_h >= 1200) multiply = 5;
+        else if (monitor_h >= 960) multiply = 4;
+        else if (monitor_h >= 720) multiply = 3;
+        else if (monitor_h >= 480) multiply = 2;
 
         window_w = 320 * multiply;
         window_h = 240 * multiply;
         offset_x = 0;
 
+        SetWindowPosition(monitor_w/2 - window_w/2, monitor_h/2 - window_h/2);
         SetWindowSize(window_w, window_h);
     }
 
