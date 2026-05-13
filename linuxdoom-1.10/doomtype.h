@@ -27,7 +27,7 @@
 
 #ifndef __BYTEBOOL__
 #define __BYTEBOOL__
-typedef enum {FF,TT} boolean;
+typedef enum {BOOLEAN_MINUS_ONE=-1,FF,TT} boolean;
 typedef unsigned char byte;
 #endif
 
