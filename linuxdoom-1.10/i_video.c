@@ -105,34 +105,12 @@ void poll_single_key(bool *state, int rlkey, int doomkey) {
         ev.type = ev_keydown;
         ev.data1 = doomkey;
         D_PostEvent(&ev);
-
-        if (rlkey == 'W') {
-            ev.type = ev_keydown;
-            ev.data1 = DOOM_KEY_UPARROW;
-            D_PostEvent(&ev);
-        }
-        if (rlkey == 'S') {
-            ev.type = ev_keydown;
-            ev.data1 = DOOM_KEY_DOWNARROW;
-            D_PostEvent(&ev);
-        }
     }
     else if (!IsKeyDown(rlkey) && *state) {
         *state = false;
         ev.type = ev_keyup;
         ev.data1 = doomkey;
         D_PostEvent(&ev);
-
-        if (rlkey == 'W') {
-            ev.type = ev_keyup;
-            ev.data1 = DOOM_KEY_UPARROW;
-            D_PostEvent(&ev);
-        }
-        if (rlkey == 'S') {
-            ev.type = ev_keyup;
-            ev.data1 = DOOM_KEY_DOWNARROW;
-            D_PostEvent(&ev);
-        }
     }
 }
 
