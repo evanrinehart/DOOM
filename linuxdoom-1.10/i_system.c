@@ -23,7 +23,9 @@
 static const char
 rcsid[] = "$Id: m_bbox.c,v 1.1 1997/02/03 22:45:10 b1 Exp $";
 
+#define _POSIX_C_SOURCE 199309L
 
+#include <time.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -45,6 +47,16 @@ rcsid[] = "$Id: m_bbox.c,v 1.1 1997/02/03 22:45:10 b1 Exp $";
 #endif
 #include "i_system.h"
 
+void I_Nanosleep(long sec, long nsec) {
+    struct timespec ts = {sec, nsec};
+    nanosleep(&ts, NULL);
+}
+
+void I_Sleep(float delta_t) {
+    long sec = floor(delta_t);
+    long nsec = (delta_t - sec) * 1e9;
+    I_Nanosleep(sec, nsec);
+}
 
 
 
@@ -88,11 +100,10 @@ byte* I_ZoneBase (int*	size)
 int  I_GetTime (void)
 {
     struct timeval	tp;
-    struct timezone	tzp;
     int			newtics;
     static int		basetime=0;
   
-    gettimeofday(&tp, &tzp);
+    gettimeofday(&tp, NULL);
     if (!basetime)
 	basetime = tp.tv_sec;
     newtics = (tp.tv_sec-basetime)*TICRATE + tp.tv_usec*TICRATE/1000000;
@@ -132,7 +143,7 @@ void I_WaitVBL(int count)
     sleep(0);
 #else
     printf("WaitVBL(%d)\n", count);
-    usleep (count * (1000000/70) );                                
+    I_Sleep((float)count / 70);
 #endif
 #endif
 }
