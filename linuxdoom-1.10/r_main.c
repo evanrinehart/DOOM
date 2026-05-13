@@ -454,7 +454,7 @@ fixed_t R_ScaleFromGlobalAngle (angle_t visangle)
 {
     fixed_t		scale;
     int			anglea;
-    int			angleb;
+    //int			angleb; // The calculation of int angleb was overflowing. Now uses more precision
     int			sinea;
     int			sineb;
     fixed_t		num;

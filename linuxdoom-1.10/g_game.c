@@ -218,7 +218,7 @@ void*		statcopy;				// for statistics driver
  
 int G_CmdChecksum (ticcmd_t* cmd) 
 { 
-    int		i;
+    unsigned		i;
     int		sum = 0; 
 	 
     for (i=0 ; i< sizeof(*cmd)/4 - 1 ; i++) 
@@ -1167,8 +1167,8 @@ void G_WorldDone (void)
 	{
 	  case 15:
 	  case 31:
-	    if (!secretexit)
-		break;
+	    if (!secretexit) break;
+        /* fallthrough */
 	  case 6:
 	  case 11:
 	  case 20:

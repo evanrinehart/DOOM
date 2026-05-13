@@ -900,7 +900,7 @@ void M_VerifyNightmare(int ch)
     if (ch != 'y')
 	return;
 		
-    G_DeferedInitNew(nightmare,epi+1,1);
+    G_DeferedInitNew((int)nightmare,epi+1,1);
     M_ClearMenus ();
 }
 
@@ -1255,7 +1255,7 @@ void M_StopMessage(void)
 //
 int M_StringWidth(char* string)
 {
-    int             i;
+    unsigned        i;
     int             w = 0;
     int             c;
 	
@@ -1278,7 +1278,7 @@ int M_StringWidth(char* string)
 //
 int M_StringHeight(char* string)
 {
-    int             i;
+    unsigned        i;
     int             h;
     int             height = SHORT(hu_font[0]->height);
 	
