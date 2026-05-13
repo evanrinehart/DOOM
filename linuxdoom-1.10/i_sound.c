@@ -348,7 +348,7 @@ void I_ShutdownMusic(void)	{
 
     callback_should_end = 1;
     while (callback_should_end < 2) {
-        usleep(1000);
+        I_Sleep(0.01);
     }
 
     if (registered_song.data) free(registered_song.data);
