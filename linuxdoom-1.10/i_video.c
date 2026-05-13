@@ -150,8 +150,8 @@ void I_GetEvent(void) {
     if (mouse_captured && (button || motion)) {
         ev.type = ev_mouse;
         ev.data1 = IsMouseButtonDown(0) | (IsMouseButtonDown(1) ? 2 : 0) | (IsMouseButtonDown(2) ? 4 : 0);
-        ev.data2 = delta.x;
-        ev.data3 = -delta.y;
+        ev.data2 = (int)delta.x;
+        ev.data3 = (int)-delta.y;
         D_PostEvent(&ev);
     }
 
