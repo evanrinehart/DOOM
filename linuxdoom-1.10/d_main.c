@@ -30,6 +30,8 @@ static const char rcsid[] = "$Id: d_main.c,v 1.8 1997/02/03 22:45:09 b1 Exp $";
 #define	BGCOLOR		7
 #define	FGCOLOR		8
 
+#include <stdint.h>
+
 
 #ifdef NORMALUNIX
 #include <stdio.h>
@@ -1072,7 +1074,7 @@ void D_DoomMain (void)
 	// for statistics driver
 	extern  void*	statcopy;                            
 
-	statcopy = (void*)atoi(myargv[p+1]);
+	statcopy = (void*)atoll(myargv[p+1]);
 	printf ("External statistics registered.\n");
     }
     
