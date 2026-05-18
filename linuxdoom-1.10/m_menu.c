@@ -1739,7 +1739,7 @@ int GetMessageLine(char *buf, char *src) {
     int n = 0;
     while (*src && *src != '\n') { n++; *buf++ = *src++; }
     *buf = 0;
-    return n + 1;
+    return *src == 0 ? n : n + 1;
 }
 
 
@@ -1758,8 +1758,6 @@ void M_Drawer (void)
     int			start;
 
     inhelpscreens = false;
-
-//printf("M_Drawer messageString = [%s]\n", messageString);
     
     // Horiz. & Vertically center string and print it.
     if (messageToPrint)
@@ -1772,7 +1770,6 @@ void M_Drawer (void)
 	    x = 160 - M_StringWidth(string)/2;
 	    M_WriteText(x,y,string);
 	    y += SHORT(hu_font[0]->height);
-
 	}
 	return;
     }
