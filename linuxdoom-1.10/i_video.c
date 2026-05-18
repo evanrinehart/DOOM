@@ -18,6 +18,8 @@
 #include "m_argv.h"
 #include "d_main.h"
 
+static bool video_initialized = false;
+
 extern byte *screens[5];
 
 static Color current_palette[256];
@@ -33,6 +35,8 @@ static long frame_num = 0;
 static bool mouse_captured = 0;
 
 void I_ShutdownGraphics(void) {
+    if (!video_initialized) return;
+
     // called from I_Quit also I_Error in i_system.c
 
     UnloadTexture(screen_tex);
@@ -252,6 +256,12 @@ void I_InitGraphics(void) {
     // before FinishUpdate presents it, whatever is in screen[0]
 
     InitWindow(320, 240, "DOOM");
+
+    if (!IsWindowReady()) {
+        I_Error("I_InitGraphics: InitWindow failed\n");
+    }
+
+    video_initialized = true;
 
     if (M_CheckParm("-fullscreen")) {
         int monitor = GetCurrentMonitor();
