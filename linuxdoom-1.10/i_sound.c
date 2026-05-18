@@ -39,7 +39,7 @@ struct sized_blob registered_song = {NULL};
 
 static int callback_should_reload = 0;
 static int callback_should_end = 0;
-static int callback_should_switch_emulator = 0;
+
 
 void audio_callback(void *bufferData, unsigned int num_frames) {
 
@@ -60,10 +60,6 @@ void audio_callback(void *bufferData, unsigned int num_frames) {
 
         callback_should_reload = 0;
         music_playing = 1;
-    }
-
-    if (callback_should_switch_emulator) {
-        callback_should_switch_emulator = 0;
     }
 
     struct ADLMIDI_AudioFormat format;
@@ -322,8 +318,8 @@ void I_InitMusic(void) {
     }
 
     printf("   ADLMIDI initialized... switching emulator\n");
-    adl_switchEmulator(midi_player, ADLMIDI_EMU_DOSBOX);
-    adl_setVolumeRangeModel(midi_player, ADLMIDI_VolumeModel_DMX);
+    adl_switchEmulator(midi_player, ADLMIDI_EMU_NUKED);
+    adl_setVolumeRangeModel(midi_player, ADLMIDI_VolumeModel_Generic);
 
     fprintf( stderr, "  SAMPLERATE=%d sampleSize=%d channels=%d ... ", SAMPLERATE, SAMPLESIZE, 2);
     SetAudioStreamBufferSizeDefault(4096);
