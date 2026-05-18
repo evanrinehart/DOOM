@@ -1875,12 +1875,12 @@ void M_Init (void)
 	ReadDef1.y = 165;
 	ReadMenu1[0].routine = M_FinishReadThis;
 	break;
-      case shareware:
-	ReadDef1.x = 280;
-	ReadDef1.y = 185;
-	break;
 	// Episode 2 and 3 are handled,
 	//  branching to an ad screen.
+      case shareware:
+	ReadDef1.x = 280; // move the skull so you can read the ad
+	ReadDef1.y = 185;
+    /* fallthrough */
       case registered:
 	// We need to remove the fourth episode.
 	EpiDef.numitems--;
