@@ -6,7 +6,7 @@
 #
 CC=  gcc  # gcc or g++
 
-CFLAGS=-g -Wall -Wextra -Wconversion -Wno-unused-const-variable -Wno-unused-but-set-variable -DNORMALUNIX -DLINUX # -DUSEASM
+CFLAGS=-g -Wall -Wextra -std=c11 -Wno-unused-parameter -Wno-unused-but-set-parameter -Wno-unused-const-variable -Wno-unused-but-set-variable -Wno-missing-field-initializers -DNORMALUNIX -DLINUX # -DUSEASM
 LDFLAGS=-L/usr/X11R6/lib
 LIBS=-lXext -lX11 -lm -lstdc++
 
@@ -107,11 +107,11 @@ raylib :
 	git clone --depth=1 --branch=$(RAYLIB_VERSION) $(RAYLIB_URL) raylib
 
 raylib.h : raylib
-	cp raylib/src/raylib.h .
+	cp -v raylib/src/raylib.h .
 
 $(O)/libraylib.a : raylib
 	$(MAKE) -C raylib/src
-	cp raylib/src/libraylib.a $(O)/
+	cp -v raylib/src/libraylib.a $(O)/
 
 ADLMIDI_VERSION = v1.6.1
 ADLMIDI_URL = https://github.com/Wohlstand/libADLMIDI
@@ -120,7 +120,7 @@ adlmidi :
 	git clone --depth=1 --branch=$(ADLMIDI_VERSION) $(ADLMIDI_URL) adlmidi
 
 adlmidi.h : adlmidi
-	cp adlmidi/include/adlmidi.h .
+	cp -v adlmidi/include/adlmidi.h .
 
 $(O)/libADLMIDI.a : adlmidi
 	mkdir -p adlmidi/build
