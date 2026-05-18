@@ -391,7 +391,7 @@ menu_t  ReadDef1 =
     &MainDef,
     ReadMenu1,
     M_DrawReadThis1,
-    280,185,
+    330,175,
     0
 };
 
@@ -754,13 +754,15 @@ void M_DrawReadThis1(void)
     inhelpscreens = true;
     switch ( gamemode )
     {
+      case retail:
+	V_DrawPatchDirect (0,0,0,W_CacheLumpName("HELP1",PU_CACHE));
+	break;
       case commercial:
 	V_DrawPatchDirect (0,0,0,W_CacheLumpName("HELP",PU_CACHE));
 	break;
       case shareware:
       case registered:
-      case retail:
-	V_DrawPatchDirect (0,0,0,W_CacheLumpName("HELP1",PU_CACHE));
+	V_DrawPatchDirect (0,0,0,W_CacheLumpName("HELP2",PU_CACHE));
 	break;
       default:
 	break;
@@ -785,7 +787,7 @@ void M_DrawReadThis2(void)
 	break;
       case shareware:
       case registered:
-	V_DrawPatchDirect (0,0,0,W_CacheLumpName("HELP2",PU_CACHE));
+	V_DrawPatchDirect (0,0,0,W_CacheLumpName("HELP1",PU_CACHE));
 	break;
       default:
 	break;
@@ -1874,6 +1876,9 @@ void M_Init (void)
 	ReadMenu1[0].routine = M_FinishReadThis;
 	break;
       case shareware:
+	ReadDef1.x = 280;
+	ReadDef1.y = 185;
+	break;
 	// Episode 2 and 3 are handled,
 	//  branching to an ad screen.
       case registered:
