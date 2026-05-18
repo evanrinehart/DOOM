@@ -25,10 +25,6 @@
 static const char
 rcsid[] = "$Id: r_segs.c,v 1.3 1997/01/29 20:10:19 b1 Exp $";
 
-
-
-
-
 #include <stdlib.h>
 
 #include "i_system.h"
@@ -38,6 +34,12 @@ rcsid[] = "$Id: r_segs.c,v 1.3 1997/01/29 20:10:19 b1 Exp $";
 
 #include "r_local.h"
 #include "r_sky.h"
+
+
+unsigned unsigned_abs(unsigned u) {
+    const unsigned half = (UINT_MAX / 2) + 1;
+    return u < half ? u : -u;
+}
 
 
 // OPTIMIZE: closed two sided lines as single sided
@@ -367,6 +369,7 @@ void R_RenderSegLoop (void)
 
 
 
+
 //
 // R_StoreWallRange
 // A wall segment will be drawn
@@ -400,7 +403,7 @@ R_StoreWallRange
     
     // calculate rw_distance for scale calculation
     rw_normalangle = curline->angle + ANG90;
-    offsetangle = abs(rw_normalangle-rw_angle1);
+    offsetangle = unsigned_abs(rw_normalangle-rw_angle1);
     
     if (offsetangle > ANG90)
 	offsetangle = ANG90;
