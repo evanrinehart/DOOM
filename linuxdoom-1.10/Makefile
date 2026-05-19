@@ -83,8 +83,8 @@ all:	 $(O)/$(BINNAME)
 
 clean:
 	rm -f *.o *~ *.flc
-	rm -f linux/*.o
-	rm -f linux/libraylib.a
+	rm -f $(O)/*.o
+	rm -f $(O)/libraylib.a
 	rm -f raylib.h
 	rm -f adlmidi.h
 
