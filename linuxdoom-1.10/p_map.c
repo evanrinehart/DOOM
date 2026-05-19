@@ -64,7 +64,7 @@ line_t*		ceilingline;
 
 // keep track of special lines as they are hit,
 // but don't process them until the move is proven valid
-#define MAXSPECIALCROSS		8
+#define MAXSPECIALCROSS		32
 
 line_t*		spechit[MAXSPECIALCROSS];
 int		numspechit;
@@ -237,10 +237,12 @@ boolean PIT_CheckLine (line_t* ld)
 	tmdropoffz = lowfloor;
 		
     // if contacted a special line, add it to the list
-    if (ld->special)
+    if (ld->special && numspechit < MAXSPECIALCROSS)
     {
 	spechit[numspechit] = ld;
 	numspechit++;
+	if (numspechit > MAXSPECIALCROSS/2) printf("WARN %d/%d specials hit (spechits) by a single monster (%p)\n", numspechit, MAXSPECIALCROSS, tmthing);
+	if (numspechit == MAXSPECIALCROSS) printf("OOOF %d/%d spechits; wheels coming off\n", numspechit, MAXSPECIALCROSS);
     }
 
     return true;
