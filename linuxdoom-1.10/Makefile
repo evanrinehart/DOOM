@@ -10,8 +10,10 @@ CFLAGS=-g -Wall -Wextra -std=c11 -Wno-unused-parameter -Wno-unused-but-set-param
 LDFLAGS=-L/usr/X11R6/lib
 LIBS=-lXext -lX11 -lm -lstdc++
 
+BINNAME=doom
+
 # subdirectory for objects
-O=linux
+O=out
 
 # not too sophisticated dependency
 OBJS=				\
@@ -77,7 +79,7 @@ OBJS=				\
 		$(O)/info.o				\
 		$(O)/sounds.o
 
-all:	 $(O)/linuxxdoom
+all:	 $(O)/$(BINNAME)
 
 clean:
 	rm -f *.o *~ *.flc
@@ -86,9 +88,9 @@ clean:
 	rm -f raylib.h
 	rm -f adlmidi.h
 
-$(O)/linuxxdoom:	$(OBJS) $(O)/i_main.o $(O)/libraylib.a $(O)/libADLMIDI.a
+$(O)/$(BINNAME):	$(OBJS) $(O)/i_main.o $(O)/libraylib.a $(O)/libADLMIDI.a
 	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) $(O)/i_main.o $(O)/libraylib.a $(O)/libADLMIDI.a \
-	-o $(O)/linuxxdoom $(LIBS)
+	-o $(O)/$(BINNAME) $(LIBS)
 
 $(O)/%.o:	%.c
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -126,4 +128,4 @@ $(O)/libADLMIDI.a : adlmidi
 	mkdir -p adlmidi/build
 	cd adlmidi/build && cmake -DCMAKE_BUILD_TYPE=Release .. && make
 	cp adlmidi/include/adlmidi.h .
-	cp adlmidi/build/libADLMIDI.a linux/
+	cp adlmidi/build/libADLMIDI.a $(O)/

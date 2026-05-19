@@ -277,7 +277,8 @@ void I_InitGraphics(void) {
         int monitor_w = GetMonitorWidth(monitor);
         int monitor_h = GetMonitorHeight(monitor);
 
-        if (M_CheckParm("-2")) multiply = 2;
+        if (M_CheckParm("-1")) multiply = 1;
+        else if (M_CheckParm("-2")) multiply = 2;
         else if (M_CheckParm("-3")) multiply = 3;
         else if (M_CheckParm("-4")) multiply = 4;
         else if (M_CheckParm("-5")) multiply = 5;
