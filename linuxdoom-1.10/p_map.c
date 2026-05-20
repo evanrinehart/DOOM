@@ -1220,7 +1220,15 @@ P_RadiusAttack
     
     fixed_t	dist;
 	
-    dist = (damage+MAXRADIUS)<<FRACBITS;
+    // linuxdoom, chocolate doom, overflows and nullifies the effect of adding MAXRADIUS
+    //dist = (damage + MAXRADIUS)<<FRACBITS;
+
+    // Would yield the same result without undefined behavior
+    dist = damage << FRACBITS;
+
+    // Probably the intended formula since MAXRADIUS is already = 32*(1<<FRACBITS)
+    //dist = (damage << FRACBITS) + MAXRADIUS;
+
     yh = (spot->y + dist - bmaporgy)>>MAPBLOCKSHIFT;
     yl = (spot->y - dist - bmaporgy)>>MAPBLOCKSHIFT;
     xh = (spot->x + dist - bmaporgx)>>MAPBLOCKSHIFT;
