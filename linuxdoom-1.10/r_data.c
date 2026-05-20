@@ -29,6 +29,7 @@ rcsid[] = "$Id: r_data.c,v 1.4 1997/02/03 16:47:55 b1 Exp $";
 
 #include <stdint.h>
 #include <strings.h>
+#include <stddef.h>
 
 #include "i_system.h"
 #include "z_zone.h"
@@ -521,8 +522,10 @@ void R_InitTextures (void)
 
 	if (offset > maxoff)
 	    I_Error ("R_InitTextures: bad texture directory");
-	
-	mtexture = (maptexture_t *) ( (byte *)maptex + offset);
+
+	maptexture_t temptex;
+	memcpy(&temptex, (byte *)maptex + offset, sizeof (maptexture_t));
+	mtexture = &temptex;
 
 	texture = textures[i] =
 	    Z_Malloc (sizeof(texture_t)
@@ -534,7 +537,7 @@ void R_InitTextures (void)
 	texture->patchcount = SHORT(mtexture->patchcount);
 
 	memcpy (texture->name, mtexture->name, sizeof(texture->name));
-	mpatch = &mtexture->patches[0];
+	mpatch = (mappatch_t *)((byte *)maptex + offset + offsetof(maptexture_t, patches));
 	patch = &texture->patches[0];
 
 	for (j=0 ; j<texture->patchcount ; j++, mpatch++, patch++)
