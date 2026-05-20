@@ -194,7 +194,9 @@ Z_Malloc
     memblock_t* newblock;
     memblock_t*	base;
 
-    size = (size + 3) & ~3;
+    int align = sizeof (int *) - 1;
+
+    size = (size + align) & ~align;
     
     // scan through the block list,
     // looking for the first free block
