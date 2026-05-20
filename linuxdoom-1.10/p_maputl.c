@@ -237,7 +237,7 @@ P_InterceptVector
     fixed_t	num;
     fixed_t	den;
 	
-    den = FixedMul (v1->dy>>8,v2->dx) - FixedMul(v1->dx>>8,v2->dy);
+    den = FixedMul (v1->dy>>8,v2->dx) - FixedMul(v1->dx>>8,v2->dy); // might overflow
 
     if (den == 0)
 	return 0;

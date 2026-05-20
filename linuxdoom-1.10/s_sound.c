@@ -765,11 +765,11 @@ S_AdjustSoundParams
 
     // calculate the distance to sound origin
     //  and clip it if necessary
-    adx = abs(listener->x - source->x);
-    ady = abs(listener->y - source->y);
+    adx = abs(listener->x - source->x); // this subtraction might overflow
+    ady = abs(listener->y - source->y); // similarly
 
     // From _GG1_ p.428. Appox. eucledian distance fast.
-    approx_dist = adx + ady - ((adx < ady ? adx : ady)>>1);
+    approx_dist = adx + ady - ((adx < ady ? adx : ady)>>1); // the sum might overflow
     
     if (gamemap != 8
 	&& approx_dist > S_CLIPPING_DIST)

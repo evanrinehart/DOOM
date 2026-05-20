@@ -814,7 +814,7 @@ P_DamageMobj
 				target->x,
 				target->y);
 		
-	thrust = damage*(FRACUNIT>>3)*100/target->info->mass;
+	thrust = damage*(FRACUNIT>>3)*100/target->info->mass; // overflows when e.g. damage=10000 (telefrag)
 
 	// make fall forwards sometimes
 	if ( damage < 40
