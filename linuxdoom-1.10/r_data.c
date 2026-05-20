@@ -626,8 +626,8 @@ void R_InitSpriteLumps (void)
 
 	patch = W_CacheLumpNum (firstspritelump+i, PU_CACHE);
 	spritewidth[i] = SHORT(patch->width)<<FRACBITS;
-	spriteoffset[i] = SHORT(patch->leftoffset)<<FRACBITS;
-	spritetopoffset[i] = SHORT(patch->topoffset)<<FRACBITS;
+	spriteoffset[i] = SHORT(patch->leftoffset) * FRACUNIT;
+	spritetopoffset[i] = SHORT(patch->topoffset) * FRACUNIT;
     }
 }
 

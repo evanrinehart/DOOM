@@ -363,8 +363,8 @@ P_NightmareRespawn (mobj_t* mobj)
     mobj_t*		mo;
     mapthing_t*		mthing;
 		
-    x = mobj->spawnpoint.x << FRACBITS; 
-    y = mobj->spawnpoint.y << FRACBITS; 
+    x = mobj->spawnpoint.x * FRACUNIT;
+    y = mobj->spawnpoint.y * FRACUNIT;
 
     // somthing is occupying it's position?
     if (!P_CheckPosition (mobj, x, y) ) 
@@ -659,8 +659,8 @@ void P_SpawnPlayer (mapthing_t* mthing)
     if (p->playerstate == PST_REBORN)
 	G_PlayerReborn (mthing->type-1);
 
-    x 		= mthing->x << FRACBITS;
-    y 		= mthing->y << FRACBITS;
+    x 		= mthing->x * FRACUNIT;
+    y 		= mthing->y * FRACUNIT;
     z		= ONFLOORZ;
     mobj	= P_SpawnMobj (x,y,z, MT_PLAYER);
 
@@ -773,8 +773,8 @@ void P_SpawnMapThing (mapthing_t* mthing)
     }
     
     // spawn it
-    x = mthing->x << FRACBITS;
-    y = mthing->y << FRACBITS;
+    x = mthing->x * FRACUNIT;
+    y = mthing->y * FRACUNIT;
 
     if (mobjinfo[i].flags & MF_SPAWNCEILING)
 	z = ONCEILINGZ;
@@ -816,7 +816,7 @@ P_SpawnPuff
 {
     mobj_t*	th;
 	
-    z += ((P_Random()-P_Random())<<10);
+    z += ((P_Random()-P_Random()) * 1024);
 
     th = P_SpawnMobj (x,y,z, MT_PUFF);
     th->momz = FRACUNIT;
@@ -844,7 +844,7 @@ P_SpawnBlood
 {
     mobj_t*	th;
 	
-    z += ((P_Random()-P_Random())<<10);
+    z += ((P_Random()-P_Random()) * 1024);
     th = P_SpawnMobj (x,y,z, MT_BLOOD);
     th->momz = FRACUNIT*2;
     th->tics -= P_Random()&3;
@@ -907,7 +907,7 @@ P_SpawnMissile
 
     // fuzzy player
     if (dest->flags & MF_SHADOW)
-	an += (P_Random()-P_Random())<<20;	
+	an += (P_Random()-P_Random()) * (1 << 20);
 
     th->angle = an;
     an >>= ANGLETOFINESHIFT;

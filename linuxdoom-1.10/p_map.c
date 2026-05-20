@@ -1314,8 +1314,8 @@ boolean PIT_ChangeSector (mobj_t*	thing)
 			  thing->y,
 			  thing->z + thing->height/2, MT_BLOOD);
 	
-	mo->momx = (P_Random() - P_Random ())<<12;
-	mo->momy = (P_Random() - P_Random ())<<12;
+	mo->momx = (P_Random() - P_Random ()) * (1 << 12);
+	mo->momy = (P_Random() - P_Random ()) * (1 << 12);
     }
 
     // keep checking (crush other things)	

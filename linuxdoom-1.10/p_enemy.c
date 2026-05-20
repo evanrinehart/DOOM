@@ -693,7 +693,7 @@ void A_Chase (mobj_t*	actor)
     if (actor->movedir < 8)
     {
 	actor->angle &= (7U<<29);
-	delta = actor->angle - (actor->movedir << 29);
+	delta = actor->angle - ((angle_t)actor->movedir << 29);
 	
 	if (delta > 0)
 	    actor->angle -= ANG90/2;
@@ -792,7 +792,7 @@ void A_FaceTarget (mobj_t* actor)
 				    actor->target->y);
     
     if (actor->target->flags & MF_SHADOW)
-	actor->angle += (P_Random()-P_Random())<<21;
+	actor->angle += (P_Random()-P_Random()) * (1 << 21);
 }
 
 
@@ -801,7 +801,7 @@ void A_FaceTarget (mobj_t* actor)
 //
 void A_PosAttack (mobj_t* actor)
 {
-    int		angle;
+    angle_t		angle;
     int		damage;
     int		slope;
 	
@@ -813,7 +813,7 @@ void A_PosAttack (mobj_t* actor)
     slope = P_AimLineAttack (actor, angle, MISSILERANGE);
 
     S_StartSound (actor, sfx_pistol);
-    angle += (P_Random()-P_Random())<<20;
+    angle += (P_Random()-P_Random()) * (1<<20); // overflow is possible here
     damage = ((P_Random()%5)+1)*3;
     P_LineAttack (actor, angle, MISSILERANGE, slope, damage);
 }
@@ -821,8 +821,8 @@ void A_PosAttack (mobj_t* actor)
 void A_SPosAttack (mobj_t* actor)
 {
     int		i;
-    int		angle;
-    int		bangle;
+    angle_t		angle;
+    angle_t		bangle;
     int		damage;
     int		slope;
 	
@@ -836,7 +836,7 @@ void A_SPosAttack (mobj_t* actor)
 
     for (i=0 ; i<3 ; i++)
     {
-	angle = bangle + ((P_Random()-P_Random())<<20);
+	angle = bangle + ((P_Random()-P_Random()) * (1<<20));
 	damage = ((P_Random()%5)+1)*3;
 	P_LineAttack (actor, angle, MISSILERANGE, slope, damage);
     }
@@ -844,8 +844,8 @@ void A_SPosAttack (mobj_t* actor)
 
 void A_CPosAttack (mobj_t* actor)
 {
-    int		angle;
-    int		bangle;
+    angle_t		angle;
+    angle_t		bangle;
     int		damage;
     int		slope;
 	
@@ -857,7 +857,7 @@ void A_CPosAttack (mobj_t* actor)
     bangle = actor->angle;
     slope = P_AimLineAttack (actor, bangle, MISSILERANGE);
 
-    angle = bangle + ((P_Random()-P_Random())<<20);
+    angle = bangle + ((P_Random()-P_Random()) * (1 << 20));
     damage = ((P_Random()%5)+1)*3;
     P_LineAttack (actor, angle, MISSILERANGE, slope, damage);
 }

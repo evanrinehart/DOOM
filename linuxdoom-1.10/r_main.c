@@ -481,14 +481,10 @@ fixed_t R_ScaleFromGlobalAngle (angle_t visangle)
     //angleb = ANG90 + (visangle-rw_normalangle);
     long long hp_angleb = ANG90 + (visangle-rw_normalangle);
 
-    if (hp_angleb < 0) {
-        printf("hp_angleb is negative wow!\n");
-    }
-
     // both sines are allways positive
     sinea = finesine[anglea>>ANGLETOFINESHIFT];	
     sineb = finesine[hp_angleb>>ANGLETOFINESHIFT];
-    num = FixedMul(projection,sineb)<<detailshift;
+    num = FixedMul(projection,sineb) * (1 << detailshift);
     den = FixedMul(rw_distance,sinea);
 
     if (den > num>>16)

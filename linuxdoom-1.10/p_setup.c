@@ -143,8 +143,8 @@ void P_LoadVertexes (int lump)
     // internal representation as fixed.
     for (i=0 ; i<numvertexes ; i++, li++, ml++)
     {
-	li->x = SHORT(ml->x)<<FRACBITS;
-	li->y = SHORT(ml->y)<<FRACBITS;
+	li->x = SHORT(ml->x) * FRACUNIT;
+	li->y = SHORT(ml->y) * FRACUNIT;
     }
 
     // Free buffer memory.
@@ -178,7 +178,7 @@ void P_LoadSegs (int lump)
 	li->v1 = &vertexes[SHORT(ml->v1)];
 	li->v2 = &vertexes[SHORT(ml->v2)];
 					
-	li->angle = (SHORT(ml->angle))<<16;
+	li->angle = (SHORT(ml->angle)) * (1 << 16);
 	li->offset = (SHORT(ml->offset))<<16;
 	linedef = SHORT(ml->linedef);
 	ldef = &lines[linedef];
@@ -244,8 +244,8 @@ void P_LoadSectors (int lump)
     ss = sectors;
     for (i=0 ; i<numsectors ; i++, ss++, ms++)
     {
-	ss->floorheight = SHORT(ms->floorheight)<<FRACBITS;
-	ss->ceilingheight = SHORT(ms->ceilingheight)<<FRACBITS;
+	ss->floorheight = SHORT(ms->floorheight) * FRACUNIT;
+	ss->ceilingheight = SHORT(ms->ceilingheight) * FRACUNIT;
 	ss->floorpic = R_FlatNumForName(ms->floorpic);
 	ss->ceilingpic = R_FlatNumForName(ms->ceilingpic);
 	ss->lightlevel = SHORT(ms->lightlevel);
@@ -279,15 +279,15 @@ void P_LoadNodes (int lump)
     
     for (i=0 ; i<numnodes ; i++, no++, mn++)
     {
-	no->x = SHORT(mn->x)<<FRACBITS;
-	no->y = SHORT(mn->y)<<FRACBITS;
-	no->dx = SHORT(mn->dx)<<FRACBITS;
-	no->dy = SHORT(mn->dy)<<FRACBITS;
+	no->x = SHORT(mn->x) * FRACUNIT;
+	no->y = SHORT(mn->y) * FRACUNIT;
+	no->dx = SHORT(mn->dx) * FRACUNIT;
+	no->dy = SHORT(mn->dy) * FRACUNIT;
 	for (j=0 ; j<2 ; j++)
 	{
 	    no->children[j] = SHORT(mn->children[j]);
 	    for (k=0 ; k<4 ; k++)
-		no->bbox[j][k] = SHORT(mn->bbox[j][k])<<FRACBITS;
+		no->bbox[j][k] = SHORT(mn->bbox[j][k]) * FRACUNIT;
 	}
     }
 	
@@ -451,8 +451,8 @@ void P_LoadSideDefs (int lump)
     sd = sides;
     for (i=0 ; i<numsides ; i++, msd++, sd++)
     {
-	sd->textureoffset = SHORT(msd->textureoffset)<<FRACBITS;
-	sd->rowoffset = SHORT(msd->rowoffset)<<FRACBITS;
+	sd->textureoffset = SHORT(msd->textureoffset) * FRACUNIT;
+	sd->rowoffset = SHORT(msd->rowoffset) * FRACUNIT;
 	sd->toptexture = R_TextureNumForName(msd->toptexture);
 	sd->bottomtexture = R_TextureNumForName(msd->bottomtexture);
 	sd->midtexture = R_TextureNumForName(msd->midtexture);
@@ -478,8 +478,8 @@ void P_LoadBlockMap (int lump)
     for (i=0 ; i<count ; i++)
 	blockmaplump[i] = SHORT(blockmaplump[i]);
 		
-    bmaporgx = blockmaplump[0]<<FRACBITS;
-    bmaporgy = blockmaplump[1]<<FRACBITS;
+    bmaporgx = blockmaplump[0] * FRACUNIT;
+    bmaporgy = blockmaplump[1] * FRACUNIT;
     bmapwidth = blockmaplump[2];
     bmapheight = blockmaplump[3];
 	

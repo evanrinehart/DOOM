@@ -151,7 +151,7 @@ void P_MovePlayer (player_t* player)
 	
     cmd = &player->cmd;
 	
-    player->mo->angle += (cmd->angleturn<<16);
+    player->mo->angle += (cmd->angleturn * (1<<16));
 
     // Do not let the player control movement
     //  if not onground.
