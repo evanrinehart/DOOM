@@ -54,7 +54,7 @@ P_AproxDistance
     dy = abs(dy);
     if (dx < dy)
 	return dx+dy-(dx>>1);
-    return dx+dy-(dy>>1);
+    return dx+dy-(dy>>1); // may overflow
 }
 
 

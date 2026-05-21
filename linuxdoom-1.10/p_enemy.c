@@ -180,7 +180,7 @@ boolean P_CheckMeleeRange (mobj_t*	actor)
 	return false;
 		
     pl = actor->target;
-    dist = P_AproxDistance (pl->x-actor->x, pl->y-actor->y);
+    dist = P_AproxDistance (pl->x-actor->x, pl->y-actor->y); // subtractions might overflow
 
     if (dist >= MELEERANGE-20*FRACUNIT+pl->info->radius)
 	return false;
@@ -287,7 +287,7 @@ boolean P_Move (mobj_t*	actor)
     if ((unsigned)actor->movedir >= 8)
 	I_Error ("Weird actor->movedir!");
 		
-    tryx = actor->x + actor->info->speed*xspeed[actor->movedir];
+    tryx = actor->x + actor->info->speed*xspeed[actor->movedir]; // these two sums might overflow
     tryy = actor->y + actor->info->speed*yspeed[actor->movedir];
 
     try_ok = P_TryMove (actor, tryx, tryy);

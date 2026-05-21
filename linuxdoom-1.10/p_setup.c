@@ -554,7 +554,7 @@ void P_GroupLines (void)
 			
 	// set the degenmobj_t to the middle of the bounding box
 	sector->soundorg.x = (bbox[BOXRIGHT]+bbox[BOXLEFT])/2;
-	sector->soundorg.y = (bbox[BOXTOP]+bbox[BOXBOTTOM])/2;
+	sector->soundorg.y = (bbox[BOXTOP]+bbox[BOXBOTTOM])/2; // overflows on e.g. MAP30
 		
 	// adjust bounding box to map blocks
 	block = (bbox[BOXTOP]-bmaporgy+MAXRADIUS)>>MAPBLOCKSHIFT;

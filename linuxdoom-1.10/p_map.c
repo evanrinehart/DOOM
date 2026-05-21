@@ -393,10 +393,10 @@ P_CheckPosition
     tmx = x;
     tmy = y;
 	
-    tmbbox[BOXTOP] = y + tmthing->radius;
+    tmbbox[BOXTOP] = y + tmthing->radius; // all four of these formulas might overflow
     tmbbox[BOXBOTTOM] = y - tmthing->radius;
     tmbbox[BOXRIGHT] = x + tmthing->radius;
-    tmbbox[BOXLEFT] = x - tmthing->radius; // x might be very negative, then this subtraction overflows
+    tmbbox[BOXLEFT] = x - tmthing->radius;
 
     newsubsec = R_PointInSubsector (x,y);
     ceilingline = NULL;
@@ -419,8 +419,8 @@ P_CheckPosition
     // because mobj_ts are grouped into mapblocks
     // based on their origin point, and can overlap
     // into adjacent blocks by up to MAXRADIUS units.
-    xl = (tmbbox[BOXLEFT] - bmaporgx - MAXRADIUS)>>MAPBLOCKSHIFT; // the first subtraction might overflow
-    xh = (tmbbox[BOXRIGHT] - bmaporgx + MAXRADIUS)>>MAPBLOCKSHIFT; // similarly
+    xl = (tmbbox[BOXLEFT] - bmaporgx - MAXRADIUS)>>MAPBLOCKSHIFT; // these four sums might overflow
+    xh = (tmbbox[BOXRIGHT] - bmaporgx + MAXRADIUS)>>MAPBLOCKSHIFT;
     yl = (tmbbox[BOXBOTTOM] - bmaporgy - MAXRADIUS)>>MAPBLOCKSHIFT;
     yh = (tmbbox[BOXTOP] - bmaporgy + MAXRADIUS)>>MAPBLOCKSHIFT;
 
@@ -430,8 +430,8 @@ P_CheckPosition
 		return false;
     
     // check lines
-    xl = (tmbbox[BOXLEFT] - bmaporgx)>>MAPBLOCKSHIFT; // the subtraction might overflow
-    xh = (tmbbox[BOXRIGHT] - bmaporgx)>>MAPBLOCKSHIFT; // similarly
+    xl = (tmbbox[BOXLEFT] - bmaporgx)>>MAPBLOCKSHIFT; // these four subtractions might overflow
+    xh = (tmbbox[BOXRIGHT] - bmaporgx)>>MAPBLOCKSHIFT;
     yl = (tmbbox[BOXBOTTOM] - bmaporgy)>>MAPBLOCKSHIFT;
     yh = (tmbbox[BOXTOP] - bmaporgy)>>MAPBLOCKSHIFT;
 

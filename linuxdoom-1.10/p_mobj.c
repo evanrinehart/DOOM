@@ -151,14 +151,14 @@ void P_XYMovement (mobj_t* mo)
     {
 	if (xmove > MAXMOVE/2 || ymove > MAXMOVE/2)
 	{
-	    ptryx = mo->x + xmove/2;
+	    ptryx = mo->x + xmove/2; // these might overflow
 	    ptryy = mo->y + ymove/2;
 	    xmove >>= 1;
 	    ymove >>= 1;
 	}
 	else
 	{
-	    ptryx = mo->x + xmove;
+	    ptryx = mo->x + xmove; // these might overflow
 	    ptryy = mo->y + ymove;
 	    xmove = ymove = 0;
 	}

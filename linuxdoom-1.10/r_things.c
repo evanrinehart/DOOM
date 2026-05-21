@@ -480,13 +480,13 @@ void R_ProjectSprite (mobj_t* thing)
     fixed_t		iscale;
     
     // transform the origin point
-    tr_x = thing->x - viewx;
+    tr_x = thing->x - viewx; // these might overflow
     tr_y = thing->y - viewy;
 	
     gxt = FixedMul(tr_x,viewcos); 
     gyt = -FixedMul(tr_y,viewsin);
     
-    tz = gxt-gyt; 
+    tz = gxt-gyt; // possible overflow
 
     // thing is behind view plane?
     if (tz < MINZ)
@@ -496,7 +496,7 @@ void R_ProjectSprite (mobj_t* thing)
 	
     gxt = -FixedMul(tr_x,viewsin); 
     gyt = FixedMul(tr_y,viewcos); 
-    tx = -(gyt+gxt); 
+    tx = -(gyt+gxt); // possible overflow
 
     // too far off the side?
     if (abs(tx)>(tz<<2)) // tz << 2 might overflow

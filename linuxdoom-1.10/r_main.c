@@ -293,7 +293,7 @@ R_PointToAngle
 ( fixed_t	x,
   fixed_t	y )
 {	
-    x -= viewx; // this might overflow when x is very negative
+    x -= viewx; // either of these might overflow
     y -= viewy;
     
     if ( (!x) && (!y) )
