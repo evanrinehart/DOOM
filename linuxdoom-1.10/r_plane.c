@@ -100,7 +100,11 @@ fixed_t			cachedystep[SCREENHEIGHT];
 //
 void R_InitPlanes (void)
 {
-  // Doh!
+    for (int i = 0; i < MAXVISPLANES; i++) {
+        visplane_t *vp = &visplanes[i];
+        vp->top = vp->top_store + 1;
+        vp->bottom = vp->bottom_store + 1;
+    }
 }
 
 
@@ -253,7 +257,7 @@ R_FindPlane
     check->minx = SCREENWIDTH;
     check->maxx = -1;
     
-    memset (check->top,0xff,sizeof(check->top));
+    memset (check->top_store + 1, 0xff, sizeof check->top_store - 2);
 		
     return check;
 }
@@ -318,7 +322,7 @@ R_CheckPlane
     pl->minx = start;
     pl->maxx = stop;
 
-    memset (pl->top,0xff,sizeof(pl->top));
+    memset (pl->top_store + 1, 0xff, sizeof pl->top_store - 2);
 		
     return pl;
 }

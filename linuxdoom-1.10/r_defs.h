@@ -464,18 +464,16 @@ typedef struct
   int			lightlevel;
   int			minx;
   int			maxx;
-  
+
   // leave pads for [minx-1]/[maxx+1]
-  
-  byte		pad1;
+
   // Here lies the rub for all
   //  dynamic resize/change of resolution.
-  byte		top[SCREENWIDTH];
-  byte		pad2;
-  byte		pad3;
-  // See above.
-  byte		bottom[SCREENWIDTH];
-  byte		pad4;
+
+  byte top_store[SCREENWIDTH + 2];
+  byte bottom_store[SCREENWIDTH + 2];
+  byte *top; // points one past the start
+  byte *bottom; // points one past the start
 
 } visplane_t;
 
