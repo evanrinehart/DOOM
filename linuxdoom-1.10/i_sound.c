@@ -253,7 +253,7 @@ Wave load_sound_from_wad(char *name) {
     }
 
     if (srate == -21436) { // epic HAX
-        srate = 11025;
+        srate = 44100;
     }
 
     if (srate < 0) {
