@@ -84,6 +84,7 @@ all:	 $(O)/$(BINNAME)
 clean:
 	rm -f *.o *~ *.flc
 	rm -f $(O)/*.o
+	rm -f $(O)/$(BINNAME)
 
 $(O)/$(BINNAME):	$(OBJS) $(O)/i_main.o $(RAYLIB_LIB) $(ADLMIDI_LIB)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) $(O)/i_main.o $(RAYLIB_LIB) $(ADLMIDI_LIB) \
