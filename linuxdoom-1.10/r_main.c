@@ -401,6 +401,8 @@ R_PointToDist
 	
     dx = abs(x - viewx);
     dy = abs(y - viewy);
+
+    if (dx==0) return dy;
 	
     if (dy>dx)
     {
