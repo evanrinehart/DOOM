@@ -630,7 +630,6 @@ void S_SetMusicVolume(int volume)
 
 void S_SetSfxVolume(int volume)
 {
-    printf("S_SetSfxVolume(%d)\n", volume);
 
     if (volume < 0 || volume > 127)
 	I_Error("Attempt to set sfx volume at %d", volume);

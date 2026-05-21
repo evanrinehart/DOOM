@@ -104,19 +104,16 @@ void audio_callback(void *bufferData, unsigned int num_frames) {
 
 void I_SetChannels() {
     // had set up some conversion tables for volume and un/signed samples
-    printf("I_SetChannels\n");
 }	
  
 void I_SetSfxVolume(int volume) {
     // apply the volume settings from the menu
-    printf("I_SetSfxVolume(%d)\n", volume);
 }
 
 void I_SetMusicVolume(int volume) {
     if (volume > 15) return;
 
     // apply the volume settings from the menu
-    printf("I_SetMusicVolume(%d)\n", volume);
     boost = (float)volume / 15 * boost_max;
 }
 
