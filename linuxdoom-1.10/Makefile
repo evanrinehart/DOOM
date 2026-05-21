@@ -84,19 +84,19 @@ all:	 $(O)/$(BINNAME)
 clean:
 	rm -f *.o *~ *.flc
 	rm -f $(O)/*.o
-	rm -f $(O)/libraylib.a
-	rm -f raylib.h
-	rm -f adlmidi.h
 
-$(O)/$(BINNAME):	$(OBJS) $(O)/i_main.o $(O)/libraylib.a $(O)/libADLMIDI.a
-	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) $(O)/i_main.o $(O)/libraylib.a $(O)/libADLMIDI.a \
+$(O)/$(BINNAME):	$(OBJS) $(O)/i_main.o $(RAYLIB_LIB) $(ADLMIDI_LIB)
+	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) $(O)/i_main.o $(RAYLIB_LIB) $(ADLMIDI_LIB) \
 	-o $(O)/$(BINNAME) $(LIBS)
 
 $(O)/%.o:	%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(O)/i_video.o : i_video.c raylib.h
-$(O)/i_sound.o : i_sound.c raylib.h adlmidi.h
+$(O)/i_video.o : i_video.c $(RAYLIB)
+	$(CC) $(CFLAGS) -Iraylib/src -o $(O)/i_video.o -c i_video.c
+
+$(O)/i_sound.o : i_sound.c $(ADLMIDI) $(RAYLIB)
+	$(CC) $(CFLAGS) -Iadlmidi/include -Iraylib/src -o $(O)/i_sound.o -c i_sound.c
 
 #############################################################
 #
@@ -104,28 +104,23 @@ $(O)/i_sound.o : i_sound.c raylib.h adlmidi.h
 
 RAYLIB_VERSION = 6.0
 RAYLIB_URL = https://github.com/raysan5/raylib.git
+RAYLIB = raylib/README.md
+RAYLIB_LIB = raylib/src/libraylib.a
 
-raylib :
+$(RAYLIB) :
 	git clone --depth=1 --branch=$(RAYLIB_VERSION) $(RAYLIB_URL) raylib
 
-raylib.h : raylib
-	cp -v raylib/src/raylib.h .
-
-$(O)/libraylib.a : raylib
+$(RAYLIB_LIB) : $(RAYLIB)
 	$(MAKE) -C raylib/src
-	cp -v raylib/src/libraylib.a $(O)/
 
 ADLMIDI_VERSION = v1.6.1
 ADLMIDI_URL = https://github.com/Wohlstand/libADLMIDI
+ADLMIDI = adlmidi/README.md
+ADLMIDI_LIB = adlmidi/build/libADLMIDI.a
 
-adlmidi :
+$(ADLMIDI) :
 	git clone --depth=1 --branch=$(ADLMIDI_VERSION) $(ADLMIDI_URL) adlmidi
 
-adlmidi.h : adlmidi
-	cp -v adlmidi/include/adlmidi.h .
-
-$(O)/libADLMIDI.a : adlmidi
+$(ADLMIDI_LIB) : $(ADLMIDI)
 	mkdir -p adlmidi/build
 	cd adlmidi/build && cmake -DCMAKE_BUILD_TYPE=Release .. && make
-	cp adlmidi/include/adlmidi.h .
-	cp adlmidi/build/libADLMIDI.a $(O)/
