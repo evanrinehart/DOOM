@@ -1757,6 +1757,7 @@ void M_Drawer (void)
     int			start;
 
     inhelpscreens = false;
+
     
     // Horiz. & Vertically center string and print it.
     if (messageToPrint)
