@@ -60,7 +60,7 @@ void I_Sleep(float delta_t) {
 
 
 
-int	mb_used = 6;
+int	mb_used = 16;
 
 
 void
