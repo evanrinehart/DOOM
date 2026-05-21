@@ -1292,7 +1292,7 @@ void ST_createWidgets(void)
 		  ST_AMMOX,
 		  ST_AMMOY,
 		  tallnum,
-		  &plyr->ammo[weaponinfo[plyr->readyweapon].ammo],
+		  NULL,
 		  &st_statusbaron,
 		  ST_AMMOWIDTH );
 
