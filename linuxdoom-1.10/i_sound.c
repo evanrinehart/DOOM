@@ -359,7 +359,6 @@ void I_ShutdownMusic(void)	{
 
 void I_PlaySong(int handle, int looping)
 {
-    printf("I_PlaySong(%d,%d)\n", handle, looping);
     if (handle != 1) return;
 
     if (registered_song.data == NULL) {
@@ -373,7 +372,6 @@ void I_PlaySong(int handle, int looping)
 
 void I_PauseSong (int handle)
 {
-    printf("I_PauseSong(%d)\n", handle);
     if (handle != 1) return;
 
     music_playing = 0;
@@ -381,7 +379,6 @@ void I_PauseSong (int handle)
 
 void I_ResumeSong (int handle)
 {
-    printf("I_ResumeSong(%d)\n", handle);
     if (handle != 1) return;
 
     music_playing = 1;
@@ -389,7 +386,6 @@ void I_ResumeSong (int handle)
 
 void I_StopSong(int handle)
 {
-    printf("I_StopSong(%d)\n", handle);
     if (handle != 1) return;
 
     music_playing = 0;
@@ -397,7 +393,6 @@ void I_StopSong(int handle)
 
 void I_UnRegisterSong(int handle)
 {
-    printf("I_UnRegisterSong(%d)\n", handle);
     if (handle != 1) return;
 
     if (registered_song.data == NULL) {
@@ -412,8 +407,6 @@ void I_UnRegisterSong(int handle)
 
 int I_RegisterSong(void* data, size_t len)
 {
-    printf("I_RegisterSong(%p, %zu)\n", data, len);
-
     unsigned char *buffer = malloc(len);
     memcpy(buffer, data, len);
 
@@ -428,7 +421,6 @@ int I_RegisterSong(void* data, size_t len)
 // Is the song playing?
 int I_QrySongPlaying(int handle)
 {
-    printf("I_QrySongPlaying(%d)\n", handle);
     if (handle != 1) return 0;
     else return music_playing;
 }
