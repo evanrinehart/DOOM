@@ -252,6 +252,10 @@ Wave load_sound_from_wad(char *name) {
         return w;
     }
 
+    if (srate == -21436) { // epic HAX
+        srate = 11025;
+    }
+
     if (srate < 0) {
         printf("bad sample rate in sfx lump header\n");
         return w;
@@ -295,6 +299,7 @@ void I_InitSound() {
         Wave w = load_sound_from_wad(name);
         sound_library[i] = LoadSoundFromWave(w);
         if (IsSoundValid(sound_library[i]) == 0) {
+            // FIXME, the sound is invalid and will crash if played, make it not
             printf("failed to load sound \"%s\" from wave\n", name);
         }
     }
