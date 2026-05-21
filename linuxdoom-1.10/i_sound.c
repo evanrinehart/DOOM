@@ -237,23 +237,14 @@ Wave load_sound_from_wad(char *name) {
     lumpsize = W_LumpLength(lumpnum);
 
     unsigned char *data = W_CacheLumpNum(lumpnum, PU_STATIC);
-    int format = *((short*)(data + 0));
-    int srate = *((short*)(data + 2));
-    int num_samples = *((int*)(data + 4)) - 32;
+    int format = *((unsigned short*)(data + 0));
+    int srate = *((unsigned short*)(data + 2));
+    unsigned num_samples = *((unsigned int*)(data + 4)) - 32;
 
     Wave w = {0,0,0,0,NULL};
     if (format != 3) {
         printf("bad format in sfx lump header\n");
         return w;
-    }
-
-    if (num_samples < 0) {
-        printf("bad number of samples in sfx lump header\n");
-        return w;
-    }
-
-    if (srate == -21436) { // epic HAX
-        srate = 44100;
     }
 
     if (srate < 0) {
