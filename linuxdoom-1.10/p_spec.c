@@ -1188,7 +1188,6 @@ int EV_DoDonut(line_t*	line)
 		(s2->lines[i]->backsector == s1))
 		continue;
 	    s3 = s2->lines[i]->backsector;
-
 	    
 	    //	Spawn rising slime
 	    floor = Z_Malloc (sizeof(*floor), PU_LEVSPEC, 0);
