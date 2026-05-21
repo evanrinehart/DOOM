@@ -605,7 +605,7 @@ R_StoreWallRange
 		rw_bottomtexturemid = worldlow;
 	}
 	rw_toptexturemid += sidedef->rowoffset;
-	rw_bottomtexturemid += sidedef->rowoffset;
+	rw_bottomtexturemid += sidedef->rowoffset; // overflows in TNT demo2
 	
 	// allocate space for masked texture tables
 	if (sidedef->midtexture)
