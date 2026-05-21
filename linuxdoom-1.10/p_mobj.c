@@ -713,7 +713,9 @@ void P_SpawnMapThing (mapthing_t* mthing)
     fixed_t		x;
     fixed_t		y;
     fixed_t		z;
-		
+
+    if (mthing->type == 0) return;
+
     // count deathmatch start positions
     if (mthing->type == 11)
     {
@@ -726,7 +728,7 @@ void P_SpawnMapThing (mapthing_t* mthing)
     }
 	
     // check for players specially
-    if (mthing->type <= 4)
+    if (1 <= mthing->type && mthing->type <= 4)
     {
 	// save spots for respawning in network games
 	playerstarts[mthing->type-1] = *mthing;
