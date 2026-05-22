@@ -67,6 +67,8 @@ struct joystick_state poll_joystick() {
     js.buttons |= IsGamepadButtonDown(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN) ? 2 : 0;
     js.buttons |= IsGamepadButtonDown(0, GAMEPAD_BUTTON_RIGHT_FACE_UP) ? 4 : 0;
     js.buttons |= IsGamepadButtonDown(0, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT) ? 8 : 0;
+    js.buttons |= IsGamepadButtonDown(0, GAMEPAD_BUTTON_LEFT_TRIGGER_1) ? 16 : 0;
+    js.buttons |= IsGamepadButtonDown(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_1) ? 32 : 0;
     return js;
 }
 
