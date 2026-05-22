@@ -56,19 +56,22 @@ struct joystick_state {
     int buttons;
 };
 
+const char *gamepads[8];
+int current_gamepad = 0;
+
 struct joystick_state poll_joystick() {
     struct joystick_state js = {0,0,0};
-    if (!IsGamepadAvailable(0)) return js;
-    float a1 = GetGamepadAxisMovement(0, 0);
+    if (!IsGamepadAvailable(current_gamepad)) return js;
+    float a1 = GetGamepadAxisMovement(current_gamepad, 0);
     js.axis1 = a1 < -0.1 ? -1 : (a1 > 0.1 ? 1 : 0);
-    float a2 = GetGamepadAxisMovement(0, 1);
+    float a2 = GetGamepadAxisMovement(current_gamepad, 1);
     js.axis2 = a2 < -0.1 ? -1 : (a2 > 0.1 ? 1 : 0);
-    js.buttons |= IsGamepadButtonDown(0, GAMEPAD_BUTTON_RIGHT_FACE_LEFT) ? 1 : 0;
-    js.buttons |= IsGamepadButtonDown(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN) ? 2 : 0;
-    js.buttons |= IsGamepadButtonDown(0, GAMEPAD_BUTTON_RIGHT_FACE_UP) ? 4 : 0;
-    js.buttons |= IsGamepadButtonDown(0, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT) ? 8 : 0;
-    js.buttons |= IsGamepadButtonDown(0, GAMEPAD_BUTTON_LEFT_TRIGGER_1) ? 16 : 0;
-    js.buttons |= IsGamepadButtonDown(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_1) ? 32 : 0;
+    js.buttons |= IsGamepadButtonDown(current_gamepad, GAMEPAD_BUTTON_RIGHT_FACE_LEFT) ? 1 : 0;
+    js.buttons |= IsGamepadButtonDown(current_gamepad, GAMEPAD_BUTTON_RIGHT_FACE_DOWN) ? 2 : 0;
+    js.buttons |= IsGamepadButtonDown(current_gamepad, GAMEPAD_BUTTON_RIGHT_FACE_UP) ? 4 : 0;
+    js.buttons |= IsGamepadButtonDown(current_gamepad, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT) ? 8 : 0;
+    js.buttons |= IsGamepadButtonDown(current_gamepad, GAMEPAD_BUTTON_LEFT_TRIGGER_1) ? 16 : 0;
+    js.buttons |= IsGamepadButtonDown(current_gamepad, GAMEPAD_BUTTON_RIGHT_TRIGGER_1) ? 32 : 0;
     return js;
 }
 
@@ -148,8 +151,6 @@ void DumpGamepads(void) {
     printf("\n");
 }
 
-const char *gamepads[8];
-
 void I_GetEvent(void) {
     // was called from I_StartTic
     // get events and post them with D_PostEvent
@@ -160,11 +161,13 @@ void I_GetEvent(void) {
             printf("NOTICE gamepad %d = \"%s\" appeared!\n", i, GetGamepadName(i));
             gamepads[i] = GetGamepadName(i);
             DumpGamepads();
+            current_gamepad = i;
         }
         else if (!IsGamepadAvailable(i) && gamepads[i]) {
             printf("NOTICE gamepad %d is gone!\n", i);
             gamepads[i] = NULL;
             DumpGamepads();
+            if (i == current_gamepad) current_gamepad = 0;
         }
     }
 
