@@ -136,10 +136,37 @@ void poll_multi_key(struct multi_key *mk) {
     }
 }
 
+void DumpGamepads(void) {
+    for (int i = 0; i < 8; i++) {
+        if (IsGamepadAvailable(i)) {
+            printf("GAMEPAD %d = \"%s\"\n", i, GetGamepadName(i));
+        }
+        else {
+            printf("GAMEPAD %d = not there\n", i);
+        }
+    }
+    printf("\n");
+}
+
+const char *gamepads[8];
+
 void I_GetEvent(void) {
     // was called from I_StartTic
     // get events and post them with D_PostEvent
     // also updated mousemoved
+
+    for (int i = 0; i < 8; i++) {
+        if (IsGamepadAvailable(i) && gamepads[i]==NULL) {
+            printf("NOTICE gamepad %d = \"%s\" appeared!\n", i, GetGamepadName(i));
+            gamepads[i] = GetGamepadName(i);
+            DumpGamepads();
+        }
+        else if (!IsGamepadAvailable(i) && gamepads[i]) {
+            printf("NOTICE gamepad %d is gone!\n", i);
+            gamepads[i] = NULL;
+            DumpGamepads();
+        }
+    }
 
     event_t ev;
 
@@ -331,7 +358,12 @@ void I_InitGraphics(void) {
     for (int i = 0; i < 12; i++) add_key(KEY_F1 + i, DOOM_KEY_F1 + i);
 
     // two obscure controllers I have
-    SetGamepadMappings("03000000790000004e95000011010000,DragonRise Inc. NGC USB Gamepad,a:b1,b:b0,dpdown:b14,dpleft:b15,dpright:b13,dpup:b12,leftshoulder:b4,lefttrigger:a3,leftx:a0,lefty:a1~,rightshoulder:b5,righttrigger:a4,rightx:a5,righty:a2~,start:b9,x:b2,y:b3,platform:Linux,");
+    SetGamepadMappings("03000000790000004e95000011010000,DragonRise Inc. NGC USB Gamepad,a:b1,b:b0,dpdown:b14,dpleft:b15,dpright:b13,dpup:b12,leftshoulder:b4,lefttrigger:a3,leftx:a0,lefty:a1,rightshoulder:b5,righttrigger:a4,rightx:a5,righty:a2,start:b9,x:b2,y:b3,platform:Linux,");
     SetGamepadMappings("03000000790000001100000010010000,!NNEXT Gamepad,a:b2,b:b1,x:b3,y:b0,leftshoulder:b4,rightshoulder:b5,back:b8,start:b9,leftx:a0,lefty:a1,dpup:-a1,dpdown:+a1,dpleft:-a0,dpright:+a0");
+
+    for (int i = 0; i < 8; i++) {
+        if (IsGamepadAvailable(i)) gamepads[i] = GetGamepadName(i);
+    }
+    DumpGamepads();
 
 }
