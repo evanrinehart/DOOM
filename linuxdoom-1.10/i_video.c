@@ -18,9 +18,12 @@
 #include "m_argv.h"
 #include "d_main.h"
 
+
 static bool video_initialized = false;
 
 extern byte *screens[5];
+extern byte gammatable[5][256];
+extern int usegamma;
 
 static Color current_palette[256];
 static Texture screen_tex;
@@ -272,9 +275,9 @@ void I_SetPalette (byte* palette) {
     // to set the palette
 
     for (int i = 0; i < 256; i++) {
-        current_palette[i].r = palette[3*i + 0];
-        current_palette[i].g = palette[3*i + 1];
-        current_palette[i].b = palette[3*i + 2];
+        current_palette[i].r = gammatable[usegamma][palette[3*i + 0]];
+        current_palette[i].g = gammatable[usegamma][palette[3*i + 1]];
+        current_palette[i].b = gammatable[usegamma][palette[3*i + 2]];
         current_palette[i].a = 255;
     }
 
@@ -358,7 +361,13 @@ void I_InitGraphics(void) {
     add_key(KEY_RIGHT, DOOM_KEY_RIGHTARROW);
     add_key(KEY_DOWN, DOOM_KEY_DOWNARROW);
     add_key(KEY_UP, DOOM_KEY_UPARROW);
-    for (int i = 0; i < 12; i++) add_key(KEY_F1 + i, DOOM_KEY_F1 + i);
+
+    for (int i = 0; i < 10; i++) {
+        add_key(KEY_F1 + i, DOOM_KEY_F1 + i);
+    }
+
+    add_key(KEY_F11, DOOM_KEY_F11);
+    add_key(KEY_F12, DOOM_KEY_F12);
 
     // two obscure controllers I have
     SetGamepadMappings("03000000790000004e95000011010000,DragonRise Inc. NGC USB Gamepad,a:b1,b:b0,dpdown:b14,dpleft:b15,dpright:b13,dpup:b12,leftshoulder:b4,lefttrigger:a3,leftx:a0,lefty:a1,rightshoulder:b5,righttrigger:a4,rightx:a5,righty:a2,start:b9,x:b2,y:b3,platform:Linux,");
