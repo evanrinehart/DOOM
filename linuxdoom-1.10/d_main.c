@@ -653,7 +653,7 @@ void IdentifyVersion (void)
     if ( TryIWAD("doomu.wad", retail, doom, english) ) return;
     if ( TryIWAD("doom.wad", registered, doom, english) ) return;
     if ( TryIWAD("doom1.wad", shareware, doom, english) ) return;
-    if ( TryIWAD("freedoom1.wad", registered, doom, english) ) return;
+    if ( TryIWAD("freedoom1.wad", retail, doom, english) ) return;
     if ( TryIWAD("freedoom2.wad", commercial, doom2, english) ) return;
 
     printf("Game mode indeterminate.\n");

@@ -750,6 +750,13 @@ struct strings_table {
 
 struct strings_table strings;
 
+char *F_GetString(char *name) {
+    for (size_t i = 0; i < strings.count; i++) {
+        if (strcmp(name, strings.entries[i].name) == 0) return strings.entries[i].text;
+    }
+    return NULL;
+}
+
 char *goto_next_line(char *base) {
     while (*base && *base != '\n') base++;
     return *base ? base+1 : base;
@@ -853,19 +860,33 @@ void F_SetCustomFinale(char *dehacked, int len) {
         }
     }
 
-    /* delete me
-    for (size_t i = 0; i < strings.count; i++) {
-        printf("strings[%s] = [%s]\n", strings.entries[i].name, strings.entries[i].text);
-    }
-    */
+    if (F_GetString("E1TEXT")) e1text = F_GetString("E1TEXT");
+    if (F_GetString("E2TEXT")) e2text = F_GetString("E2TEXT");
+    if (F_GetString("E3TEXT")) e3text = F_GetString("E3TEXT");
+    if (F_GetString("E4TEXT")) e4text = F_GetString("E4TEXT");
+
+    if (F_GetString("C1TEXT")) c1text = F_GetString("C1TEXT");
+    if (F_GetString("C2TEXT")) c2text = F_GetString("C2TEXT");
+    if (F_GetString("C3TEXT")) c3text = F_GetString("C3TEXT");
+    if (F_GetString("C4TEXT")) c4text = F_GetString("C4TEXT");
+    if (F_GetString("C5TEXT")) c5text = F_GetString("C5TEXT");
+    if (F_GetString("C6TEXT")) c6text = F_GetString("C6TEXT");
+
+    if (F_GetString("P1TEXT")) p1text = F_GetString("P1TEXT");
+    if (F_GetString("P2TEXT")) p2text = F_GetString("P2TEXT");
+    if (F_GetString("P3TEXT")) p3text = F_GetString("P3TEXT");
+    if (F_GetString("P4TEXT")) p4text = F_GetString("P4TEXT");
+    if (F_GetString("P5TEXT")) p5text = F_GetString("P5TEXT");
+    if (F_GetString("P6TEXT")) p6text = F_GetString("P6TEXT");
+
+    if (F_GetString("T1TEXT")) t1text = F_GetString("T1TEXT");
+    if (F_GetString("T2TEXT")) t2text = F_GetString("T2TEXT");
+    if (F_GetString("T3TEXT")) t3text = F_GetString("T3TEXT");
+    if (F_GetString("T4TEXT")) t4text = F_GetString("T4TEXT");
+    if (F_GetString("T5TEXT")) t5text = F_GetString("T5TEXT");
+    if (F_GetString("T6TEXT")) t6text = F_GetString("T6TEXT");
 
     free(dehacked_string);
 
 }
 
-char *F_GetString(char *name) {
-    for (size_t i = 0; i < strings.count; i++) {
-        if (strcmp(name, strings.entries[i].name) == 0) return strings.entries[i].text;
-    }
-    return NULL;
-}
