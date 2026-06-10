@@ -653,6 +653,8 @@ void IdentifyVersion (void)
     if ( TryIWAD("doomu.wad", retail, doom, english) ) return;
     if ( TryIWAD("doom.wad", registered, doom, english) ) return;
     if ( TryIWAD("doom1.wad", shareware, doom, english) ) return;
+    if ( TryIWAD("freedoom1.wad", registered, doom, english) ) return;
+    if ( TryIWAD("freedoom2.wad", commercial, doom2, english) ) return;
 
     printf("Game mode indeterminate.\n");
     gamemode = indetermined;
@@ -736,7 +738,6 @@ void FindResponseFile (void)
 	}
 }
 
-
 //
 // D_DoomMain
 //
@@ -760,71 +761,6 @@ void D_DoomMain (void)
 	deathmatch = 2;
     else if (M_CheckParm ("-deathmatch"))
 	deathmatch = 1;
-
-    switch ( gamemode )
-    {
-      case retail:
-	sprintf (title,
-		 "                         "
-		 "The Ultimate DOOM Startup v%i.%i"
-		 "                           ",
-		 VERSION/100,VERSION%100);
-	break;
-      case shareware:
-	sprintf (title,
-		 "                            "
-		 "DOOM Shareware Startup v%i.%i"
-		 "                           ",
-		 VERSION/100,VERSION%100);
-	break;
-      case registered:
-	sprintf (title,
-		 "                            "
-		 "DOOM Registered Startup v%i.%i"
-		 "                           ",
-		 VERSION/100,VERSION%100);
-	break;
-      case commercial:
-        switch(gamemission) {
-            case doom:
-                // handled elsewhere
-                break;
-            case doom2:
-                sprintf (title,
-                "                         "
-                "DOOM 2: Hell on Earth v%i.%i"
-                "                           ",
-                VERSION/100,VERSION%100);
-                break;
-            case pack_plut:
-                sprintf (title,
-                "                   "
-                "DOOM 2: Plutonia Experiment v%i.%i"
-                "                           ",
-                VERSION/100,VERSION%100);
-                break;
-            case pack_tnt:
-                sprintf (title,
-                "                     "
-                "DOOM 2: TNT - Evilution v%i.%i"
-                "                           ",
-                VERSION/100,VERSION%100);
-                break;
-            case none:
-                // handled elsewhere
-                break;
-        }
-        break;
-      default:
-	sprintf (title,
-		 "                     "
-		 "Public DOOM - v%i.%i"
-		 "                           ",
-		 VERSION/100,VERSION%100);
-	break;
-    }
-    
-    printf ("%s\n",title);
 
     if (devparm)
 	printf(D_DEVSTR);
@@ -1016,32 +952,118 @@ void D_DoomMain (void)
     }
 	
 
-    // Check and print which version is executed.
-    switch ( gamemode )
-    {
-      case shareware:
-      case indetermined:
-	printf (
-	    "===========================================================================\n"
-	    "                                Shareware!\n"
-	    "===========================================================================\n"
-	);
-	break;
-      case registered:
-      case retail:
-      case commercial:
-	printf (
-	    "===========================================================================\n"
-	    "                 Commercial product - do not distribute!\n"
-	    "         Please report software piracy to the SPA: 1-800-388-PIR8\n"
-	    "===========================================================================\n"
-	);
-	break;
-	
-      default:
-	// Ouch.
-	break;
+    int dehacked_num = W_CheckNumForName("DEHACKED");
+    if (dehacked_num < 0) {
+        printf("no DEHACKED lump found\n");
     }
+    else {
+        char *dehacked = W_CacheLumpNum(dehacked_num, PU_CACHE);
+        int len = W_LumpLength(dehacked_num);
+        F_SetCustomFinale(dehacked, len);
+    }
+
+    char *banner = F_GetString("STARTUP5");
+    if (banner) {
+        printf("%s\n", banner);
+    }
+    else {
+
+        switch ( gamemode )
+        {
+          case retail:
+            sprintf (title,
+                     "                         "
+                     "The Ultimate DOOM Startup v%i.%i"
+                     "                           ",
+                     VERSION/100,VERSION%100);
+            break;
+          case shareware:
+            sprintf (title,
+                     "                            "
+                     "DOOM Shareware Startup v%i.%i"
+                     "                           ",
+                     VERSION/100,VERSION%100);
+            break;
+          case registered:
+            sprintf (title,
+                     "                            "
+                     "DOOM Registered Startup v%i.%i"
+                     "                           ",
+                     VERSION/100,VERSION%100);
+            break;
+          case commercial:
+            switch(gamemission) {
+                case doom:
+                    // handled elsewhere
+                    break;
+                case doom2:
+                    sprintf (title,
+                    "                         "
+                    "DOOM 2: Hell on Earth v%i.%i"
+                    "                           ",
+                    VERSION/100,VERSION%100);
+                    break;
+                case pack_plut:
+                    sprintf (title,
+                    "                   "
+                    "DOOM 2: Plutonia Experiment v%i.%i"
+                    "                           ",
+                    VERSION/100,VERSION%100);
+                    break;
+                case pack_tnt:
+                    sprintf (title,
+                    "                     "
+                    "DOOM 2: TNT - Evilution v%i.%i"
+                    "                           ",
+                    VERSION/100,VERSION%100);
+                    break;
+                case none:
+                    // handled elsewhere
+                    break;
+            }
+            break;
+          default:
+            sprintf (title,
+                     "                     "
+                     "Public DOOM - v%i.%i"
+                     "                           ",
+                     VERSION/100,VERSION%100);
+            break;
+        }
+
+        printf ("%s\n",title);
+
+
+        // Check and print which version is executed.
+        switch ( gamemode )
+        {
+          case shareware:
+          case indetermined:
+            printf (
+                "===========================================================================\n"
+                "                                Shareware!\n"
+                "===========================================================================\n"
+            );
+            break;
+          case registered:
+          case retail:
+          case commercial:
+            printf (
+                "===========================================================================\n"
+                "                 Commercial product - do not distribute!\n"
+                "         Please report software piracy to the SPA: 1-800-388-PIR8\n"
+                "===========================================================================\n"
+            );
+            break;
+
+          default:
+            // Ouch.
+            break;
+        }
+
+    }
+
+
 
     printf ("M_Init: Init miscellaneous info.\n");
     M_Init ();

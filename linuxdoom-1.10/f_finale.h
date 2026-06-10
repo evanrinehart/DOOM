@@ -43,6 +43,8 @@ void F_Drawer (void);
 void F_StartFinale (void);
 
 
+void F_SetCustomFinale(char *dehacked, int len);
+char *F_GetString(char *name);
 
 
 #endif

@@ -26,6 +26,7 @@ static const char
 rcsid[] = "$Id: f_finale.c,v 1.5 1997/02/03 21:26:34 b1 Exp $";
 
 #include <ctype.h>
+#include <stdlib.h>
 
 // Functions.
 #include "i_system.h"
@@ -736,3 +737,135 @@ void F_Drawer (void)
 }
 
 
+struct strings_entry {
+    char name[32];
+    char *text;
+};
+
+struct strings_table {
+    struct strings_entry *entries;
+    size_t max;
+    size_t count;
+};
+
+struct strings_table strings;
+
+char *goto_next_line(char *base) {
+    while (*base && *base != '\n') base++;
+    return *base ? base+1 : base;
+}
+
+char *copy_string_key(char *base, char *buffer) {
+    int i = 0;
+    while (*base && *base != ' ' && *base != '=') {
+        buffer[i++] = *base++;
+        if (i == 32) return NULL;
+    }
+    buffer[i] = 0;
+    return base;
+}
+
+int compare_line(char *base, char *pattern) {
+    for (;;) {
+        if ((*base == 0 || *base == '\n') && *pattern == 0) return 0;
+        if (*pattern != *base) return 1;
+        pattern++;
+        base++;
+    }
+}
+
+char *find_strings_section(char *content) {
+    for (; *content; content = goto_next_line(content) ) {
+        if (compare_line(content, "[STRINGS]") == 0) return goto_next_line(content);
+    }
+    return NULL;
+}
+
+char *read_string_content(long indent, char *base, char *outbuf, size_t *size_out) {
+    size_t len = 0;
+    while (*base && *base != '\n') {
+        if (*base == '\\' && *(base+1) == 'n') {
+            if (outbuf) { *outbuf++ = '\n'; }
+            base += 2;
+            len++;
+        }
+        else if (*base == '\\' && *(base+1) == '\n') {
+            base += 2;
+            base += indent;
+        }
+        else {
+            if (outbuf) { *outbuf++ = *base; }
+            base++;
+            len++;
+        }
+    }
+    if (outbuf) *outbuf = 0;
+    if (size_out) *size_out = len;
+    return *base == '\n' ? base + 1 : base;
+}
+
+void print_line(char *base) {
+    while (*base && *base != '\n') putc(*base++, stdout);
+    putc('\n', stdout);
+}
+
+void F_SetCustomFinale(char *dehacked, int len) {
+    char *dehacked_string = malloc(len + 1);
+    memcpy(dehacked_string, dehacked, len);
+    dehacked_string[len] = 0;
+
+    strings.entries = malloc(400 * sizeof (struct strings_entry));
+    strings.max = 400;
+    strings.count = 0;
+
+    char *content = find_strings_section(dehacked_string);
+    if (content == NULL) return;
+
+    while (*content) {
+        if (*content == '#') { content = goto_next_line(content); continue; }
+
+        if (strings.count == strings.max) {
+            printf("Warning: too many strings\n");
+            break;
+        }
+
+        struct strings_entry *ent = &strings.entries[strings.count++];
+        char *more = copy_string_key(content, ent->name);
+
+        if (*more == ' ') {
+            while (*more == ' ') more++;
+            while (*more == '=') more++;
+            while (*more == ' ') more++;
+            long indent = more - content;
+            size_t len;
+
+            // read string content using indent level until bare newline
+            read_string_content(indent, more, NULL, &len);
+            ent->text = malloc(len + 1);
+            content = read_string_content(indent, more, ent->text, NULL);
+        }
+        else {
+            // content starts immediately
+            size_t len;
+            read_string_content(0, more, NULL, &len);
+            ent->text = malloc(len + 1);
+            content = read_string_content(0, more, ent->text, NULL);
+        }
+    }
+
+    /* delete me
+    for (size_t i = 0; i < strings.count; i++) {
+        printf("strings[%s] = [%s]\n", strings.entries[i].name, strings.entries[i].text);
+    }
+    */
+
+    free(dehacked_string);
+
+}
+
+char *F_GetString(char *name) {
+    for (size_t i = 0; i < strings.count; i++) {
+        if (strcmp(name, strings.entries[i].name) == 0) return strings.entries[i].text;
+    }
+    return NULL;
+}
