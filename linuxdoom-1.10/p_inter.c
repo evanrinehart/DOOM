@@ -47,6 +47,8 @@ rcsid[] = "$Id: p_inter.c,v 1.4 1997/02/03 22:45:11 b1 Exp $";
 #endif
 #include "p_inter.h"
 
+#include "f_finale.h"
+
 
 #define BONUSADD	6
 
@@ -370,13 +372,13 @@ P_TouchSpecialThing
       case SPR_ARM1:
 	if (!P_GiveArmor (player, 1))
 	    return;
-	player->message = GOTARMOR;
+	player->message = F_GETSTRING(GOTARMOR);
 	break;
 		
       case SPR_ARM2:
 	if (!P_GiveArmor (player, 2))
 	    return;
-	player->message = GOTMEGA;
+	player->message = F_GETSTRING(GOTMEGA);
 	break;
 	
 	// bonus items
@@ -385,7 +387,7 @@ P_TouchSpecialThing
 	if (player->health > 200)
 	    player->health = 200;
 	player->mo->health = player->health;
-	player->message = GOTHTHBONUS;
+	player->message = F_GETSTRING(GOTHTHBONUS);
 	break;
 	
       case SPR_BON2:
@@ -394,7 +396,7 @@ P_TouchSpecialThing
 	    player->armorpoints = 200;
 	if (!player->armortype)
 	    player->armortype = 1;
-	player->message = GOTARMBONUS;
+	player->message = F_GETSTRING(GOTARMBONUS);
 	break;
 	
       case SPR_SOUL:
@@ -402,7 +404,7 @@ P_TouchSpecialThing
 	if (player->health > 200)
 	    player->health = 200;
 	player->mo->health = player->health;
-	player->message = GOTSUPER;
+	player->message = F_GETSTRING(GOTSUPER);
 	sound = sfx_getpow;
 	break;
 	
@@ -412,7 +414,7 @@ P_TouchSpecialThing
 	player->health = 200;
 	player->mo->health = player->health;
 	P_GiveArmor (player,2);
-	player->message = GOTMSPHERE;
+	player->message = F_GETSTRING(GOTMSPHERE);
 	sound = sfx_getpow;
 	break;
 	
@@ -420,7 +422,7 @@ P_TouchSpecialThing
 	// leave cards for everyone
       case SPR_BKEY:
 	if (!player->cards[it_bluecard])
-	    player->message = GOTBLUECARD;
+	    player->message = F_GETSTRING(GOTBLUECARD);
 	P_GiveCard (player, it_bluecard);
 	if (!netgame)
 	    break;
@@ -428,7 +430,7 @@ P_TouchSpecialThing
 	
       case SPR_YKEY:
 	if (!player->cards[it_yellowcard])
-	    player->message = GOTYELWCARD;
+	    player->message = F_GETSTRING(GOTYELWCARD);
 	P_GiveCard (player, it_yellowcard);
 	if (!netgame)
 	    break;
@@ -436,7 +438,7 @@ P_TouchSpecialThing
 	
       case SPR_RKEY:
 	if (!player->cards[it_redcard])
-	    player->message = GOTREDCARD;
+	    player->message = F_GETSTRING(GOTREDCARD);
 	P_GiveCard (player, it_redcard);
 	if (!netgame)
 	    break;
@@ -444,7 +446,7 @@ P_TouchSpecialThing
 	
       case SPR_BSKU:
 	if (!player->cards[it_blueskull])
-	    player->message = GOTBLUESKUL;
+	    player->message = F_GETSTRING(GOTBLUESKUL);
 	P_GiveCard (player, it_blueskull);
 	if (!netgame)
 	    break;
@@ -452,7 +454,7 @@ P_TouchSpecialThing
 	
       case SPR_YSKU:
 	if (!player->cards[it_yellowskull])
-	    player->message = GOTYELWSKUL;
+	    player->message = F_GETSTRING(GOTYELWSKUL);
 	P_GiveCard (player, it_yellowskull);
 	if (!netgame)
 	    break;
@@ -460,7 +462,7 @@ P_TouchSpecialThing
 	
       case SPR_RSKU:
 	if (!player->cards[it_redskull])
-	    player->message = GOTREDSKULL;
+	    player->message = F_GETSTRING(GOTREDSKULL);
 	P_GiveCard (player, it_redskull);
 	if (!netgame)
 	    break;
@@ -470,7 +472,7 @@ P_TouchSpecialThing
       case SPR_STIM:
 	if (!P_GiveBody (player, 10))
 	    return;
-	player->message = GOTSTIM;
+	player->message = F_GETSTRING(GOTSTIM);
 	break;
 	
       case SPR_MEDI:
@@ -478,9 +480,9 @@ P_TouchSpecialThing
 	    return;
 
 	if (player->health < 25)
-	    player->message = GOTMEDINEED;
+	    player->message = F_GETSTRING(GOTMEDINEED);
 	else
-	    player->message = GOTMEDIKIT;
+	    player->message = F_GETSTRING(GOTMEDIKIT);
 	break;
 
 	
@@ -488,14 +490,14 @@ P_TouchSpecialThing
       case SPR_PINV:
 	if (!P_GivePower (player, pw_invulnerability))
 	    return;
-	player->message = GOTINVUL;
+	player->message = F_GETSTRING(GOTINVUL);
 	sound = sfx_getpow;
 	break;
 	
       case SPR_PSTR:
 	if (!P_GivePower (player, pw_strength))
 	    return;
-	player->message = GOTBERSERK;
+	player->message = F_GETSTRING(GOTBERSERK);
 	if (player->readyweapon != wp_fist)
 	    player->pendingweapon = wp_fist;
 	sound = sfx_getpow;
@@ -504,28 +506,28 @@ P_TouchSpecialThing
       case SPR_PINS:
 	if (!P_GivePower (player, pw_invisibility))
 	    return;
-	player->message = GOTINVIS;
+	player->message = F_GETSTRING(GOTINVIS);
 	sound = sfx_getpow;
 	break;
 	
       case SPR_SUIT:
 	if (!P_GivePower (player, pw_ironfeet))
 	    return;
-	player->message = GOTSUIT;
+	player->message = F_GETSTRING(GOTSUIT);
 	sound = sfx_getpow;
 	break;
 	
       case SPR_PMAP:
 	if (!P_GivePower (player, pw_allmap))
 	    return;
-	player->message = GOTMAP;
+	player->message = F_GETSTRING(GOTMAP);
 	sound = sfx_getpow;
 	break;
 	
       case SPR_PVIS:
 	if (!P_GivePower (player, pw_infrared))
 	    return;
-	player->message = GOTVISOR;
+	player->message = F_GETSTRING(GOTVISOR);
 	sound = sfx_getpow;
 	break;
 	
@@ -541,49 +543,49 @@ P_TouchSpecialThing
 	    if (!P_GiveAmmo (player,am_clip,1))
 		return;
 	}
-	player->message = GOTCLIP;
+	player->message = F_GETSTRING(GOTCLIP);
 	break;
 	
       case SPR_AMMO:
 	if (!P_GiveAmmo (player, am_clip,5))
 	    return;
-	player->message = GOTCLIPBOX;
+	player->message = F_GETSTRING(GOTCLIPBOX);
 	break;
 	
       case SPR_ROCK:
 	if (!P_GiveAmmo (player, am_misl,1))
 	    return;
-	player->message = GOTROCKET;
+	player->message = F_GETSTRING(GOTROCKET);
 	break;
 	
       case SPR_BROK:
 	if (!P_GiveAmmo (player, am_misl,5))
 	    return;
-	player->message = GOTROCKBOX;
+	player->message = F_GETSTRING(GOTROCKBOX);
 	break;
 	
       case SPR_CELL:
 	if (!P_GiveAmmo (player, am_cell,1))
 	    return;
-	player->message = GOTCELL;
+	player->message = F_GETSTRING(GOTCELL);
 	break;
 	
       case SPR_CELP:
 	if (!P_GiveAmmo (player, am_cell,5))
 	    return;
-	player->message = GOTCELLBOX;
+	player->message = F_GETSTRING(GOTCELLBOX);
 	break;
 	
       case SPR_SHEL:
 	if (!P_GiveAmmo (player, am_shell,1))
 	    return;
-	player->message = GOTSHELLS;
+	player->message = F_GETSTRING(GOTSHELLS);
 	break;
 	
       case SPR_SBOX:
 	if (!P_GiveAmmo (player, am_shell,5))
 	    return;
-	player->message = GOTSHELLBOX;
+	player->message = F_GETSTRING(GOTSHELLBOX);
 	break;
 	
       case SPR_BPAK:
@@ -595,56 +597,56 @@ P_TouchSpecialThing
 	}
 	for (i=0 ; i<NUMAMMO ; i++)
 	    P_GiveAmmo (player, i, 1);
-	player->message = GOTBACKPACK;
+	player->message = F_GETSTRING(GOTBACKPACK);
 	break;
 	
 	// weapons
       case SPR_BFUG:
 	if (!P_GiveWeapon (player, wp_bfg, false) )
 	    return;
-	player->message = GOTBFG9000;
+	player->message = F_GETSTRING(GOTBFG9000);
 	sound = sfx_wpnup;	
 	break;
 	
       case SPR_MGUN:
 	if (!P_GiveWeapon (player, wp_chaingun, special->flags&MF_DROPPED) )
 	    return;
-	player->message = GOTCHAINGUN;
+	player->message = F_GETSTRING(GOTCHAINGUN);
 	sound = sfx_wpnup;	
 	break;
 	
       case SPR_CSAW:
 	if (!P_GiveWeapon (player, wp_chainsaw, false) )
 	    return;
-	player->message = GOTCHAINSAW;
+	player->message = F_GETSTRING(GOTCHAINSAW);
 	sound = sfx_wpnup;	
 	break;
 	
       case SPR_LAUN:
 	if (!P_GiveWeapon (player, wp_missile, false) )
 	    return;
-	player->message = GOTLAUNCHER;
+	player->message = F_GETSTRING(GOTLAUNCHER);
 	sound = sfx_wpnup;	
 	break;
 	
       case SPR_PLAS:
 	if (!P_GiveWeapon (player, wp_plasma, false) )
 	    return;
-	player->message = GOTPLASMA;
+	player->message = F_GETSTRING(GOTPLASMA);
 	sound = sfx_wpnup;	
 	break;
 	
       case SPR_SHOT:
 	if (!P_GiveWeapon (player, wp_shotgun, special->flags&MF_DROPPED ) )
 	    return;
-	player->message = GOTSHOTGUN;
+	player->message = F_GETSTRING(GOTSHOTGUN);
 	sound = sfx_wpnup;	
 	break;
 		
       case SPR_SGN2:
 	if (!P_GiveWeapon (player, wp_supershotgun, special->flags&MF_DROPPED ) )
 	    return;
-	player->message = GOTSHOTGUN2;
+	player->message = F_GETSTRING(GOTSHOTGUN2);
 	sound = sfx_wpnup;	
 	break;
 		

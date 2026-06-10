@@ -63,6 +63,7 @@ rcsid[] = "$Id: m_menu.c,v 1.7 1997/02/03 22:45:10 b1 Exp $";
 
 #include "m_menu.h"
 
+#include "f_finale.h"
 
 
 extern patch_t*		hu_font[HU_FONTSIZE];
@@ -910,7 +911,7 @@ void M_ChooseSkill(int choice)
 {
     if (choice == nightmare)
     {
-	M_StartMessage(NIGHTMARE,M_VerifyNightmare,true);
+	M_StartMessage(F_GETSTRING(NIGHTMARE),M_VerifyNightmare,true);
 	return;
     }
 	
@@ -1096,15 +1097,37 @@ void M_QuitResponse(int ch)
 
 
 
+char *M_GetQuitMessage(int i) {
+    char *msg;
+    switch (i) {
+        case 0: msg = F_GetString("QUITMSG"); break;
+        case 1: msg = F_GetString("QUITMSG1"); break;
+        case 2: msg = F_GetString("QUITMSG2"); break;
+        case 3: msg = F_GetString("QUITMSG3"); break;
+        case 4: msg = F_GetString("QUITMSG4"); break;
+        case 5: msg = F_GetString("QUITMSG5"); break;
+        case 6: msg = F_GetString("QUITMSG6"); break;
+        case 7: msg = F_GetString("QUITMSG7"); break;
+        case 8: msg = F_GetString("QUITMSG8"); break;
+        case 9: msg = F_GetString("QUITMSG9"); break;
+        case 10: msg = F_GetString("QUITMSG10"); break;
+        case 11: msg = F_GetString("QUITMSG11"); break;
+        case 12: msg = F_GetString("QUITMSG12"); break;
+        case 13: msg = F_GetString("QUITMSG13"); break;
+        case 14: msg = F_GetString("QUITMSG14"); break;
+        default: msg = NULL;
+    }
+    return msg ? msg : endmsg[i];
+}
 
 void M_QuitDOOM(int choice)
 {
   // We pick index 0 which is language sensitive,
   //  or one at random, between 1 and maximum number.
   if (language != english )
-    sprintf(endstring,"%s\n\n"DOSY, endmsg[0] );
+    sprintf(endstring,"%s\n\n%s", M_GetQuitMessage(0), F_GETSTRING(DOSY));
   else
-    sprintf(endstring,"%s\n\n"DOSY, endmsg[ (gametic%(NUM_QUITMESSAGES-2))+1 ]);
+    sprintf(endstring,"%s\n\n%s", M_GetQuitMessage(gametic%(NUM_QUITMESSAGES-2)+1) , F_GETSTRING(DOSY));
   
   M_StartMessage(endstring,M_QuitResponse,true);
 }

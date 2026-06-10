@@ -43,6 +43,8 @@ rcsid[] = "$Id: f_finale.c,v 1.5 1997/02/03 21:26:34 b1 Exp $";
 #include "doomstat.h"
 #include "r_state.h"
 
+#include "f_finale.h"
+
 // ?
 //#include "doomstat.h"
 //#include "r_local.h"
@@ -571,6 +573,37 @@ void F_CastPrint (char* text)
 	
 }
 
+char *F_GetCastName(int num) {
+    char *key;
+
+    switch (castorder[num].type) {
+        case MT_POSSESSED: key = "CC_ZOMBIE"; break;
+        case MT_SHOTGUY: key = "CC_SHOTGUN"; break;
+        case MT_CHAINGUY: key = "CC_HEAVY"; break;
+        case MT_TROOP: key = "CC_IMP"; break;
+        case MT_SERGEANT: key = "CC_DEMON"; break;
+        case MT_SKULL: key = "CC_LOST"; break;
+        case MT_HEAD: key = "CC_CACO"; break;
+        case MT_KNIGHT: key = "CC_HELL"; break;
+        case MT_BRUISER: key = "CC_BARON"; break;
+        case MT_BABY: key = "CC_ARACH"; break;
+        case MT_PAIN: key = "CC_PAIN"; break;
+        case MT_UNDEAD: key = "CC_REVEN"; break;
+        case MT_FATSO: key = "CC_MANCU"; break;
+        case MT_VILE: key = "CC_ARCH"; break;
+        case MT_SPIDER: key = "CC_SPIDER"; break;
+        case MT_CYBORG: key = "CC_CYBER"; break;
+        case MT_PLAYER: key = "CC_HERO"; break;
+        default: key = NULL;
+    }
+
+    if (key) {
+        char *name = F_GetString(key);
+        if (name) return name;
+    }
+
+    return castorder[num].name;
+}
 
 //
 // F_CastDrawer
@@ -588,7 +621,7 @@ void F_CastDrawer (void)
     // erase the entire screen to a background
     V_DrawPatch (0,0,0, W_CacheLumpName ("BOSSBACK", PU_CACHE));
 
-    F_CastPrint (castorder[castnum].name);
+    F_CastPrint (F_GetCastName(castnum));
     
     // draw the current frame in the middle of the screen
     sprdef = &sprites[caststate->sprite];
@@ -750,16 +783,23 @@ struct strings_table {
 
 struct strings_table strings;
 
-char *F_GetString(char *name) {
+char *F_GetStringElse(char *name, char *fallback) {
     for (size_t i = 0; i < strings.count; i++) {
         if (strcmp(name, strings.entries[i].name) == 0) return strings.entries[i].text;
     }
-    return NULL;
+    return fallback;
+}
+
+char *F_GetString(char *name) {
+    return F_GetStringElse(name, NULL);
 }
 
 char *goto_next_line(char *base) {
-    while (*base && *base != '\n') base++;
-    return *base ? base+1 : base;
+    while (*base && *base != '\n' && *base != '\r') base++;
+    if (*base == 0) return base;
+    if (*base == '\n') return base+1;
+    if (*base == '\r' && *(base+1) && *(base+1) == '\n') return base+2;
+    return base+1;
 }
 
 char *copy_string_key(char *base, char *buffer) {
@@ -774,7 +814,7 @@ char *copy_string_key(char *base, char *buffer) {
 
 int compare_line(char *base, char *pattern) {
     for (;;) {
-        if ((*base == 0 || *base == '\n') && *pattern == 0) return 0;
+        if ((*base == 0 || *base == '\n' || *base == '\r') && *pattern == 0) return 0;
         if (*pattern != *base) return 1;
         pattern++;
         base++;
@@ -830,6 +870,8 @@ void F_SetCustomFinale(char *dehacked, int len) {
 
     while (*content) {
         if (*content == '#') { content = goto_next_line(content); continue; }
+        if (*content == '\n') break;
+        if (*content == '\r') break;
 
         if (strings.count == strings.max) {
             printf("Warning: too many strings\n");

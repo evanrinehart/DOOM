@@ -43,6 +43,8 @@ rcsid[] = "$Id: hu_stuff.c,v 1.4 1997/02/03 16:47:52 b1 Exp $";
 #include "dstrings.h"
 #include "sounds.h"
 
+#include "f_finale.h"
+
 //
 // Locally used constants, shortcuts.
 //
@@ -389,6 +391,197 @@ char ForeignTranslation(unsigned char ch)
     return ch < 128 ? frenchKeyMap[ch] : ch;
 }
 
+char *GetDoomMapName(int episode, int map) {
+    if (episode < 1 || episode > 4 || map < 1 || map > 9)
+        return F_GETSTRING(HUSTR_E1M1);
+
+    switch (episode) {
+        case 1:
+            switch (map) {
+                case 1: return F_GETSTRING(HUSTR_E1M1);
+                case 2: return F_GETSTRING(HUSTR_E1M2);
+                case 3: return F_GETSTRING(HUSTR_E1M3);
+                case 4: return F_GETSTRING(HUSTR_E1M4);
+                case 5: return F_GETSTRING(HUSTR_E1M5);
+                case 6: return F_GETSTRING(HUSTR_E1M6);
+                case 7: return F_GETSTRING(HUSTR_E1M7);
+                case 8: return F_GETSTRING(HUSTR_E1M8);
+                default: return F_GETSTRING(HUSTR_E1M9);
+            }
+        case 2:
+            switch (map) {
+                case 1: return F_GETSTRING(HUSTR_E2M1);
+                case 2: return F_GETSTRING(HUSTR_E2M2);
+                case 3: return F_GETSTRING(HUSTR_E2M3);
+                case 4: return F_GETSTRING(HUSTR_E2M4);
+                case 5: return F_GETSTRING(HUSTR_E2M5);
+                case 6: return F_GETSTRING(HUSTR_E2M6);
+                case 7: return F_GETSTRING(HUSTR_E2M7);
+                case 8: return F_GETSTRING(HUSTR_E2M8);
+                default: return F_GETSTRING(HUSTR_E2M9);
+            }
+        case 3:
+            switch (map) {
+                case 1: return F_GETSTRING(HUSTR_E3M1);
+                case 2: return F_GETSTRING(HUSTR_E3M2);
+                case 3: return F_GETSTRING(HUSTR_E3M3);
+                case 4: return F_GETSTRING(HUSTR_E3M4);
+                case 5: return F_GETSTRING(HUSTR_E3M5);
+                case 6: return F_GETSTRING(HUSTR_E3M6);
+                case 7: return F_GETSTRING(HUSTR_E3M7);
+                case 8: return F_GETSTRING(HUSTR_E3M8);
+                default: return F_GETSTRING(HUSTR_E3M9);
+            }
+        default:
+            switch (map) {
+                case 1: return F_GETSTRING(HUSTR_E4M1);
+                case 2: return F_GETSTRING(HUSTR_E4M2);
+                case 3: return F_GETSTRING(HUSTR_E4M3);
+                case 4: return F_GETSTRING(HUSTR_E4M4);
+                case 5: return F_GETSTRING(HUSTR_E4M5);
+                case 6: return F_GETSTRING(HUSTR_E4M6);
+                case 7: return F_GETSTRING(HUSTR_E4M7);
+                case 8: return F_GETSTRING(HUSTR_E4M8);
+                default: return F_GETSTRING(HUSTR_E4M9);
+            }
+    }
+}
+
+char *GetDoom2MapName(int map) {
+    switch (map) {
+        case 1: return F_GETSTRING(HUSTR_1);
+        case 2: return F_GETSTRING(HUSTR_2);
+        case 3: return F_GETSTRING(HUSTR_3);
+        case 4: return F_GETSTRING(HUSTR_4);
+        case 5: return F_GETSTRING(HUSTR_5);
+        case 6: return F_GETSTRING(HUSTR_6);
+        case 7: return F_GETSTRING(HUSTR_7);
+        case 8: return F_GETSTRING(HUSTR_8);
+        case 9: return F_GETSTRING(HUSTR_9);
+        case 10: return F_GETSTRING(HUSTR_10);
+        case 11: return F_GETSTRING(HUSTR_11);
+        case 12: return F_GETSTRING(HUSTR_12);
+        case 13: return F_GETSTRING(HUSTR_13);
+        case 14: return F_GETSTRING(HUSTR_14);
+        case 15: return F_GETSTRING(HUSTR_15);
+        case 16: return F_GETSTRING(HUSTR_16);
+        case 17: return F_GETSTRING(HUSTR_17);
+        case 18: return F_GETSTRING(HUSTR_18);
+        case 19: return F_GETSTRING(HUSTR_19);
+        case 20: return F_GETSTRING(HUSTR_20);
+        case 21: return F_GETSTRING(HUSTR_21);
+        case 22: return F_GETSTRING(HUSTR_22);
+        case 23: return F_GETSTRING(HUSTR_23);
+        case 24: return F_GETSTRING(HUSTR_24);
+        case 25: return F_GETSTRING(HUSTR_25);
+        case 26: return F_GETSTRING(HUSTR_26);
+        case 27: return F_GETSTRING(HUSTR_27);
+        case 28: return F_GETSTRING(HUSTR_28);
+        case 29: return F_GETSTRING(HUSTR_29);
+        case 30: return F_GETSTRING(HUSTR_30);
+        case 31: return F_GETSTRING(HUSTR_31);
+        case 32: return F_GETSTRING(HUSTR_32);
+    }
+
+    return F_GETSTRING(HUSTR_1);
+}
+
+char *GetTNTMapName(int map) {
+    switch (map) {
+        case 1: return F_GETSTRING(THUSTR_1);
+        case 2: return F_GETSTRING(THUSTR_2);
+        case 3: return F_GETSTRING(THUSTR_3);
+        case 4: return F_GETSTRING(THUSTR_4);
+        case 5: return F_GETSTRING(THUSTR_5);
+        case 6: return F_GETSTRING(THUSTR_6);
+        case 7: return F_GETSTRING(THUSTR_7);
+        case 8: return F_GETSTRING(THUSTR_8);
+        case 9: return F_GETSTRING(THUSTR_9);
+        case 10: return F_GETSTRING(THUSTR_10);
+        case 11: return F_GETSTRING(THUSTR_11);
+        case 12: return F_GETSTRING(THUSTR_12);
+        case 13: return F_GETSTRING(THUSTR_13);
+        case 14: return F_GETSTRING(THUSTR_14);
+        case 15: return F_GETSTRING(THUSTR_15);
+        case 16: return F_GETSTRING(THUSTR_16);
+        case 17: return F_GETSTRING(THUSTR_17);
+        case 18: return F_GETSTRING(THUSTR_18);
+        case 19: return F_GETSTRING(THUSTR_19);
+        case 20: return F_GETSTRING(THUSTR_20);
+        case 21: return F_GETSTRING(THUSTR_21);
+        case 22: return F_GETSTRING(THUSTR_22);
+        case 23: return F_GETSTRING(THUSTR_23);
+        case 24: return F_GETSTRING(THUSTR_24);
+        case 25: return F_GETSTRING(THUSTR_25);
+        case 26: return F_GETSTRING(THUSTR_26);
+        case 27: return F_GETSTRING(THUSTR_27);
+        case 28: return F_GETSTRING(THUSTR_28);
+        case 29: return F_GETSTRING(THUSTR_29);
+        case 30: return F_GETSTRING(THUSTR_30);
+        case 31: return F_GETSTRING(THUSTR_31);
+        case 32: return F_GETSTRING(THUSTR_32);
+    }
+
+    return F_GETSTRING(THUSTR_1);
+}
+
+char *GetPlutoniaMapName(int map) {
+    switch (map) {
+        case 1: return F_GETSTRING(PHUSTR_1);
+        case 2: return F_GETSTRING(PHUSTR_2);
+        case 3: return F_GETSTRING(PHUSTR_3);
+        case 4: return F_GETSTRING(PHUSTR_4);
+        case 5: return F_GETSTRING(PHUSTR_5);
+        case 6: return F_GETSTRING(PHUSTR_6);
+        case 7: return F_GETSTRING(PHUSTR_7);
+        case 8: return F_GETSTRING(PHUSTR_8);
+        case 9: return F_GETSTRING(PHUSTR_9);
+        case 10: return F_GETSTRING(PHUSTR_10);
+        case 11: return F_GETSTRING(PHUSTR_11);
+        case 12: return F_GETSTRING(PHUSTR_12);
+        case 13: return F_GETSTRING(PHUSTR_13);
+        case 14: return F_GETSTRING(PHUSTR_14);
+        case 15: return F_GETSTRING(PHUSTR_15);
+        case 16: return F_GETSTRING(PHUSTR_16);
+        case 17: return F_GETSTRING(PHUSTR_17);
+        case 18: return F_GETSTRING(PHUSTR_18);
+        case 19: return F_GETSTRING(PHUSTR_19);
+        case 20: return F_GETSTRING(PHUSTR_20);
+        case 21: return F_GETSTRING(PHUSTR_21);
+        case 22: return F_GETSTRING(PHUSTR_22);
+        case 23: return F_GETSTRING(PHUSTR_23);
+        case 24: return F_GETSTRING(PHUSTR_24);
+        case 25: return F_GETSTRING(PHUSTR_25);
+        case 26: return F_GETSTRING(PHUSTR_26);
+        case 27: return F_GETSTRING(PHUSTR_27);
+        case 28: return F_GETSTRING(PHUSTR_28);
+        case 29: return F_GETSTRING(PHUSTR_29);
+        case 30: return F_GETSTRING(PHUSTR_30);
+        case 31: return F_GETSTRING(PHUSTR_31);
+        case 32: return F_GETSTRING(PHUSTR_32);
+    }
+
+    return F_GETSTRING(THUSTR_1);
+}
+
+char *HU_GetMapName(int gamemode, int gamemission, int gameepisode, int gamemap) {
+    switch (gamemode) {
+        case shareware:
+        case registered:
+        case retail:
+            return GetDoomMapName(gameepisode, gamemap);
+        case commercial:
+            switch (gamemission) {
+                case doom2: return GetDoom2MapName(gamemap);
+                case pack_tnt: return GetTNTMapName(gamemap);
+                case pack_plut: return GetPlutoniaMapName(gamemap);
+            }
+    }
+
+    return GetDoomMapName(gameepisode, gamemap);
+}
+    
+
 void HU_Init(void)
 {
 
@@ -442,29 +635,8 @@ void HU_Start(void)
 		       HU_TITLEX, HU_TITLEY,
 		       hu_font,
 		       HU_FONTSTART);
-    
-    switch ( gamemode )
-    {
-      case shareware:
-      case registered:
-      case retail:
-	s = HU_TITLE;
-	break;
 
-/* FIXME
-      case pack_plut:
-	s = HU_TITLEP;
-	break;
-      case pack_tnt:
-	s = HU_TITLET;
-	break;
-*/
-	
-      case commercial:
-      default:
-	 s = HU_TITLE2;
-	 break;
-    }
+    s = HU_GetMapName(gamemode, gamemission, gameepisode, gamemap);
     
     while (*s)
 	HUlib_addCharToTextLine(&w_title, *(s++));

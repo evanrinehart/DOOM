@@ -45,6 +45,9 @@ void F_StartFinale (void);
 
 void F_SetCustomFinale(char *dehacked, int len);
 char *F_GetString(char *name);
+char *F_GetStringElse(char *name, char *fallback);
+
+#define F_GETSTRING(A) F_GetStringElse(#A, A)
 
 
 #endif

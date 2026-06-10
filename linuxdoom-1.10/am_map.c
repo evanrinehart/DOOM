@@ -47,6 +47,7 @@ static const char rcsid[] = "$Id: am_map.c,v 1.4 1997/02/03 21:24:33 b1 Exp $";
 
 #include "am_map.h"
 
+#include "f_finale.h"
 
 // For use if I do walls with outsides/insides
 #define REDS		(256-5*16)
@@ -679,20 +680,20 @@ AM_Responder
 	  case AM_FOLLOWKEY:
 	    followplayer = !followplayer;
 	    f_oldloc.x = MAXINT;
-	    plr->message = followplayer ? AMSTR_FOLLOWON : AMSTR_FOLLOWOFF;
+	    plr->message = followplayer ? F_GETSTRING(AMSTR_FOLLOWON) : F_GETSTRING(AMSTR_FOLLOWOFF);
 	    break;
 	  case AM_GRIDKEY:
 	    grid = !grid;
-	    plr->message = grid ? AMSTR_GRIDON : AMSTR_GRIDOFF;
+	    plr->message = grid ? F_GETSTRING(AMSTR_GRIDON) : F_GETSTRING(AMSTR_GRIDOFF);
 	    break;
 	  case AM_MARKKEY:
-	    sprintf(buffer, "%s %d", AMSTR_MARKEDSPOT, markpointnum);
+	    sprintf(buffer, "%s %d", F_GETSTRING(AMSTR_MARKEDSPOT), markpointnum);
 	    plr->message = buffer;
 	    AM_addMark();
 	    break;
 	  case AM_CLEARMARKKEY:
 	    AM_clearMarks();
-	    plr->message = AMSTR_MARKSCLEARED;
+	    plr->message = F_GETSTRING(AMSTR_MARKSCLEARED);
 	    break;
 	  default:
 	    cheatstate=0;
