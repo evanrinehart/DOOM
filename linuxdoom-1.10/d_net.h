@@ -136,7 +136,7 @@ void NetUpdate (void);
 void D_QuitNetGame (void);
 
 //? how many ticks to run?
-void TryRunTics (void);
+void TryRunTics (bool singletic);
 
 
 #endif

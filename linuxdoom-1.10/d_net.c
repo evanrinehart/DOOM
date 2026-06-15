@@ -634,8 +634,21 @@ int	oldnettics;
 
 extern	boolean	advancedemo;
 
-void TryRunTics (void)
+void RunSingleTic(void) {
+    I_StartTic ();
+    D_ProcessEvents ();
+    G_BuildTiccmd (&netcmds[consoleplayer][maketic%BACKUPTICS]);
+    if (advancedemo)
+        D_DoAdvanceDemo ();
+    M_Ticker ();
+    G_Ticker ();
+    gametic++;
+    maketic++;
+}
+
+void TryRunTics (bool singletic)
 {
+
     int		i;
     int		lowtic;
     int		entertic;
@@ -644,6 +657,11 @@ void TryRunTics (void)
     int		availabletics;
     int		counts;
     int		numplaying;
+
+    if (singletic) {
+        RunSingleTic();
+        return;
+    }
     
     // get real tics		
     entertic = I_GetTime ()/ticdup;

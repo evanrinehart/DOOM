@@ -1,4 +1,5 @@
 // Emacs style mode select   -*- C++ -*- 
+
 //-----------------------------------------------------------------------------
 //
 // $Id:$
@@ -512,104 +513,46 @@ void S_ResumeSound(void)
     }
 }
 
+//
+// Updates sounds on channel
+//
+void S_UpdateSoundChannel(int cnum, mobj_t *listener) {
+    channel_t *c = &channels[cnum];
+
+    if (c->sfxinfo == NULL) { return; }
+    if (!I_SoundIsPlaying(c->handle)) { S_StopChannel(cnum); return; }
+
+    sfxinfo_t *sfx = c->sfxinfo;
+    int volume = snd_SfxVolume;
+    int pitch = sfx->link ? sfx->pitch : NORM_PITCH;
+    int sep = NORM_SEP;
+
+    if (sfx->link && sfx->volume < 0) {
+        volume += sfx->volume;
+        if (volume < 1) { S_StopChannel(cnum); return; }
+    }
+
+    // check non-local sounds for distance clipping
+    //  or modify their params
+    if (c->origin && listener != c->origin) {
+        int audible = S_AdjustSoundParams(listener, c->origin, &volume, &sep, &pitch);
+        if (!audible) {
+            S_StopChannel(cnum);
+        }
+        else {
+            I_UpdateSoundParams(c->handle, volume, sep, pitch);
+        }
+    }
+}
 
 //
 // Updates music & sounds
 //
 void S_UpdateSounds(void* listener_p)
 {
-    int		audible;
-    int		cnum;
-    int		volume;
-    int		sep;
-    int		pitch;
-    sfxinfo_t*	sfx;
-    channel_t*	c;
-    
-    mobj_t*	listener = (mobj_t*)listener_p;
-
-
-    
-    // Clean up unused data.
-    // This is currently not done for 16bit (sounds cached static).
-    // DOS 8bit remains. 
-    /*if (gametic > nextcleanup)
-    {
-	for (i=1 ; i<NUMSFX ; i++)
-	{
-	    if (S_sfx[i].usefulness < 1
-		&& S_sfx[i].usefulness > -1)
-	    {
-		if (--S_sfx[i].usefulness == -1)
-		{
-		    Z_ChangeTag(S_sfx[i].data, PU_CACHE);
-		    S_sfx[i].data = 0;
-		}
-	    }
-	}
-	nextcleanup = gametic + 15;
-    }*/
-    
-    for (cnum=0 ; cnum<numChannels ; cnum++)
-    {
-	c = &channels[cnum];
-	sfx = c->sfxinfo;
-
-	if (c->sfxinfo)
-	{
-	    if (I_SoundIsPlaying(c->handle))
-	    {
-		// initialize parameters
-		volume = snd_SfxVolume;
-		pitch = NORM_PITCH;
-		sep = NORM_SEP;
-
-		if (sfx->link)
-		{
-		    pitch = sfx->pitch;
-		    volume += sfx->volume;
-		    if (volume < 1)
-		    {
-			S_StopChannel(cnum);
-			continue;
-		    }
-		    else if (volume > snd_SfxVolume)
-		    {
-			volume = snd_SfxVolume;
-		    }
-		}
-
-		// check non-local sounds for distance clipping
-		//  or modify their params
-		if (c->origin && listener_p != c->origin)
-		{
-		    audible = S_AdjustSoundParams(listener,
-						  c->origin,
-						  &volume,
-						  &sep,
-						  &pitch);
-		    
-		    if (!audible)
-		    {
-			S_StopChannel(cnum);
-		    }
-		    else
-			I_UpdateSoundParams(c->handle, volume, sep, pitch);
-		}
-	    }
-	    else
-	    {
-		// if channel is allocated but sound has stopped,
-		//  free it
-		S_StopChannel(cnum);
-	    }
-	}
+    for (int cnum = 0; cnum < numChannels; cnum++) {
+        S_UpdateSoundChannel(cnum, listener_p);
     }
-    // kill music if it is a single-play && finished
-    // if (	mus_playing
-    //      && !I_QrySongPlaying(mus_playing->handle)
-    //      && !mus_paused )
-    // S_StopMusic();
 }
 
 

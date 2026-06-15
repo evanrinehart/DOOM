@@ -183,14 +183,6 @@ int I_SoundIsPlaying(int handle) {
     }
 }
 
-void I_UpdateSound( void ) {
-    // would do mixing of a certain amount of samples. Called by d_main if SNDSERV not defined
-}
-
-void I_SubmitSound(void) {
-    // output sound synchronously, called by d_main if SNDINTR not defined
-}
-
 void
 I_UpdateSoundParams
 ( int	handle,
