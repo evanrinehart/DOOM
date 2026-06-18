@@ -23,10 +23,6 @@
 //
 //-----------------------------------------------------------------------------
 
-
-static const char
-rcsid[] = "$Id: r_data.c,v 1.4 1997/02/03 16:47:55 b1 Exp $";
-
 #include <stdint.h>
 #include <strings.h>
 #include <stddef.h>

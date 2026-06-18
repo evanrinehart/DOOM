@@ -6,7 +6,7 @@
 #
 CC=  gcc  # gcc or g++
 
-CFLAGS=-g -Wall -Wextra -std=c11 -Wno-unused-parameter -Wno-unused-but-set-parameter -Wno-unused-const-variable -Wno-unused-but-set-variable -Wno-missing-field-initializers -DNORMALUNIX -DLINUX # -DUSEASM
+CFLAGS=-g -Wall -Wextra -std=c11 -Wno-unused-parameter -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-missing-field-initializers -DNORMALUNIX -DLINUX # -DUSEASM
 LDFLAGS=-L/usr/X11R6/lib
 LIBS=-lXext -lX11 -lm -lstdc++
 
