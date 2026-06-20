@@ -572,6 +572,49 @@ void P_GroupLines (void)
 	
 }
 
+void P_DumpLevel(char *base) {
+
+    FILE *file;
+    char path[256];
+
+
+    //printf("Map Geometry Dump:\n");
+    //printf("\nsectors (i, floor_z, ceiling_z)\n");
+    sprintf(path, "%s/sectors", base);
+    file = fopen(path, "w"); if (file == NULL) { I_Error("P_DumpLevel: can't open file %s\n", path); }
+    for (int i = 0; i < numsectors; i++) {
+        sector_t *s = &sectors[i];
+        fprintf(file, "%d %d %d\n", i, s->floorheight, s->ceilingheight);
+    }
+    fclose(file);
+
+    //printf("\nvertexes (i, x, y)\n");
+    sprintf(path, "%s/vertices", base);
+    file = fopen(path, "w"); if (file == NULL) { I_Error("P_DumpLevel: can't open file %s\n", path); }
+    for (int i = 0; i < numvertexes; i++) {
+        vertex_t *v = &vertexes[i];
+        fprintf(file, "%d %d %d\n", i, v->x, v->y);
+    }
+    fclose(file);
+
+    //printf("\nlines (i, v1, v2, side1, side2)\n");
+    sprintf(path, "%s/lines", base);
+    file = fopen(path, "w"); if (file == NULL) { I_Error("P_DumpLevel: can't open file %s\n", path); }
+    for (int i = 0; i < numlines; i++) {
+        line_t *l = &lines[i];
+        fprintf(file, "%d %ld %ld %d %d\n", i, l->v1 - vertexes, l->v2 - vertexes, l->sidenum[0], l->sidenum[1]);
+    }
+    fclose(file);
+
+    //printf("\nsides (i, sector)\n");
+    sprintf(path, "%s/sides", base);
+    file = fopen(path, "w"); if (file == NULL) { I_Error("P_DumpLevel: can't open file %s\n", path); }
+    for (int i = 0; i < numsides; i++) {
+        side_t *s = &sides[i];
+        fprintf(file, "%d %ld\n", i, s->sector - sectors);
+    }
+    fclose(file);
+}
 
 //
 // P_SetupLevel
@@ -685,6 +728,12 @@ P_SetupLevel
 	R_PrecacheLevel ();
 
     //printf ("free memory: 0x%x\n", Z_FreeMemory());
+
+    int p = M_CheckParm ("-dumplevel");
+    if (p) {
+        char *base = myargv[p+1];
+        P_DumpLevel(base);
+    }
 
 }
 
