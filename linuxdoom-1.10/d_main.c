@@ -615,8 +615,8 @@ void IdentifyVersion (void)
 
     if ( TryIWAD("doom2f.wad", commercial, doom2, french, "DOOM II") ) return;
     if ( TryIWAD("doom2.wad", commercial, doom2, english, "DOOM II") ) return;
-    if ( TryIWAD("plutonia.wad", commercial, pack_plut, english, "Final DOOM: Plutonia Experiment") ) return;
-    if ( TryIWAD("tnt.wad", commercial, pack_tnt, english, "Final DOOM: TNT Evilution") ) return;
+    if ( TryIWAD("plutonia.wad", commercial, pack_plut, english, "Final DOOM - The Plutonia Experiment") ) return;
+    if ( TryIWAD("tnt.wad", commercial, pack_tnt, english, "Final DOOM - TNT: Evilution") ) return;
     if ( TryIWAD("doomu.wad", retail, doom, english, "Ultimate DOOM") ) return;
     if ( TryIWAD("doom.wad", registered, doom, english, "DOOM") ) return;
     if ( TryIWAD("doom1.wad", shareware, doom, english, "Shareware DOOM") ) return;
