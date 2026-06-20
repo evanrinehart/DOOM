@@ -283,14 +283,14 @@ void I_SetPalette (byte* palette) {
 
 }
 
-void I_InitGraphics(void) {
+void I_InitGraphics(char *title) {
     // called from d_main
 
     // set up video backend and possibly override screen[0]
     // which is where rendering ultimately writes to
     // before FinishUpdate presents it, whatever is in screen[0]
 
-    InitWindow(320, 240, "DOOM");
+    InitWindow(320, 240, title);
 
     if (!IsWindowReady()) {
         I_Error("I_InitGraphics: InitWindow failed\n");

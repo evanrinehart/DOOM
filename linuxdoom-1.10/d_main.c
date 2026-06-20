@@ -117,7 +117,7 @@ FILE*		debugfile;
 
 boolean		advancedemo;
 
-
+char *window_title = "DOOM";
 
 
 char		wadfile[1024];		// primary wad file
@@ -363,7 +363,7 @@ void D_DoomLoop (void)
 	debugfile = fopen (filename,"w");
     }
 	
-    I_InitGraphics ();
+    I_InitGraphics (window_title);
 
     while (1)
     {
@@ -542,7 +542,7 @@ char *GetHomeDir() {
 #endif
 }
 
-bool TryIWAD(char *name, GameMode_t mode, GameMission_t mission, Language_t lang) {
+bool TryIWAD(char *name, GameMode_t mode, GameMission_t mission, Language_t lang, char *title) {
     bool got_it = false;
     char *doomwaddir = GetDoomWadDir();
     char *path = malloc(strlen(doomwaddir)+1+strlen(name)+1);
@@ -551,6 +551,7 @@ bool TryIWAD(char *name, GameMode_t mode, GameMission_t mission, Language_t lang
         got_it = true;
         gamemode = mode;
         gamemission = mission;
+        window_title = title;
         if (lang == french) printf("French version\n");
         language = lang;
         D_AddFile (path);
@@ -612,15 +613,15 @@ void IdentifyVersion (void)
 	return;
     }
 
-    if ( TryIWAD("doom2f.wad", commercial, doom2, french) ) return;
-    if ( TryIWAD("doom2.wad", commercial, doom2, english) ) return;
-    if ( TryIWAD("plutonia.wad", commercial, pack_plut, english) ) return;
-    if ( TryIWAD("tnt.wad", commercial, pack_tnt, english) ) return;
-    if ( TryIWAD("doomu.wad", retail, doom, english) ) return;
-    if ( TryIWAD("doom.wad", registered, doom, english) ) return;
-    if ( TryIWAD("doom1.wad", shareware, doom, english) ) return;
-    if ( TryIWAD("freedoom1.wad", retail, doom, english) ) return;
-    if ( TryIWAD("freedoom2.wad", commercial, doom2, english) ) return;
+    if ( TryIWAD("doom2f.wad", commercial, doom2, french, "DOOM II") ) return;
+    if ( TryIWAD("doom2.wad", commercial, doom2, english, "DOOM II") ) return;
+    if ( TryIWAD("plutonia.wad", commercial, pack_plut, english, "Final DOOM: Plutonia Experiment") ) return;
+    if ( TryIWAD("tnt.wad", commercial, pack_tnt, english, "Final DOOM: TNT Evilution") ) return;
+    if ( TryIWAD("doomu.wad", retail, doom, english, "Ultimate DOOM") ) return;
+    if ( TryIWAD("doom.wad", registered, doom, english, "DOOM") ) return;
+    if ( TryIWAD("doom1.wad", shareware, doom, english, "Shareware DOOM") ) return;
+    if ( TryIWAD("freedoom1.wad", retail, doom, english, "FreeDOOM") ) return;
+    if ( TryIWAD("freedoom2.wad", commercial, doom2, english, "FreeDOOM phase 2") ) return;
 
     printf("Game mode indeterminate.\n");
     gamemode = indetermined;
