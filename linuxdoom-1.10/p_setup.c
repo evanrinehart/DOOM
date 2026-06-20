@@ -41,6 +41,8 @@
 
 #include "doomstat.h"
 
+#include "m_argv.h"
+
 
 void	P_SpawnMapThing (mapthing_t*	mthing);
 
