@@ -236,10 +236,14 @@ void I_UpdateNoBlit (void) {
     // called from d_main
 }
 
+extern boolean noblit;
+
 void I_FinishUpdate (void) {
     // called from d_main
     // copied image data from screens[0] into some shm image and synced
     // optionally expanding the picture 2x 3x ...
+
+    if (noblit) return;
 
     Color *writing = screen_img.data;
     for (int i = 0; i < SCREENWIDTH*SCREENHEIGHT; i++) {
