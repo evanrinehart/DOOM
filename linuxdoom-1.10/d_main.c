@@ -539,6 +539,28 @@ bool TryIWAD(char *name, GameMode_t mode, GameMission_t mission, Language_t lang
     return got_it;
 }
 
+
+struct iwad {
+    char *filename;
+    int mode;
+    int mission;
+    int language;
+    char *window_title;
+};
+
+struct iwad known_iwads[] = {
+    {"doom2f.wad",    commercial, doom2,     french,  "DOOM II"},
+    {"doom2.wad",     commercial, doom2,     english, "DOOM II"},
+    {"plutonia.wad",  commercial, pack_plut, english, "Final DOOM - The Plutonia Experiment"},
+    {"tnt.wad",       commercial, pack_tnt,  english, "Final DOOM - TNT: Evilution"},
+    {"doomu.wad",     retail,     doom,      english, "Ultimate DOOM"},
+    {"doom.wad",      registered, doom,      english, "DOOM"},
+    {"doom1.wad",     shareware,  doom,      english, "Shareware DOOM"},
+    {"freedoom1.wad", retail,     doom,      english, "FreeDOOM"},
+    {"freedoom2.wad", commercial, doom2,     english, "FreeDOOM phase 2"},
+    {NULL, 0, 0, 0, NULL}
+};
+
 //
 // IdentifyVersion
 // Checks availability of IWAD files by name,
@@ -548,15 +570,13 @@ bool TryIWAD(char *name, GameMode_t mode, GameMission_t mission, Language_t lang
 void IdentifyVersion (void)
 {
 
-    if ( TryIWAD("doom2f.wad", commercial, doom2, french, "DOOM II") ) return;
-    if ( TryIWAD("doom2.wad", commercial, doom2, english, "DOOM II") ) return;
-    if ( TryIWAD("plutonia.wad", commercial, pack_plut, english, "Final DOOM - The Plutonia Experiment") ) return;
-    if ( TryIWAD("tnt.wad", commercial, pack_tnt, english, "Final DOOM - TNT: Evilution") ) return;
-    if ( TryIWAD("doomu.wad", retail, doom, english, "Ultimate DOOM") ) return;
-    if ( TryIWAD("doom.wad", registered, doom, english, "DOOM") ) return;
-    if ( TryIWAD("doom1.wad", shareware, doom, english, "Shareware DOOM") ) return;
-    if ( TryIWAD("freedoom1.wad", retail, doom, english, "FreeDOOM") ) return;
-    if ( TryIWAD("freedoom2.wad", commercial, doom2, english, "FreeDOOM phase 2") ) return;
+    int p = M_CheckParm("-iwad"); // only try named iwad
+    char *chosen_iwad = p ? myargv[p+1] : NULL;
+
+    for (struct iwad *info = known_iwads; info->filename; info++) {
+        if (chosen_iwad && strcmp(info->filename, chosen_iwad) != 0) continue;
+        if (TryIWAD(info->filename, info->mode, info->mission, info->language, info->window_title)) return;
+    }
 
     printf("Game mode indeterminate.\n");
     gamemode = indetermined;
