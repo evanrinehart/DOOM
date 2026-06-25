@@ -190,3 +190,24 @@ void I_Error (char *error, ...)
     
     exit(-1);
 }
+
+
+char *GetDoomWadDir() {
+#ifdef NORMALUNIX
+    char *dir = getenv("DOOMWADDIR");
+    if (!dir) return ".";
+    return dir;
+#else
+    return ".";
+#endif
+}
+
+char *GetHomeDir() {
+#ifdef NORMALUNIX
+    char *home = getenv("HOME");
+    if (!home) I_Error("Please set $HOME to your home directory");
+    return home;
+#else
+    return "";
+#endif
+}

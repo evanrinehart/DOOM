@@ -122,7 +122,6 @@ char *window_title = "DOOM";
 
 char		wadfile[1024];		// primary wad file
 char		mapdir[1024];           // directory of development maps
-char		basedefault[1024];      // default file
 
 
 void D_CheckNetGame (void);
@@ -522,26 +521,6 @@ void D_AddFile (char *file)
     wadfiles[numwadfiles] = newfile;
 }
 
-char *GetDoomWadDir() {
-#ifdef NORMALUNIX
-    char *dir = getenv("DOOMWADDIR");
-    if (!dir) return ".";
-    return dir;
-#else
-    return ".";
-#endif
-}
-
-char *GetHomeDir() {
-#ifdef NORMALUNIX
-    char *home = getenv("HOME");
-    if (!home) I_Error("Please set $HOME to your home directory");
-    return home;
-#else
-    return "";
-#endif
-}
-
 bool TryIWAD(char *name, GameMode_t mode, GameMission_t mission, Language_t lang, char *title) {
     bool got_it = false;
     char *doomwaddir = GetDoomWadDir();
@@ -568,9 +547,6 @@ bool TryIWAD(char *name, GameMode_t mode, GameMission_t mission, Language_t lang
 //
 void IdentifyVersion (void)
 {
-
-    char *home = GetHomeDir();
-    sprintf(basedefault, "%s/.doomrc", home);
 
     if ( TryIWAD("doom2f.wad", commercial, doom2, french, "DOOM II") ) return;
     if ( TryIWAD("doom2.wad", commercial, doom2, english, "DOOM II") ) return;

@@ -91,6 +91,9 @@ void I_Error (char *error, ...);
 void I_Nanosleep(long sec, long nsec);
 void I_Sleep(float delta_t);
 
+char *GetDoomWadDir();
+char *GetHomeDir();
+
 #endif
 //-----------------------------------------------------------------------------
 //

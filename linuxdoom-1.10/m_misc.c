@@ -346,10 +346,14 @@ void M_LoadDefaults (void)
     if (i && i<myargc-1)
     {
 	defaultfile = myargv[i+1];
-	printf ("	default file: %s\n",defaultfile);
     }
-    else
-	defaultfile = basedefault;
+    else {
+	char *home = GetHomeDir();
+	char *buf = malloc(1024);
+	sprintf(buf, "%s/.doomrc", home);
+	defaultfile = buf;
+    }
+    printf ("	default file: %s\n",defaultfile);
     
     // read the file in, overriding any set defaults
     f = fopen (defaultfile, "r");
