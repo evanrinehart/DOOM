@@ -216,10 +216,7 @@ void R_InitSpriteDefs (char** namelist)
 		frame = lumpinfo[l].name[4] - 'A';
 		rotation = lumpinfo[l].name[5] - '0';
 
-		if (modifiedgame)
-		    patched = W_GetNumForName (lumpinfo[l].name);
-		else
-		    patched = l;
+		patched = W_GetNumForName (lumpinfo[l].name); // lookup necessary to handle possibly modded sprites
 
 		R_InstallSpriteLump (patched, frame, rotation, false);
 

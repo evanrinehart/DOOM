@@ -187,7 +187,6 @@ void W_AddFile (char *filename)
 			 "or PWAD id\n", filename);
 	    }
 	    
-	    // ???modifiedgame = true;		
 	}
 	header.numlumps = LONG(header.numlumps);
 	header.infotableofs = LONG(header.infotableofs);

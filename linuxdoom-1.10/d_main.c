@@ -598,7 +598,6 @@ void D_DoomMain (void)
     IdentifyVersion ();
 	
     setbuf (stdout, NULL);
-    modifiedgame = false;
 	
     nomonsters = M_CheckParm ("-nomonsters");
     respawnparm = M_CheckParm ("-respawn");
@@ -671,7 +670,6 @@ void D_DoomMain (void)
     {
 	// the parms after p are wadfile/lump names,
 	// until end of parms or another - preceded parm
-	modifiedgame = true;            // homebrew levels
 	while (++p != myargc && myargv[p][0] != '-')
 	    D_AddFile (myargv[p]);
     }
@@ -753,7 +751,7 @@ void D_DoomMain (void)
     
 
     // Check for -file in shareware
-    if (modifiedgame)
+    if (M_CheckParm ("-file"))
     {
 	// These are the lumps that will be checked in IWAD,
 	// if any one is not present, execution will be aborted.
@@ -775,12 +773,9 @@ void D_DoomMain (void)
 	    for (i = 0;i < 23; i++)
 		if (W_CheckNumForName(name[i])<0)
 		    I_Error("\nThis is not the registered version.");
-    }
-    
-    // Iff additonal PWAD files are used, print modified banner
-    if (modifiedgame)
-    {
-	/*m*/printf (
+
+        // Iff additonal PWAD files are used, print modified banner
+	printf (
 	    "===========================================================================\n"
 	    "ATTENTION:  This version of DOOM has been modified.  If you would like to\n"
 	    "get a copy of the original game, call 1-800-IDGAMES or see the readme file.\n"
@@ -790,7 +785,6 @@ void D_DoomMain (void)
 	    );
 	getchar ();
     }
-	
 
     int dehacked_num = W_CheckNumForName("DEHACKED");
     if (dehacked_num < 0) {
