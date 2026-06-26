@@ -49,22 +49,16 @@ int M_CheckParm (char *check)
 }
 
 
-
 char *M_GetParm(char *check) {
-    int		i;
-
-    for (i = 1;i<myargc;i++)
-    {
-	if ( !strcasecmp(check, myargv[i]) && i < myargc-1)
-	    return myargv[i+1];
-    }
-
-    return NULL;
+    int p = M_CheckParm(check);
+    if (!p || p >= myargc - 1) return NULL;
+    return myargv[p + 1];
 }
 
 
 char **M_GetParmArgs(char *check, int *numout) {
-    int p = M_CheckParm(check); if (!p) return NULL;
+    int p = M_CheckParm(check);
+    if (!p) return NULL;
     *numout = 0;
     for (int count = 1; p + count < myargc; count++) {
         if (myargv[p + count][0] == '-') break;

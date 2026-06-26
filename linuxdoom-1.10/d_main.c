@@ -604,7 +604,7 @@ void IdentifyVersion (void)
 //
 void D_DoomMain (void)
 {
-    int             p;
+
     int val1, val2;
     char                    file[256];
 
@@ -738,47 +738,42 @@ void D_DoomMain (void)
     ST_Init ();
     
     // start the apropriate game based on parms
-    p = M_CheckParm ("-record");
-
-    if (p && p < myargc-1)
-    {
-	G_RecordDemo (myargv[p+1]);
-	autostart = true;
+    name = M_GetParm("-record");
+    if (name) {
+        G_RecordDemo(name);
+        autostart = true;
     }
 	
-    p = M_CheckParm ("-playdemo");
-    if (p && p < myargc-1)
-    {
-	singledemo = true;              // quit after one demo
-	G_DeferedPlayDemo (myargv[p+1]);
-	D_DoomLoop ();  // never returns
+    name = M_GetParm("-playdemo");
+    if (name) {
+        singledemo = true;              // quit after one demo
+        G_DeferedPlayDemo(name);
+        D_DoomLoop ();  // never returns
     }
 	
-    p = M_CheckParm ("-timedemo");
-    if (p && p < myargc-1)
-    {
-	G_TimeDemo (myargv[p+1]);
-	D_DoomLoop ();  // never returns
+    name = M_GetParm("-timedemo");
+    if (name) {
+        G_TimeDemo(name);
+        D_DoomLoop ();  // never returns
     }
 	
-    p = M_CheckParm ("-loadgame");
-    if (p && p < myargc-1)
-    {
-	sprintf(file, SAVEGAMENAME"%c.dsg",myargv[p+1][0]);
-	G_LoadGame (file);
-    }
-	
-
-    if ( gameaction != ga_loadgame )
-    {
-	if (autostart || netgame)
-	    G_InitNew (startskill, startepisode, startmap);
-	else
-	    D_StartTitle ();                // start up intro loop
-
+    name = M_GetParm("-loadgame"); // argument usually 0 to 5 but could be a letter
+    if (name) {
+        sprintf(file, SAVEGAMENAME"%c.dsg", name[0]);
+        G_LoadGame (file);
     }
 
-    D_DoomLoop ();  // never returns
+    if ( gameaction == ga_loadgame ) {
+        D_DoomLoop(); // never returns
+    }
+    else if (autostart || netgame) {
+        G_InitNew (startskill, startepisode, startmap);
+        D_DoomLoop(); // never returns
+    }
+    else {
+        D_StartTitle (); // start up intro loop
+        D_DoomLoop(); // never returns
+    }
 }
 
 
