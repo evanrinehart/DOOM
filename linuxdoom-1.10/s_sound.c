@@ -74,6 +74,7 @@ const char snd_prefixen[]
 #define NA			0
 #define S_NUMCHANNELS		2
 
+extern boolean verbose;
 
 // Current music/sfx card - index useless
 //  w/o a reference LUT in a sound module.
@@ -159,7 +160,7 @@ void S_Init
 {  
   int		i;
 
-  fprintf( stderr, "S_Init: default sfx volume %d\n", sfxVolume);
+  if (verbose) printf("S_Init: default sfx volume %d\n", sfxVolume);
 
   // Whatever these did with DMX, these are rather dummies now.
   I_SetChannels();

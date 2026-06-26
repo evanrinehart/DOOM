@@ -18,6 +18,7 @@
 #include "m_argv.h"
 #include "d_main.h"
 
+extern boolean verbose;
 
 static bool video_initialized = false;
 
@@ -292,6 +293,8 @@ void I_InitGraphics(char *title) {
     // which is where rendering ultimately writes to
     // before FinishUpdate presents it, whatever is in screen[0]
 
+    SetTraceLogLevel(verbose ? LOG_INFO : LOG_NONE);
+
     InitWindow(320, 240, title);
 
     if (!IsWindowReady()) {
@@ -378,6 +381,7 @@ void I_InitGraphics(char *title) {
     for (int i = 0; i < 8; i++) {
         if (IsGamepadAvailable(i)) gamepads[i] = GetGamepadName(i);
     }
-    DumpGamepads();
+
+    if (verbose) DumpGamepads();
 
 }

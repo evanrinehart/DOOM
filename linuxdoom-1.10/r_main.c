@@ -766,27 +766,27 @@ void R_ExecuteSetViewSize (void)
 extern int	detailLevel;
 extern int	screenblocks;
 
-
+extern boolean verbose;
 
 void R_Init (void)
 {
     R_InitData ();
-    printf ("\nR_InitData");
+    if (verbose) printf ("\nR_InitData");
     R_InitPointToAngle ();
-    printf ("\nR_InitPointToAngle");
+    if (verbose) printf ("\nR_InitPointToAngle");
     R_InitTables ();
     // viewwidth / viewheight / detailLevel are set by the defaults
-    printf ("\nR_InitTables");
+    if (verbose) printf ("\nR_InitTables");
 
     R_SetViewSize (screenblocks, detailLevel);
     R_InitPlanes ();
-    printf ("\nR_InitPlanes");
+    if (verbose) printf ("\nR_InitPlanes");
     R_InitLightTables ();
-    printf ("\nR_InitLightTables");
+    if (verbose) printf ("\nR_InitLightTables");
     R_InitSkyMap ();
-    printf ("\nR_InitSkyMap");
+    if (verbose) printf ("\nR_InitSkyMap");
     R_InitTranslationTables ();
-    printf ("\nR_InitTranslationsTables");
+    if (verbose) printf ("\nR_InitTranslationsTables");
 	
     framecount = 0;
 }

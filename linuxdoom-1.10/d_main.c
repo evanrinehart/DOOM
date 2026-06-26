@@ -118,6 +118,7 @@ boolean		advancedemo;
 
 char *game_title = "DOOM";
 char *window_title = "DOOM";
+boolean verbose = false;
 
 
 char		wadfile[1024];		// primary wad file
@@ -558,7 +559,7 @@ bool TryIWAD(struct iwad *info) {
         gamemission = info->mission;
         game_title = info->title;
         window_title = info->window_title;
-        if (info->language == french) printf("French version\n");
+        if (verbose && info->language == french) printf("French version\n");
         language = info->language;
         D_AddFile (path);
     }
@@ -585,7 +586,7 @@ void IdentifyVersion (void)
         if (TryIWAD(info)) return;
     }
 
-    printf("Game mode indeterminate.\n");
+    if (verbose) printf("Game mode indeterminate.\n");
     gamemode = indetermined;
     gamemission = none;
 
@@ -602,6 +603,8 @@ void D_DoomMain (void)
     int             p;
     char *arg;
     char                    file[256];
+
+    verbose = M_CheckParm("-verbose") || M_CheckParm("-v") || M_CheckParm("--verbose");
 
     IdentifyVersion ();
 	
@@ -671,16 +674,16 @@ void D_DoomMain (void)
 
 
     // init subsystems
-    printf ("V_Init: allocate screens.\n");
+    if (verbose) printf ("V_Init: allocate screens.\n");
     V_Init ();
 
-    printf ("M_LoadDefaults: Load system defaults.\n");
+    if (verbose) printf ("M_LoadDefaults: Load system defaults.\n");
     M_LoadDefaults ();              // load before initing other systems
 
-    printf ("Z_Init: Init zone memory allocation daemon. \n");
+    if (verbose) printf ("Z_Init: Init zone memory allocation daemon. \n");
     Z_Init ();
 
-    printf ("W_Init: Init WADfiles.\n");
+    if (verbose) printf ("W_Init: Init WADfiles.\n");
     W_InitMultipleFiles (wadfiles);
 
     // now that wads are initialized we can check for fake retail
@@ -689,6 +692,7 @@ void D_DoomMain (void)
     // if present, load custom strings from DEHACKED lump
     int dehacked_num = W_CheckNumForName("DEHACKED");
     if (dehacked_num >= 0) {
+        if (verbose) printf("DEHACKED lump found. Loading custom strings.\n");
         char *dehacked = W_CacheLumpNum(dehacked_num, PU_CACHE);
         int len = W_LumpLength(dehacked_num);
         F_SetCustomFinale(dehacked, len);
@@ -697,28 +701,28 @@ void D_DoomMain (void)
     // announce DOOM
     D_PrintStartup(game_title, F_GetString("STARTUP5"));
 
-    printf ("M_Init: Init miscellaneous info.\n");
+    if (verbose) printf ("M_Init: Init miscellaneous info.\n");
     M_Init ();
 
-    printf ("R_Init: Init DOOM refresh daemon - ");
+    if (verbose) printf ("R_Init: Init DOOM refresh daemon - ");
     R_Init ();
 
-    printf ("\nP_Init: Init Playloop state.\n");
+    if (verbose) printf ("\nP_Init: Init Playloop state.\n");
     P_Init ();
 
-    printf ("I_Init: Setting up machine state.\n");
+    if (verbose) printf ("I_Init: Setting up machine state.\n");
     I_Init ();
 
-    printf ("D_CheckNetGame: Checking network game status.\n");
+    if (verbose) printf ("D_CheckNetGame: Checking network game status.\n");
     D_CheckNetGame ();
 
-    printf ("S_Init: Setting up sound.\n");
+    if (verbose) printf ("S_Init: Setting up sound.\n");
     S_Init (snd_SfxVolume /* *8 */, snd_MusicVolume /* *8*/ );
 
-    printf ("HU_Init: Setting up heads up display.\n");
+    if (verbose) printf ("HU_Init: Setting up heads up display.\n");
     HU_Init ();
 
-    printf ("ST_Init: Init status bar.\n");
+    if (verbose) printf ("ST_Init: Init status bar.\n");
     ST_Init ();
     
     // start the apropriate game based on parms

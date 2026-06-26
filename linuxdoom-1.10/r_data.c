@@ -48,6 +48,8 @@
 
 #include "r_data.h"
 
+extern boolean verbose;
+
 //
 // Graphics.
 // DOOM graphics for walls and sprites
@@ -656,13 +658,15 @@ void R_InitColormaps (void)
 void R_InitData (void)
 {
     R_InitTextures ();
-    printf ("\nInitTextures");
+    if (verbose) printf ("\nInitTextures");
     R_InitFlats ();
-    printf ("\nInitFlats");
+    if (verbose) printf ("\nInitFlats");
     R_InitSpriteLumps ();
-    printf ("\nInitSprites");
+    if (verbose) printf ("\nInitSprites");
     R_InitColormaps ();
-    printf ("\nInitColormaps");
+    if (verbose) printf ("\nInitColormaps");
+
+    printf("\n");
 }
 
 

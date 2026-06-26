@@ -17,6 +17,7 @@
 #include "w_wad.h"
 #include "doomdef.h"
 
+extern boolean verbose;
 
 static AudioStream main_stream;
 static struct ADL_MIDIPlayer *midi_player = NULL;
@@ -262,7 +263,9 @@ Wave load_sound_from_wad(char *name) {
 
 void I_InitSound() {
 
-    printf("I_InitSound...\n");
+    if (verbose) printf("I_InitSound...\n");
+
+    SetTraceLogLevel(verbose ? LOG_INFO : LOG_NONE);
 
     InitAudioDevice();
 
@@ -287,14 +290,14 @@ void I_InitSound() {
         }
     }
 
-    fprintf(stderr, "I_InitSound: sound module ready\n");
+    if (verbose) printf("I_InitSound: sound module ready\n");
 }
 
 
 
 
 void I_InitMusic(void) {
-    printf("I_InitMusic()\n");
+    if (verbose) printf("I_InitMusic()\n");
 
     midi_player = adl_init(SAMPLERATE);
     if (!midi_player) {
@@ -302,28 +305,28 @@ void I_InitMusic(void) {
         return;
     }
 
-    printf("   ADLMIDI initialized... switching emulator\n");
+    if (verbose) printf("I_InitMusic: ADLMIDI initialized\n");
     adl_switchEmulator(midi_player, ADLMIDI_EMU_NUKED);
     adl_setVolumeRangeModel(midi_player, ADLMIDI_VolumeModel_Generic);
 
-    fprintf( stderr, "  SAMPLERATE=%d sampleSize=%d channels=%d ... ", SAMPLERATE, SAMPLESIZE, 2);
+    if (verbose) printf("I_InitMusic: SAMPLERATE=%d sampleSize=%d channels=%d\n", SAMPLERATE, SAMPLESIZE, 2);
     SetAudioStreamBufferSizeDefault(4096);
     main_stream = LoadAudioStream(SAMPLERATE, 8*SAMPLESIZE, 2);
 
     if (IsAudioStreamValid(main_stream)) {
-        fprintf( stderr, "bingo.\n");
+        if (verbose) printf("I_InitMusic: audio stream valid\n");
         SetAudioStreamCallback(main_stream, audio_callback);
         PlayAudioStream(main_stream);
         //SetAudioStreamVolume(main_stream, 1.0);
     }
     else {
-        fprintf( stderr, "didn't work out.\n");
+        fprintf(stderr, "I_InitMusic: audio stream not valid\n");
     }
 
 }
 
 void I_ShutdownMusic(void)	{
-    printf("I_ShutdownMusic()\n");
+    if (verbose) printf("I_ShutdownMusic()\n");
 
     if (midi_player == NULL) return;
 

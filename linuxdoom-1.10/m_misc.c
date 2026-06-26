@@ -322,6 +322,7 @@ void M_SaveDefaults (void)
 // M_LoadDefaults
 //
 extern byte	scantokey[128];
+extern boolean verbose;
 
 void M_LoadDefaults (void)
 {
@@ -353,7 +354,7 @@ void M_LoadDefaults (void)
 	sprintf(buf, "%s/.doomrc", home);
 	defaultfile = buf;
     }
-    printf ("	default file: %s\n",defaultfile);
+    if (verbose) printf ("	default file: %s\n",defaultfile);
     
     // read the file in, overriding any set defaults
     f = fopen (defaultfile, "r");

@@ -44,6 +44,8 @@
 #endif
 #include "i_system.h"
 
+extern boolean verbose;
+
 void I_Nanosleep(long sec, long nsec) {
     struct timespec ts = {sec, nsec};
     nanosleep(&ts, NULL);
@@ -139,7 +141,7 @@ void I_WaitVBL(int count)
 #ifdef SUN
     sleep(0);
 #else
-    printf("WaitVBL(%d)\n", count);
+    if (verbose) printf("WaitVBL(%d)\n", count);
     I_Sleep((float)count / 70);
 #endif
 #endif
