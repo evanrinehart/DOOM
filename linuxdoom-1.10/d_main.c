@@ -127,6 +127,7 @@ void D_CheckNetGame (void);
 void D_ProcessEvents (void);
 void G_BuildTiccmd (ticcmd_t* cmd);
 void D_DoAdvanceDemo (void);
+void D_WartHack(int p);
 
 
 //
@@ -604,41 +605,10 @@ void D_DoomMain (void)
     if (M_CheckParm ("-deathmatch")) deathmatch = 1;
     if (M_CheckParm ("-altdeath")) deathmatch = 2;
     p = M_CheckParm("-turbo"); if (p && p < myargc - 1) G_SetTurbo(myargv[p+1]);
-    
+    p = M_CheckParm("-wart"); if (p) D_WartHack(p);
+
     // add any files specified on the command line with -file wadfile
     // to the wad list
-    //
-    // convenience hack to allow -wart e m to add a wad file
-    // prepend a tilde to the filename so wadfile will be reloadable
-    p = M_CheckParm ("-wart");
-    if (p)
-    {
-	myargv[p][4] = 'p';     // big hack, change to -warp
-
-	// Map name handling.
-	switch (gamemode )
-	{
-	  case shareware:
-	  case retail:
-	  case registered:
-	    sprintf (file,"~"DEVMAPS"E%cM%c.wad",
-		     myargv[p+1][0], myargv[p+2][0]);
-	    printf("Warping to Episode %s, Map %s.\n",
-		   myargv[p+1],myargv[p+2]);
-	    break;
-	    
-	  case commercial:
-	  default:
-	    p = atoi (myargv[p+1]);
-	    if (p<10)
-	      sprintf (file,"~"DEVMAPS"cdata/map0%i.wad", p);
-	    else
-	      sprintf (file,"~"DEVMAPS"cdata/map%i.wad", p);
-	    break;
-	}
-	D_AddFile (file);
-    }
-	
     p = M_CheckParm ("-file");
     if (p)
     {
@@ -939,4 +909,43 @@ void D_DoomMain (void)
     }
 
     D_DoomLoop ();  // never returns
+}
+
+
+
+
+
+// convenience hack to allow -wart e m to add a wad file
+// prepend a tilde to the filename so wadfile will be reloadable
+void D_WartHack(int p) {
+    char file[256];
+
+    int e;
+    int m;
+    int N;
+
+    myargv[p][4] = 'p';     // big hack, change to -warp
+
+    // Map name handling.
+    switch (gamemode) {
+        case shareware:
+        case retail:
+        case registered:
+            if (!(p < myargc - 2)) { I_Error("-wart: not enough arguments for doom 1"); }
+            e = myargv[p+1][0] - '0';
+            m = myargv[p+2][0] - '0';
+            sprintf(file,"~"DEVMAPS"E%cM%c.wad", e, m);
+            printf("Warping to Episode %d, Map %d.\n", e, m);
+            break;
+
+        case commercial:
+        default:
+            if (!(p < myargc - 1)) { I_Error("-wart: not enough arguments for doom 2"); }
+            N = atoi(myargv[p+1]);
+            sprintf(file, "~"DEVMAPS"cdata/map%02d.wad", N);
+            printf("Warping to Map %02d.\n", N);
+            break;
+    }
+
+    D_AddFile (file);
 }
