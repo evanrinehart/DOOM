@@ -91,7 +91,6 @@ void D_DoomLoop (void);
 char*		wadfiles[MAXWADFILES];
 
 
-boolean		devparm;	// started game with -devparm
 boolean         nomonsters;	// checkparm of -nomonsters
 boolean         respawnparm;	// checkparm of -respawn
 boolean         fastparm;	// checkparm of -fast
@@ -602,15 +601,11 @@ void D_DoomMain (void)
     nomonsters = M_CheckParm ("-nomonsters");
     respawnparm = M_CheckParm ("-respawn");
     fastparm = M_CheckParm ("-fast");
-    devparm = M_CheckParm ("-devparm");
     if (M_CheckParm ("-altdeath"))
 	deathmatch = 2;
     else if (M_CheckParm ("-deathmatch"))
 	deathmatch = 1;
 
-    if (devparm)
-	printf(D_DEVSTR);
-    
     // turbo option
     if ( (p=M_CheckParm ("-turbo")) )
     {
