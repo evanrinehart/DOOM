@@ -651,18 +651,12 @@ void D_DoomMain (void)
 
 
     // play a normal demo or timed demo as fast as possible
-    p = M_CheckParm ("-playdemo");
-
-    if (!p)
-	p = M_CheckParm ("-timedemo");
-
-    if (p && p < myargc-1)
-    {
-	sprintf (file,"%s.lmp", myargv[p+1]);
-	D_AddFile (file);
-	printf("Playing demo %s.lmp.\n",myargv[p+1]);
+    if ((p = M_CheckParm("-playdemo") || M_CheckParm("-timedemo"))) {
+        arg = myargv[p+1];
+        sprintf(file,"%s.lmp", arg);
+        D_AddFile(file);
+        printf("Playing demo %s.lmp.\n", arg);
     }
-    
 
 
     // init subsystems
