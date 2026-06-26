@@ -548,7 +548,6 @@ void D_ArbitrateNetStart (void)
 // D_CheckNetGame
 // Works out player numbers among the net participants
 //
-extern	int			viewangleoffset;
 
 void D_CheckNetGame (void)
 {
