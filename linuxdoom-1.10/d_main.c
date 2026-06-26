@@ -571,7 +571,7 @@ void IdentifyVersion (void)
 {
 
     int p = M_CheckParm("-iwad"); // only try named iwad
-    char *chosen_iwad = p ? myargv[p+1] : NULL;
+    char *chosen_iwad = p && p < myargc-1 ? myargv[p+1] : NULL;
 
     for (struct iwad *info = known_iwads; info->filename; info++) {
         if (chosen_iwad && strcmp(info->filename, chosen_iwad) != 0) continue;
