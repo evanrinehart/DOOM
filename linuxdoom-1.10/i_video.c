@@ -264,8 +264,6 @@ void I_FinishUpdate (void) {
 
     EndDrawing();
 
-    I_Sleep(0.025);
-
     frame_num++;
 }
 
