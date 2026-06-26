@@ -70,7 +70,7 @@ boolean G_Responder (event_t*	ev);
 
 void G_ScreenShot (void);
 
-void G_SetTurbo(char *parm);
+void G_SetTurbo(int scale);
 
 #endif
 //-----------------------------------------------------------------------------

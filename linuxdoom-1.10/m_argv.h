@@ -33,6 +33,9 @@ extern  char**	myargv;
 // in the arg list (0 if not found).
 int M_CheckParm (char* check);
 char *M_GetParm(char *check);
+char **M_GetParmArgs(char *check, int *numout);
+int M_GetParmInt(char *check);
+int M_GetParmInts(char *check, int *out1, int *out2);
 
 
 #endif

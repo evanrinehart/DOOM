@@ -130,9 +130,10 @@ void D_ProcessEvents (void);
 void G_BuildTiccmd (ticcmd_t* cmd);
 void D_DoAdvanceDemo (void);
 
-void D_WartHack(int p);
+void D_WartHack(int e, int m);
 void D_CheckForFakes(void);
 void D_PrintStartup(char *title, char *custom_startup);
+void P_SetTimeLimit(int count);
 
 
 //
@@ -597,36 +598,41 @@ void IdentifyVersion (void)
     //I_Error ("Game mode indeterminate\n");
 }
 
+
 //
 // D_DoomMain
 //
 void D_DoomMain (void)
 {
     int             p;
-    char *arg;
+    int val1, val2;
     char                    file[256];
+
+    setbuf (stdout, NULL);
+
+    /* many command line args, but not all, processed here */
 
     verbose = M_CheckParm("-verbose") || M_CheckParm("-v") || M_CheckParm("--verbose");
 
     IdentifyVersion ();
-	
-    setbuf (stdout, NULL);
 
-    nomonsters = M_CheckParm ("-nomonsters");
-    respawnparm = M_CheckParm ("-respawn");
-    fastparm = M_CheckParm ("-fast");
-    if (M_CheckParm ("-deathmatch")) deathmatch = 1;
-    if (M_CheckParm ("-altdeath")) deathmatch = 2;
-    if ((arg = M_GetParm("-turbo"))) G_SetTurbo(arg);
-    p = M_CheckParm("-wart"); if (p) D_WartHack(p);
+    nomonsters = M_CheckParm("-nomonsters");
+    respawnparm = M_CheckParm("-respawn");
+    fastparm = M_CheckParm("-fast");
+    deathmatch = M_CheckParm("-deathmatch") ? 1 : M_CheckParm ("-altdeath") ? 2 : 0;
 
-    if ((arg = M_GetParm("-timer")) && deathmatch) {
-        int time = atoi(arg);
+    int scale = M_GetParmInt("-turbo"); if (scale) G_SetTurbo(scale);
+    int count = M_GetParmInts("-wart", &val1, &val2); if (count >= 1) D_WartHack(val1, val2);
+
+    int time = M_GetParmInt("-timer");
+    if (time && deathmatch) {
         printf("Levels will end after %d minute%s\n", time, time != 1 ? "s" : "");
+        P_SetTimeLimit(time);
     }
 
     if ( M_CheckParm ("-avg") && deathmatch) {
         printf("Austin Virtual Gaming: Levels will end after 20 minutes\n");
+        P_SetTimeLimit(20);
     }
 
     // get skill / episode / map from parms
@@ -635,43 +641,47 @@ void D_DoomMain (void)
     startmap = 1;
     autostart = false;
 
-    if ((arg = M_GetParm("-skill"))) {
-        startskill = arg[0]-'1';
+    int sk = M_GetParmInt("-skill");
+    if (sk) {
+        startskill = sk;
         autostart = true;
     }
 
-    if ((arg = M_GetParm("-episode"))  && gamemission == doom) {
-        startepisode = arg[0]-'0';
+    int ep = M_GetParmInt("-episode");
+    if (ep && gamemission == doom) {
+        startepisode = ep;
         startmap = 1;
         autostart = true;
     }
 
-    if ((p = M_CheckParm ("-warp"))) {
-        if (gamemode == commercial && p < myargc - 1) {
-            startmap = atoi (myargv[p+1]);
-            autostart = true;
-        }
-        else if (p < myargc - 2) {
-            startepisode = myargv[p+1][0]-'0';
-            startmap = myargv[p+2][0]-'0';
-            autostart = true;
-        }
+    count = M_GetParmInts("-warp", &val1, &val2);
+    if (count == 2 && gamemission == doom) {
+        startepisode = val1;
+        startmap = val2;
+        autostart = true;
+    }
+    if (count == 1 && gamemission != doom) {
+        startmap = val1;
+        autostart = true;
     }
 
 
-    // play a normal demo or timed demo as fast as possible
-    if ((p = M_CheckParm("-playdemo") || M_CheckParm("-timedemo"))) {
-        arg = myargv[p+1];
-        sprintf(file,"%s.lmp", arg);
+    // setup a normal demo or time demo (fast demo)
+    char *name1 = M_GetParm("-playdemo");
+    char *name2 = M_GetParm("-timedemo");
+    char *name = name1 ? name1 : name2;
+    if (name) {
+        sprintf(file,"%s.lmp", name);
         D_AddFile(file);
-        printf("Playing demo %s.lmp.\n", arg);
+        printf("Playing demo %s.lmp.\n", name);
     }
 
 
     // D_AddFile for each PWAD file mentioned after -file
-    if ((p = M_CheckParm ("-file"))) {
+    char **args = M_GetParmArgs("-file", &count);
+    if (args) {
         if (gamemode == shareware) I_Error("You cannot -file with the shareware version. Register!");
-        while (++p != myargc && myargv[p][0] != '-') D_AddFile(myargv[p]);
+        for (int i = 0; i < count; i++) D_AddFile(args[i]);
     }
 
 
@@ -776,13 +786,10 @@ void D_DoomMain (void)
 
 // convenience hack to allow -wart e m to add a wad file
 // prepend a tilde to the filename so wadfile will be reloadable
-void D_WartHack(int p) {
+void D_WartHack(int val1, int val2) {
     char file[256];
 
-    int e;
-    int m;
-    int N;
-
+    int p = M_CheckParm("-wart");
     myargv[p][4] = 'p';     // big hack, change to -warp
 
     // Map name handling.
@@ -790,19 +797,16 @@ void D_WartHack(int p) {
         case shareware:
         case retail:
         case registered:
-            if (!(p < myargc - 2)) { I_Error("-wart: not enough arguments for doom 1"); }
-            e = myargv[p+1][0] - '0';
-            m = myargv[p+2][0] - '0';
-            sprintf(file,"~"DEVMAPS"E%cM%c.wad", e, m);
-            printf("Warping to Episode %d, Map %d.\n", e, m);
+            if (val2 == 0) { I_Error("-wart: not enough arguments for doom 1"); }
+            sprintf(file,"~"DEVMAPS"E%cM%c.wad", val1, val2);
+            printf("Warping to Episode %d, Map %d.\n", val1, val2);
             break;
 
         case commercial:
         default:
-            if (!(p < myargc - 1)) { I_Error("-wart: not enough arguments for doom 2"); }
-            N = atoi(myargv[p+1]);
-            sprintf(file, "~"DEVMAPS"cdata/map%02d.wad", N);
-            printf("Warping to Map %02d.\n", N);
+            if (val2 != 0) { I_Error("-wart: too many arguments for doom 2"); }
+            sprintf(file, "~"DEVMAPS"cdata/map%02d.wad", val1);
+            printf("Warping to Map %02d.\n", val1);
             break;
     }
 

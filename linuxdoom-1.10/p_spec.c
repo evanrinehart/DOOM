@@ -1076,6 +1076,7 @@ void P_PlayerInSpecialSector (player_t* player)
 //
 boolean		levelTimer;
 int		levelTimeCount;
+int		levelTimeCountMax;
 
 void P_UpdateSpecials (void)
 {
@@ -1247,20 +1248,9 @@ void P_SpawnSpecials (void)
     // See if -TIMER needs to be used.
     levelTimer = false;
 	
-    i = M_CheckParm("-avg");
-    if (i && deathmatch)
-    {
-	levelTimer = true;
-	levelTimeCount = 20 * 60 * 35;
-    }
-	
-    i = M_CheckParm("-timer");
-    if (i && deathmatch)
-    {
-	int	time;
-	time = atoi(myargv[i+1]) * 60 * 35;
-	levelTimer = true;
-	levelTimeCount = time;
+    if (deathmatch && levelTimeCountMax > 0) {
+        levelTimer = true;
+        levelTimeCount = levelTimeCountMax * 60 * 35;
     }
     
     //	Init special SECTORs.
@@ -1356,4 +1346,10 @@ void P_SpawnSpecials (void)
 
     // UNUSED: no horizonal sliders.
     //	P_InitSlidingDoorFrames();
+}
+
+
+
+void P_SetTimeLimit(int count) {
+    levelTimeCountMax = count < 0 ? 0 : count;
 }

@@ -61,3 +61,31 @@ char *M_GetParm(char *check) {
 
     return NULL;
 }
+
+
+char **M_GetParmArgs(char *check, int *numout) {
+    int p = M_CheckParm(check); if (!p) return NULL;
+    *numout = 0;
+    for (int count = 1; p + count < myargc; count++) {
+        if (myargv[p + count][0] == '-') break;
+        *numout = count;
+    }
+    return *numout > 0 ? &myargv[p + 1] : &myargv[p];
+}
+
+// zero ambiguous
+int M_GetParmInt(char *check) {
+    char *str = M_GetParm(check);
+    return str ? atoi(str) : 0;
+}
+
+int M_GetParmInts(char *check, int *out1, int *out2) {
+    int count;
+    char **strings = M_GetParmArgs(check, &count);
+    if (!strings) return 0;
+    if (out1) *out1 = 0;
+    if (out2) *out2 = 0;
+    if (out1 && count >= 1) *out1 = atoi(strings[0]);
+    if (out2 && count >= 2) *out2 = atoi(strings[1]);
+    return count;
+}

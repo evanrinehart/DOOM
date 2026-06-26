@@ -1656,9 +1656,7 @@ boolean G_CheckDemoStatus (void)
     return false; 
 } 
  
-void G_SetTurbo(char *parm) {
-
-    int scale = atoi(parm);
+void G_SetTurbo(int scale) {
 
     if (scale < 10) scale = 10;
     if (scale > 400) scale = 400;
