@@ -607,8 +607,6 @@ void D_DoomMain (void)
 	
     setbuf (stdout, NULL);
 
-    if (M_CheckParm ("-file") && gamemode == shareware) I_Error("You cannot -file with the shareware version. Register!");
-	
     nomonsters = M_CheckParm ("-nomonsters");
     respawnparm = M_CheckParm ("-respawn");
     fastparm = M_CheckParm ("-fast");
@@ -664,12 +662,13 @@ void D_DoomMain (void)
         printf("Playing demo %s.lmp.\n", arg);
     }
 
-    // D_AddFile each PWAD file mentioned after -file
-    p = M_CheckParm ("-file");
-    while (++p != myargc && myargv[p][0] != '-') D_AddFile(myargv[p]);
 
-    // now that wads are loaded we can check for fake retail
-    if (M_CheckParm ("-file")) D_CheckForFakes();
+    // D_AddFile for each PWAD file mentioned after -file
+    if ((p = M_CheckParm ("-file"))) {
+        if (gamemode == shareware) I_Error("You cannot -file with the shareware version. Register!");
+        while (++p != myargc && myargv[p][0] != '-') D_AddFile(myargv[p]);
+    }
+
 
     // init subsystems
     printf ("V_Init: allocate screens.\n");
@@ -683,6 +682,9 @@ void D_DoomMain (void)
 
     printf ("W_Init: Init WADfiles.\n");
     W_InitMultipleFiles (wadfiles);
+
+    // now that wads are initialized we can check for fake retail
+    if (M_CheckParm ("-file")) D_CheckForFakes();
     
     // if present, load custom strings from DEHACKED lump
     int dehacked_num = W_CheckNumForName("DEHACKED");
@@ -818,7 +820,7 @@ void D_CheckForFakes(void) {
 	if (gamemode == registered)
 	    for (i = 0;i < 23; i++)
 		if (W_CheckNumForName(name[i])<0)
-		    I_Error("\nThis is not the registered version.");
+		    I_Error("This is not the registered version.");
 
         // Iff additonal PWAD files are used, print modified banner
 	printf (
