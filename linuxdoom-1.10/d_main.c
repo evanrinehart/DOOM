@@ -116,6 +116,7 @@ FILE*		debugfile;
 
 boolean		advancedemo;
 
+char *game_title = "DOOM";
 char *window_title = "DOOM";
 
 
@@ -131,6 +132,7 @@ void D_DoAdvanceDemo (void);
 void D_WartHack(int p);
 void D_AddFileList(int p);
 void D_CheckForFakes(void);
+void D_PrintStartup(char *title, char *custom_startup);
 
 
 //
@@ -365,7 +367,7 @@ void D_DoomLoop (void)
 	debugfile = fopen (filename,"w");
     }
 	
-    I_InitGraphics (window_title);
+    I_InitGraphics (window_title==NULL ? game_title : window_title);
 
     while (1)
     {
@@ -524,30 +526,12 @@ void D_AddFile (char *file)
     wadfiles[numwadfiles] = newfile;
 }
 
-bool TryIWAD(char *name, GameMode_t mode, GameMission_t mission, Language_t lang, char *title) {
-    bool got_it = false;
-    char *doomwaddir = GetDoomWadDir();
-    char *path = malloc(strlen(doomwaddir)+1+strlen(name)+1);
-    sprintf(path, "%s/%s", doomwaddir, name);
-    if ( !access (path,R_OK) ) {
-        got_it = true;
-        gamemode = mode;
-        gamemission = mission;
-        window_title = title;
-        if (lang == french) printf("French version\n");
-        language = lang;
-        D_AddFile (path);
-    }
-    free(path);
-    return got_it;
-}
-
-
 struct iwad {
     char *filename;
     int mode;
     int mission;
     int language;
+    char *title;
     char *window_title;
 };
 
@@ -558,11 +542,32 @@ struct iwad known_iwads[] = {
     {"tnt.wad",       commercial, pack_tnt,  english, "Final DOOM - TNT: Evilution"},
     {"doomu.wad",     retail,     doom,      english, "Ultimate DOOM"},
     {"doom.wad",      registered, doom,      english, "DOOM"},
-    {"doom1.wad",     shareware,  doom,      english, "Shareware DOOM"},
-    {"freedoom1.wad", retail,     doom,      english, "FreeDOOM"},
-    {"freedoom2.wad", commercial, doom2,     english, "FreeDOOM phase 2"},
+    {"doom1.wad",     shareware,  doom,      english, "DOOM", "DOOM - Shareware"},
+    {"freedoom1.wad", retail,     doom,      english, "FreeDOOM - Phase 1", "FreeDOOM"},
+    {"freedoom2.wad", commercial, doom2,     english, "FreeDOOM - Phase 2", "FreeDOOM"},
     {NULL, 0, 0, 0, NULL}
 };
+
+bool TryIWAD(struct iwad *info) {
+    bool got_it = false;
+    char *doomwaddir = GetDoomWadDir();
+    char *path = malloc(strlen(doomwaddir)+1+strlen(info->filename)+1);
+    sprintf(path, "%s/%s", doomwaddir, info->filename);
+    if ( !access (path,R_OK) ) {
+        got_it = true;
+        gamemode = info->mode;
+        gamemission = info->mission;
+        game_title = info->title;
+        window_title = info->window_title;
+        if (info->language == french) printf("French version\n");
+        language = info->language;
+        D_AddFile (path);
+    }
+    free(path);
+    return got_it;
+}
+
+
 
 //
 // IdentifyVersion
@@ -578,7 +583,7 @@ void IdentifyVersion (void)
 
     for (struct iwad *info = known_iwads; info->filename; info++) {
         if (chosen_iwad && strcmp(info->filename, chosen_iwad) != 0) continue;
-        if (TryIWAD(info->filename, info->mode, info->mission, info->language, info->window_title)) return;
+        if (TryIWAD(info)) return;
     }
 
     printf("Game mode indeterminate.\n");
@@ -677,7 +682,7 @@ void D_DoomMain (void)
     if (M_CheckParm ("-file") && gamemode == shareware) I_Error("\nYou cannot -file with the shareware version. Register!");
     if (M_CheckParm ("-file")) D_CheckForFakes();
 
-    // if present load custom strings from DEHACKED lump
+    // if present, load custom strings from DEHACKED lump
     int dehacked_num = W_CheckNumForName("DEHACKED");
     if (dehacked_num >= 0) {
         char *dehacked = W_CacheLumpNum(dehacked_num, PU_CACHE);
@@ -685,108 +690,8 @@ void D_DoomMain (void)
         F_SetCustomFinale(dehacked, len);
     }
 
-    char *banner = F_GetString("STARTUP5");
-    if (banner) {
-        printf("%s\n", banner);
-    }
-    else {
-
-        switch ( gamemode )
-        {
-          case retail:
-            sprintf (title,
-                     "                         "
-                     "The Ultimate DOOM Startup v%i.%i"
-                     "                           ",
-                     VERSION/100,VERSION%100);
-            break;
-          case shareware:
-            sprintf (title,
-                     "                            "
-                     "DOOM Shareware Startup v%i.%i"
-                     "                           ",
-                     VERSION/100,VERSION%100);
-            break;
-          case registered:
-            sprintf (title,
-                     "                            "
-                     "DOOM Registered Startup v%i.%i"
-                     "                           ",
-                     VERSION/100,VERSION%100);
-            break;
-          case commercial:
-            switch(gamemission) {
-                case doom:
-                    // handled elsewhere
-                    break;
-                case doom2:
-                    sprintf (title,
-                    "                         "
-                    "DOOM 2: Hell on Earth v%i.%i"
-                    "                           ",
-                    VERSION/100,VERSION%100);
-                    break;
-                case pack_plut:
-                    sprintf (title,
-                    "                   "
-                    "DOOM 2: Plutonia Experiment v%i.%i"
-                    "                           ",
-                    VERSION/100,VERSION%100);
-                    break;
-                case pack_tnt:
-                    sprintf (title,
-                    "                     "
-                    "DOOM 2: TNT - Evilution v%i.%i"
-                    "                           ",
-                    VERSION/100,VERSION%100);
-                    break;
-                case none:
-                    // handled elsewhere
-                    break;
-            }
-            break;
-          default:
-            sprintf (title,
-                     "                     "
-                     "Public DOOM - v%i.%i"
-                     "                           ",
-                     VERSION/100,VERSION%100);
-            break;
-        }
-
-        printf ("%s\n",title);
-
-
-        // Check and print which version is executed.
-        switch ( gamemode )
-        {
-          case shareware:
-          case indetermined:
-            printf (
-                "===========================================================================\n"
-                "                                Shareware!\n"
-                "===========================================================================\n"
-            );
-            break;
-          case registered:
-          case retail:
-          case commercial:
-            printf (
-                "===========================================================================\n"
-                "                 Commercial product - do not distribute!\n"
-                "         Please report software piracy to the SPA: 1-800-388-PIR8\n"
-                "===========================================================================\n"
-            );
-            break;
-
-          default:
-            // Ouch.
-            break;
-        }
-
-    }
-
-
+    // announce DOOM
+    D_PrintStartup(game_title, F_GetString("STARTUP5"));
 
     printf ("M_Init: Init miscellaneous info.\n");
     M_Init ();
@@ -933,4 +838,50 @@ void D_CheckForFakes(void) {
 	    "===========================================================================\n"
 	    );
 	getchar ();
+}
+
+
+void D_PrintStartup(char *title, char *custom_startup) {
+    int a = VERSION/100;
+    int b = VERSION%100;
+    int column_width = 75;
+    char buffer[120];
+
+    if (custom_startup) {
+        printf("%s\n", custom_startup);
+        return;
+    }
+
+    if (gamemode == indetermined) {
+        // we didn't load any IWAD and have no custom startup from PWADs
+        printf("                           ");
+        printf("Public DOOM - v%d.%d", a, b);
+        printf("                           ");
+    }
+    else {
+        // one of the standard IWADs either shareware or commercial
+        sprintf(buffer, "%s - v%d.%d", title, a, b);
+        int padding = (column_width - strlen(buffer)) / 2;
+        for (int i = 0; i < padding; i++) printf(" ");
+        printf("%s", buffer);
+        for (int i = 0; i < padding; i++) printf(" ");
+        printf("\n");
+
+        if (gamemode == shareware) {
+            printf (
+                "===========================================================================\n"
+                "                                Shareware!\n"
+                "===========================================================================\n"
+            );
+        }
+        else {
+            printf (
+                "===========================================================================\n"
+                "                 Commercial product - do not distribute!\n"
+                "         Please report software piracy to the SPA: 1-800-388-PIR8\n"
+                "===========================================================================\n"
+            );
+        }
+    }
+
 }
