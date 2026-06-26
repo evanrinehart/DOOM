@@ -677,11 +677,9 @@ void D_DoomMain (void)
     if (M_CheckParm ("-file") && gamemode == shareware) I_Error("\nYou cannot -file with the shareware version. Register!");
     if (M_CheckParm ("-file")) D_CheckForFakes();
 
+    // if present load custom strings from DEHACKED lump
     int dehacked_num = W_CheckNumForName("DEHACKED");
-    if (dehacked_num < 0) {
-        printf("no DEHACKED lump found\n");
-    }
-    else {
+    if (dehacked_num >= 0) {
         char *dehacked = W_CacheLumpNum(dehacked_num, PU_CACHE);
         int len = W_LumpLength(dehacked_num);
         F_SetCustomFinale(dehacked, len);
