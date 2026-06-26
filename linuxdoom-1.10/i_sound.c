@@ -18,6 +18,7 @@
 #include "doomdef.h"
 
 extern boolean verbose;
+extern boolean nomusic;
 
 static AudioStream main_stream;
 static struct ADL_MIDIPlayer *midi_player = NULL;
@@ -298,6 +299,10 @@ void I_InitSound() {
 
 void I_InitMusic(void) {
     if (verbose) printf("I_InitMusic()\n");
+    if (nomusic) {
+        if (verbose) printf("I_InitMusic: music disabled\n");
+        return;
+    }
 
     midi_player = adl_init(SAMPLERATE);
     if (!midi_player) {

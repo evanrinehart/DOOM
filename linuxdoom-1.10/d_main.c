@@ -119,6 +119,7 @@ boolean		advancedemo;
 char *game_title = "DOOM";
 char *window_title = "DOOM";
 boolean verbose = false;
+boolean nomusic = false;
 
 
 char		wadfile[1024];		// primary wad file
@@ -613,6 +614,7 @@ void D_DoomMain (void)
     /* many command line args, but not all, processed here */
 
     verbose = M_CheckParm("-verbose") || M_CheckParm("-v") || M_CheckParm("--verbose");
+    nomusic = M_CheckParm("-nomusic");
 
     IdentifyVersion ();
 
