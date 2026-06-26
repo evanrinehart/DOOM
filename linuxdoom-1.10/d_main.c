@@ -127,7 +127,9 @@ void D_CheckNetGame (void);
 void D_ProcessEvents (void);
 void G_BuildTiccmd (ticcmd_t* cmd);
 void D_DoAdvanceDemo (void);
+
 void D_WartHack(int p);
+void D_AddFileList(int p);
 
 
 //
@@ -593,6 +595,7 @@ void IdentifyVersion (void)
 void D_DoomMain (void)
 {
     int             p;
+    char *arg;
     char                    file[256];
 
     IdentifyVersion ();
@@ -604,20 +607,50 @@ void D_DoomMain (void)
     fastparm = M_CheckParm ("-fast");
     if (M_CheckParm ("-deathmatch")) deathmatch = 1;
     if (M_CheckParm ("-altdeath")) deathmatch = 2;
-    p = M_CheckParm("-turbo"); if (p && p < myargc - 1) G_SetTurbo(myargv[p+1]);
+    if ((arg = M_GetParm("-turbo"))) G_SetTurbo(arg);
     p = M_CheckParm("-wart"); if (p) D_WartHack(p);
+    p = M_CheckParm ("-file"); D_AddFileList(p);
 
-    // add any files specified on the command line with -file wadfile
-    // to the wad list
-    p = M_CheckParm ("-file");
-    if (p)
-    {
-	// the parms after p are wadfile/lump names,
-	// until end of parms or another - preceded parm
-	while (++p != myargc && myargv[p][0] != '-')
-	    D_AddFile (myargv[p]);
+    if ((arg = M_GetParm("-timer")) && deathmatch) {
+        int time = atoi(arg);
+        printf("Levels will end after %d minute%s\n", time, time != 1 ? "s" : "");
     }
 
+    if ( M_CheckParm ("-avg") && deathmatch) {
+        printf("Austin Virtual Gaming: Levels will end after 20 minutes\n");
+    }
+
+    // get skill / episode / map from parms
+    startskill = sk_medium;
+    startepisode = 1;
+    startmap = 1;
+    autostart = false;
+
+    if ((arg = M_GetParm("-skill"))) {
+        startskill = arg[0]-'1';
+        autostart = true;
+    }
+
+    if ((arg = M_GetParm("-episode"))  && gamemission == doom) {
+        startepisode = arg[0]-'0';
+        startmap = 1;
+        autostart = true;
+    }
+
+    if ((p = M_CheckParm ("-warp"))) {
+        if (gamemode == commercial && p < myargc - 1) {
+            startmap = atoi (myargv[p+1]);
+            autostart = true;
+        }
+        else if (p < myargc - 2) {
+            startepisode = myargv[p+1][0]-'0';
+            startmap = myargv[p+2][0]-'0';
+            autostart = true;
+        }
+    }
+
+
+    // play a normal demo or timed demo as fast as possible
     p = M_CheckParm ("-playdemo");
 
     if (!p)
@@ -630,56 +663,8 @@ void D_DoomMain (void)
 	printf("Playing demo %s.lmp.\n",myargv[p+1]);
     }
     
-    // get skill / episode / map from parms
-    startskill = sk_medium;
-    startepisode = 1;
-    startmap = 1;
-    autostart = false;
 
-		
-    p = M_CheckParm ("-skill");
-    if (p && p < myargc-1)
-    {
-	startskill = myargv[p+1][0]-'1';
-	autostart = true;
-    }
 
-    p = M_CheckParm ("-episode");
-    if (p && p < myargc-1)
-    {
-	startepisode = myargv[p+1][0]-'0';
-	startmap = 1;
-	autostart = true;
-    }
-	
-    p = M_CheckParm ("-timer");
-    if (p && p < myargc-1 && deathmatch)
-    {
-	int     time;
-	time = atoi(myargv[p+1]);
-	printf("Levels will end after %d minute",time);
-	if (time>1)
-	    printf("s");
-	printf(".\n");
-    }
-
-    p = M_CheckParm ("-avg");
-    if (p && p < myargc-1 && deathmatch)
-	printf("Austin Virtual Gaming: Levels will end after 20 minutes\n");
-
-    p = M_CheckParm ("-warp");
-    if (p && p < myargc-1)
-    {
-	if (gamemode == commercial)
-	    startmap = atoi (myargv[p+1]);
-	else
-	{
-	    startepisode = myargv[p+1][0]-'0';
-	    startmap = myargv[p+2][0]-'0';
-	}
-	autostart = true;
-    }
-    
     // init subsystems
     printf ("V_Init: allocate screens.\n");
     V_Init ();
@@ -913,6 +898,15 @@ void D_DoomMain (void)
 
 
 
+
+// add any files specified on the command line with -file wadfile
+// to the wad list
+//
+// the parms after p are wadfile/lump names,
+// until end of parms or another - preceded parm
+void D_AddFileList(int p) {
+    while (++p != myargc && myargv[p][0] != '-') D_AddFile (myargv[p]);
+}
 
 
 // convenience hack to allow -wart e m to add a wad file

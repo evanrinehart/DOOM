@@ -21,6 +21,7 @@
 //-----------------------------------------------------------------------------
 
 #include <strings.h>
+#include <stdlib.h>
 
 int		myargc;
 char**		myargv;
@@ -49,4 +50,14 @@ int M_CheckParm (char *check)
 
 
 
+char *M_GetParm(char *check) {
+    int		i;
 
+    for (i = 1;i<myargc;i++)
+    {
+	if ( !strcasecmp(check, myargv[i]) && i < myargc-1)
+	    return myargv[i+1];
+    }
+
+    return NULL;
+}
