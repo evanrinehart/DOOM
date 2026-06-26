@@ -130,7 +130,6 @@ void G_BuildTiccmd (ticcmd_t* cmd);
 void D_DoAdvanceDemo (void);
 
 void D_WartHack(int p);
-void D_AddFileList(int p);
 void D_CheckForFakes(void);
 void D_PrintStartup(char *title, char *custom_startup);
 
@@ -607,6 +606,8 @@ void D_DoomMain (void)
     IdentifyVersion ();
 	
     setbuf (stdout, NULL);
+
+    if (M_CheckParm ("-file") && gamemode == shareware) I_Error("You cannot -file with the shareware version. Register!");
 	
     nomonsters = M_CheckParm ("-nomonsters");
     respawnparm = M_CheckParm ("-respawn");
@@ -615,7 +616,6 @@ void D_DoomMain (void)
     if (M_CheckParm ("-altdeath")) deathmatch = 2;
     if ((arg = M_GetParm("-turbo"))) G_SetTurbo(arg);
     p = M_CheckParm("-wart"); if (p) D_WartHack(p);
-    p = M_CheckParm ("-file"); D_AddFileList(p);
 
     if ((arg = M_GetParm("-timer")) && deathmatch) {
         int time = atoi(arg);
@@ -664,6 +664,12 @@ void D_DoomMain (void)
         printf("Playing demo %s.lmp.\n", arg);
     }
 
+    // D_AddFile each PWAD file mentioned after -file
+    p = M_CheckParm ("-file");
+    while (++p != myargc && myargv[p][0] != '-') D_AddFile(myargv[p]);
+
+    // now that wads are loaded we can check for fake retail
+    if (M_CheckParm ("-file")) D_CheckForFakes();
 
     // init subsystems
     printf ("V_Init: allocate screens.\n");
@@ -678,10 +684,6 @@ void D_DoomMain (void)
     printf ("W_Init: Init WADfiles.\n");
     W_InitMultipleFiles (wadfiles);
     
-
-    if (M_CheckParm ("-file") && gamemode == shareware) I_Error("\nYou cannot -file with the shareware version. Register!");
-    if (M_CheckParm ("-file")) D_CheckForFakes();
-
     // if present, load custom strings from DEHACKED lump
     int dehacked_num = W_CheckNumForName("DEHACKED");
     if (dehacked_num >= 0) {
@@ -762,16 +764,6 @@ void D_DoomMain (void)
 }
 
 
-
-
-// add any files specified on the command line with -file wadfile
-// to the wad list
-//
-// the parms after p are wadfile/lump names,
-// until end of parms or another - preceded parm
-void D_AddFileList(int p) {
-    while (++p != myargc && myargv[p][0] != '-') D_AddFile (myargv[p]);
-}
 
 
 // convenience hack to allow -wart e m to add a wad file
