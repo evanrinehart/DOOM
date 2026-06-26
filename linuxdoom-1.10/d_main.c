@@ -940,8 +940,8 @@ void D_PrintHelp(void) {
     printf("\n");
 
     printf("Netgame options (advanced):\n");
-    pr("-dup", "cut netgame's \"sample rate\" in half to reduce bandwidth");
-    pr("-extratic", "sent more tics worth in a netgame for added redundancy");
+    pr("-dup N", "divide netgame's \"sample rate\" by N to reduce bandwidth");
+    pr("-extratic", "send more tics worth in a netgame packet for added redundancy");
     pr("-port", "change the port used by multiplayer doom");
     printf("\n");
 
