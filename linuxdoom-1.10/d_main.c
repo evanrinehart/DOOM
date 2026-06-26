@@ -943,6 +943,7 @@ void D_PrintHelp(void) {
     pr("-dup N", "divide netgame's \"sample rate\" by N to reduce bandwidth");
     pr("-extratic", "send more tics worth in a netgame packet for added redundancy");
     pr("-port", "change the port used by multiplayer doom");
+    pr("-solo-net", "start a netgame by yourself for purposes");
     printf("\n");
 
     printf("Hacks:\n");

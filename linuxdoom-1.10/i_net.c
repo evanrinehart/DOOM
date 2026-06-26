@@ -105,6 +105,11 @@ BindToLocalPort
 	I_Error ("BindToPort: bind: %s", strerror(errno));
 }
 
+void PacketSendNull (void) {
+}
+
+void PacketGetNull (void) {
+}
 
 //
 // PacketSend
@@ -260,6 +265,19 @@ void I_InitNetwork (void)
 	DOOMPORT = atoi (myargv[p+1]);
 	printf ("using alternate port %i\n",DOOMPORT);
     }
+
+    i = M_CheckParm ("-solo-net");
+    if (i) {
+        // single player networked game
+        netsend = PacketSendNull;
+        netget = PacketGetNull;
+        netgame = true;
+        doomcom->id = DOOMCOM_ID;
+        doomcom->numplayers = doomcom->numnodes = 1;
+        doomcom->deathmatch = false;
+        doomcom->consoleplayer = 0;
+        return;
+    }
     
     // parse network game options,
     //  -net <consoleplayer> <host> <host> ...
@@ -274,6 +292,7 @@ void I_InitNetwork (void)
 	doomcom->consoleplayer = 0;
 	return;
     }
+
 
     netsend = PacketSend;
     netget = PacketGet;
