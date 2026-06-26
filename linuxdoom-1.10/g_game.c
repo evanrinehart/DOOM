@@ -1656,5 +1656,18 @@ boolean G_CheckDemoStatus (void)
     return false; 
 } 
  
- 
- 
+void G_SetTurbo(char *parm) {
+
+    int scale = atoi(parm);
+
+    if (scale < 10) scale = 10;
+    if (scale > 400) scale = 400;
+
+	printf ("turbo scale: %i%%\n",scale);
+
+	forwardmove[0] = forwardmove[0] * scale / 100;
+	forwardmove[1] = forwardmove[1] * scale / 100;
+	sidemove[0] = sidemove[0] * scale / 100;
+	sidemove[1] = sidemove[1] * scale / 100;
+
+}

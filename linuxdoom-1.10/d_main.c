@@ -601,30 +601,9 @@ void D_DoomMain (void)
     nomonsters = M_CheckParm ("-nomonsters");
     respawnparm = M_CheckParm ("-respawn");
     fastparm = M_CheckParm ("-fast");
-    if (M_CheckParm ("-altdeath"))
-	deathmatch = 2;
-    else if (M_CheckParm ("-deathmatch"))
-	deathmatch = 1;
-
-    // turbo option
-    if ( (p=M_CheckParm ("-turbo")) )
-    {
-	int     scale = 200;
-	extern int forwardmove[2];
-	extern int sidemove[2];
-	
-	if (p<myargc-1)
-	    scale = atoi (myargv[p+1]);
-	if (scale < 10)
-	    scale = 10;
-	if (scale > 400)
-	    scale = 400;
-	printf ("turbo scale: %i%%\n",scale);
-	forwardmove[0] = forwardmove[0]*scale/100;
-	forwardmove[1] = forwardmove[1]*scale/100;
-	sidemove[0] = sidemove[0]*scale/100;
-	sidemove[1] = sidemove[1]*scale/100;
-    }
+    if (M_CheckParm ("-deathmatch")) deathmatch = 1;
+    if (M_CheckParm ("-altdeath")) deathmatch = 2;
+    p = M_CheckParm("-turbo"); if (p && p < myargc - 1) G_SetTurbo(myargv[p+1]);
     
     // add any files specified on the command line with -file wadfile
     // to the wad list
