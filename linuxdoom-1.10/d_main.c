@@ -130,6 +130,7 @@ void D_DoAdvanceDemo (void);
 
 void D_WartHack(int p);
 void D_AddFileList(int p);
+void D_CheckForFakes(void);
 
 
 //
@@ -673,41 +674,8 @@ void D_DoomMain (void)
     W_InitMultipleFiles (wadfiles);
     
 
-    // Check for -file in shareware
-    if (M_CheckParm ("-file"))
-    {
-	// These are the lumps that will be checked in IWAD,
-	// if any one is not present, execution will be aborted.
-	char name[23][8]=
-	{
-	    "e2m1","e2m2","e2m3","e2m4","e2m5","e2m6","e2m7","e2m8","e2m9",
-	    "e3m1","e3m3","e3m3","e3m4","e3m5","e3m6","e3m7","e3m8","e3m9",
-	    "dphoof","bfgga0","heada1","cybra1","spida1d1"
-	};
-	int i;
-	
-	if ( gamemode == shareware)
-	    I_Error("\nYou cannot -file with the shareware "
-		    "version. Register!");
-
-	// Check for fake IWAD with right name,
-	// but w/o all the lumps of the registered version. 
-	if (gamemode == registered)
-	    for (i = 0;i < 23; i++)
-		if (W_CheckNumForName(name[i])<0)
-		    I_Error("\nThis is not the registered version.");
-
-        // Iff additonal PWAD files are used, print modified banner
-	printf (
-	    "===========================================================================\n"
-	    "ATTENTION:  This version of DOOM has been modified.  If you would like to\n"
-	    "get a copy of the original game, call 1-800-IDGAMES or see the readme file.\n"
-	    "        You will not receive technical support for modified games.\n"
-	    "                      press enter to continue\n"
-	    "===========================================================================\n"
-	    );
-	getchar ();
-    }
+    if (M_CheckParm ("-file") && gamemode == shareware) I_Error("\nYou cannot -file with the shareware version. Register!");
+    if (M_CheckParm ("-file")) D_CheckForFakes();
 
     int dehacked_num = W_CheckNumForName("DEHACKED");
     if (dehacked_num < 0) {
@@ -936,4 +904,35 @@ void D_WartHack(int p) {
     }
 
     D_AddFile (file);
+}
+
+
+void D_CheckForFakes(void) {
+	// These are the lumps that will be checked in IWAD,
+	// if any one is not present, execution will be aborted.
+	char name[23][8]=
+	{
+	    "e2m1","e2m2","e2m3","e2m4","e2m5","e2m6","e2m7","e2m8","e2m9",
+	    "e3m1","e3m3","e3m3","e3m4","e3m5","e3m6","e3m7","e3m8","e3m9",
+	    "dphoof","bfgga0","heada1","cybra1","spida1d1"
+	};
+	int i;
+
+	// Check for fake IWAD with right name,
+	// but w/o all the lumps of the registered version.
+	if (gamemode == registered)
+	    for (i = 0;i < 23; i++)
+		if (W_CheckNumForName(name[i])<0)
+		    I_Error("\nThis is not the registered version.");
+
+        // Iff additonal PWAD files are used, print modified banner
+	printf (
+	    "===========================================================================\n"
+	    "ATTENTION:  This version of DOOM has been modified.  If you would like to\n"
+	    "get a copy of the original game, call 1-800-IDGAMES or see the readme file.\n"
+	    "        You will not receive technical support for modified games.\n"
+	    "                      press enter to continue\n"
+	    "===========================================================================\n"
+	    );
+	getchar ();
 }
