@@ -536,15 +536,15 @@ struct iwad {
 };
 
 struct iwad known_iwads[] = {
-    {"doom2f.wad",    commercial, doom2,     french,  "DOOM II"},
-    {"doom2.wad",     commercial, doom2,     english, "DOOM II"},
-    {"plutonia.wad",  commercial, pack_plut, english, "Final DOOM - The Plutonia Experiment"},
-    {"tnt.wad",       commercial, pack_tnt,  english, "Final DOOM - TNT: Evilution"},
+    {"doom2f.wad",    commercial, doom2,     french,  "DOOM 2: Hell on Earth", "DOOM II"},
+    {"doom2.wad",     commercial, doom2,     english, "DOOM 2: Hell on Earth", "DOOM II"},
+    {"plutonia.wad",  commercial, pack_plut, english, "DOOM 2: The Plutonia Experiment", "Final DOOM - The Plutonia Experiment"},
+    {"tnt.wad",       commercial, pack_tnt,  english, "DOOM 2: TNT - Evilution", "Final DOOM - TNT: Evilution"},
     {"doomu.wad",     retail,     doom,      english, "Ultimate DOOM"},
     {"doom.wad",      registered, doom,      english, "DOOM"},
     {"doom1.wad",     shareware,  doom,      english, "DOOM", "DOOM - Shareware"},
-    {"freedoom1.wad", retail,     doom,      english, "FreeDOOM - Phase 1", "FreeDOOM"},
-    {"freedoom2.wad", commercial, doom2,     english, "FreeDOOM - Phase 2", "FreeDOOM"},
+    {"freedoom1.wad", retail,     doom,      english, "FreeDOOM: Phase 1", "FreeDOOM"},
+    {"freedoom2.wad", commercial, doom2,     english, "FreeDOOM: Phase 2", "FreeDOOM"},
     {NULL, 0, 0, 0, NULL}
 };
 
@@ -589,6 +589,8 @@ void IdentifyVersion (void)
     if (verbose) printf("Game mode indeterminate.\n");
     gamemode = indetermined;
     gamemission = none;
+    game_title = "Public DOOM";
+    window_title = "DOOM";
 
     // We don't abort. Let's see what the PWAD contains.
     //exit(1);
@@ -846,40 +848,35 @@ void D_PrintStartup(char *title, char *custom_startup) {
     char buffer[120];
 
     if (custom_startup) {
-        printf("%s\n", custom_startup);
-        return;
-    }
-
-    if (gamemode == indetermined) {
-        // we didn't load any IWAD and have no custom startup from PWADs
-        printf("                           ");
-        printf("Public DOOM - v%d.%d", a, b);
-        printf("                           ");
+        sprintf(buffer, "%s", title);
     }
     else {
-        // one of the standard IWADs either shareware or commercial
         sprintf(buffer, "%s - v%d.%d", title, a, b);
-        int padding = (column_width - strlen(buffer)) / 2;
-        for (int i = 0; i < padding; i++) printf(" ");
-        printf("%s", buffer);
-        for (int i = 0; i < padding; i++) printf(" ");
-        printf("\n");
+    }
 
-        if (gamemode == shareware) {
-            printf (
-                "===========================================================================\n"
-                "                                Shareware!\n"
-                "===========================================================================\n"
-            );
-        }
-        else {
-            printf (
-                "===========================================================================\n"
-                "                 Commercial product - do not distribute!\n"
-                "         Please report software piracy to the SPA: 1-800-388-PIR8\n"
-                "===========================================================================\n"
-            );
-        }
+    int padding = (column_width - strlen(buffer)) / 2;
+    for (int i = 0; i < padding; i++) printf(" ");
+    printf("%s", buffer);
+    for (int i = 0; i < padding; i++) printf(" ");
+    printf("\n");
+
+    if (custom_startup) {
+        printf("%s\n", custom_startup);
+    }
+    else if (gamemode == shareware) {
+        printf (
+            "===========================================================================\n"
+            "                                Shareware!\n"
+            "===========================================================================\n"
+        );
+    }
+    else {
+        printf (
+            "===========================================================================\n"
+            "                 Commercial product - do not distribute!\n"
+            "         Please report software piracy to the SPA: 1-800-388-PIR8\n"
+            "===========================================================================\n"
+        );
     }
 
 }
