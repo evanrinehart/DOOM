@@ -135,6 +135,7 @@ void D_WartHack(int e, int m);
 void D_CheckForFakes(void);
 void D_PrintStartup(char *title, char *custom_startup);
 void P_SetTimeLimit(int count);
+void D_PrintHelp(void);
 
 
 //
@@ -609,6 +610,11 @@ void D_DoomMain (void)
     int val1, val2;
     char                    file[256];
 
+    if (M_CheckParm("--help") || M_CheckParm("-help") || M_CheckParm("-h")) {
+        D_PrintHelp();
+        return;
+    }
+
     setbuf (stdout, NULL);
 
     /* many command line args, but not all, processed here */
@@ -880,4 +886,72 @@ void D_PrintStartup(char *title, char *custom_startup) {
         );
     }
 
+}
+
+
+void PrintHelpLine(char *pattern, char *explain) {
+    printf("\t%-20s - %s\n", pattern, explain);
+}
+
+void D_PrintHelp(void) {
+    void (*pr)(char *, char *) = PrintHelpLine;
+
+    printf("WAD loading control:\n");
+    pr("-iwad <filename>", "select main IWAD to load in case multiple are in the directory");
+    pr("-file <file1> <file2> ...", "select PWADs to load as mods. Order matters");
+    printf("\n");
+
+    printf("Ways to start a game immediately:\n");
+    pr("-skill <1-5>", "autostart game at specified skill 1=baby 5=nightmare");
+    pr("-episode N", "autostart game at the beginning of episode N in doom 1");
+    pr("-warp N N", "autostart game at specified episode and map in doom 1");
+    pr("-warp NN", "autostart game at specified map in doom 2 e.g. -warp 08");
+    pr("-net N <peer1> <peer2> ...", "attempt to start peer to peer netgame as player N using TCP/IP");
+    pr("-loadgame N", "load savegame N including game settings");
+    printf("\n");
+
+    printf("These options have no effect unless the game autostarts via -skill, -episode, -warp, or -net:\n");
+    pr("-nomonsters", "monsters are disabled");
+    pr("-fast", "monsters are faster, either moving or shooting depending");
+    pr("-respawn", "monsters respawn some time after being killed");
+    pr("-deathmatch", "put a netgame into deathmatch (pvp) mode");
+    pr("-altdeath", "alternate deathmatch rules: items and weapons respawn eventually");
+    pr("-timer N", "level ends automatically after number of minutes");
+    pr("-avg", "level ends automatically after 20 minutes");
+    pr("-turbo <10-400>", "player movement is scaled by a percentage e.g. 130 is 30%% faster");
+    printf("\n");
+
+    printf("Graphical options:\n");
+    pr("-2", "scale the window by 2x");
+    pr("-3", "scale the window by 3x");
+    pr("-4", "scale the window by 4x");
+    pr("-5", "scale the window by 5x (exact)");
+    pr("-10", "scale the window by 10x (exact)");
+    pr("-fullscreen", "scale the window to fullscreen borderless");
+    pr("-nodraw", "disable graphics rendering entirely");
+    pr("-noblit", "skip the final blit without disabling the renderer itself");
+    printf("\n");
+
+    printf("Demo options:\n");
+    pr("-playdemo <name>", "play the named demo then quit");
+    pr("-timedemo <name>", "play the named demo as fast as possible then quit");
+    pr("-record <name>", "start recording a demo saved to named file");
+    pr("-maxdemo N", "set a maximum demo size. Ends recording when limit is reached");
+    printf("\n");
+
+    printf("Netgame options (advanced):\n");
+    pr("-dup", "cut netgame's \"sample rate\" in half to reduce bandwidth");
+    pr("-extratic", "sent more tics worth in a netgame for added redundancy");
+    pr("-port", "change the port used by multiplayer doom");
+    printf("\n");
+
+    printf("Hacks:\n");
+    pr("-dumplevel <dirname>", "dump map geometry to named directory");
+    printf("\n");
+
+    printf("Miscellaneous:\n");
+    pr("-verbose", "print excessive amounts of details at startup and exit");
+    pr("-nomusic", "disable music entirely");
+    pr("-help", "display all command line options");
+    printf("\n");
 }
