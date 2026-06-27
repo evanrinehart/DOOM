@@ -864,8 +864,8 @@ G_CheckSpot
 	return true;
     }
 		
-    x = mthing->x << FRACBITS; 
-    y = mthing->y << FRACBITS; 
+    x = mthing->x * (1 << FRACBITS);
+    y = mthing->y * (1 << FRACBITS);
 	 
     if (!P_CheckPosition (players[playernum].mo, x, y) ) 
 	return false; 
