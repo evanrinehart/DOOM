@@ -129,7 +129,6 @@ char		mapdir[1024];           // directory of development maps
 
 void D_CheckNetGame (void);
 void D_ProcessEvents (void);
-void G_BuildTiccmd (ticcmd_t* cmd);
 void D_DoAdvanceDemo (void);
 
 void D_WartHack(int e, int m);
