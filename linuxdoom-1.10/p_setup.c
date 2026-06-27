@@ -559,7 +559,7 @@ void P_GroupLines (void)
 	block = block >= bmapheight ? bmapheight-1 : block;
 	sector->blockbox[BOXTOP]=block;
 
-	block = (bbox[BOXBOTTOM]-bmaporgy-MAXRADIUS)>>MAPBLOCKSHIFT;
+	block = (bbox[BOXBOTTOM]-bmaporgy-MAXRADIUS)>>MAPBLOCKSHIFT; // overflows plutonia MAP17
 	block = block < 0 ? 0 : block;
 	sector->blockbox[BOXBOTTOM]=block;
 
@@ -567,7 +567,7 @@ void P_GroupLines (void)
 	block = block >= bmapwidth ? bmapwidth-1 : block;
 	sector->blockbox[BOXRIGHT]=block;
 
-	block = (bbox[BOXLEFT]-bmaporgx-MAXRADIUS)>>MAPBLOCKSHIFT;
+	block = (bbox[BOXLEFT]-bmaporgx-MAXRADIUS)>>MAPBLOCKSHIFT; // overflows plutonia MAP17
 	block = block < 0 ? 0 : block;
 	sector->blockbox[BOXLEFT]=block;
     }
