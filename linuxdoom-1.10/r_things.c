@@ -205,7 +205,8 @@ void R_InitSpriteDefs (char** namelist)
 	memset (sprtemp,-1, sizeof(sprtemp));
 		
 	maxframe = -1;
-	intname = *(int *)namelist[i];
+	char codename[4] = {spritename[0], spritename[1], spritename[2], spritename[3]};
+	intname = *(int *)codename;
 	
 	// scan the lumps,
 	//  filling in the frames for whatever is found
