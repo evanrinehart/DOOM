@@ -77,7 +77,7 @@ ticcmd_t* I_BaseTiccmd (void);
 // Called by M_Responder when quit is selected.
 // Clean exit, displays sell blurb.
 void I_Quit (void);
-void I_QuitEndoom(unsigned char *endoom, size_t len);
+void I_QuitEndoom(unsigned char *endoom, int len);
 
 
 // Allocates from low memory under dos,
