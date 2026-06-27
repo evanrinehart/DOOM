@@ -94,6 +94,7 @@ char*		wadfiles[MAXWADFILES];
 boolean         nomonsters;	// checkparm of -nomonsters
 boolean         respawnparm;	// checkparm of -respawn
 boolean         fastparm;	// checkparm of -fast
+boolean         pistolstart;	// checkparm of -pistolstart
 
 boolean         drone;
 
@@ -627,6 +628,7 @@ void D_DoomMain (void)
     nomonsters = M_CheckParm("-nomonsters");
     respawnparm = M_CheckParm("-respawn");
     fastparm = M_CheckParm("-fast");
+    pistolstart = M_CheckParm("-pistolstart");
     deathmatch = M_CheckParm("-deathmatch") ? 1 : M_CheckParm ("-altdeath") ? 2 : 0;
 
     int scale = M_GetParmInt("-turbo"); if (scale) G_SetTurbo(scale);
@@ -916,6 +918,7 @@ void D_PrintHelp(void) {
     pr("-respawn", "monsters respawn some time after being killed");
     pr("-deathmatch", "put a netgame into deathmatch (pvp) mode");
     pr("-altdeath", "alternate deathmatch rules: items and weapons respawn eventually");
+    pr("-pistolstart", "each level begins with only a pistol and 50 rounds");
     pr("-timer N", "level ends automatically after number of minutes");
     pr("-avg", "level ends automatically after 20 minutes");
     pr("-turbo <10-400>", "player movement is scaled by a percentage e.g. 130 is 30%% faster");

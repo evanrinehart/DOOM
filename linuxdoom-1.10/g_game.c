@@ -482,6 +482,8 @@ void G_DoLoadLevel (void)
 	if (playeringame[i] && players[i].playerstate == PST_DEAD) 
 	    players[i].playerstate = PST_REBORN; 
 	memset (players[i].frags,0,sizeof(players[i].frags)); 
+
+        if (playeringame[i] && pistolstart) G_PlayerReborn(i);
     } 
 		 
     P_SetupLevel (gameepisode, gamemap, 0, gameskill);    
@@ -1347,6 +1349,7 @@ void G_DoNewGame (void)
     respawnparm = false;
     fastparm = false;
     nomonsters = false;
+    pistolstart = false;
     consoleplayer = 0;
     G_InitNew (d_skill, d_episode, d_map); 
     gameaction = ga_nothing; 
@@ -1638,6 +1641,7 @@ boolean G_CheckDemoStatus (void)
 	playeringame[1] = playeringame[2] = playeringame[3] = 0;
 	respawnparm = false;
 	fastparm = false;
+	pistolstart = false;
 	nomonsters = false;
 	consoleplayer = 0;
 	D_AdvanceDemo (); 
