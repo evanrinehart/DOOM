@@ -126,11 +126,26 @@ void I_Init (void)
 void I_Quit (void)
 {
     D_QuitNetGame ();
-    I_ShutdownSound();
     I_ShutdownMusic();
+    I_ShutdownSound();
     M_SaveDefaults ();
     I_ShutdownGraphics();
     exit(0);
+}
+
+void I_QuitEndoom(unsigned char *endoom, size_t len) {
+
+    if (len == 4000) {
+        for (size_t j = 0; j < 25; j++) {
+            for (size_t i = 0; i < 80; i++) {
+                int c = endoom[2*(80*j + i)];
+                putchar(0 <= c && c <= 127 ? c : ' ');
+            }
+            putchar('\n');
+        }
+    }
+
+    I_Quit();
 }
 
 void I_WaitVBL(int count)

@@ -1083,7 +1083,11 @@ void M_QuitResponse(int ch)
 	    S_StartSound(NULL,quitsounds[(gametic>>2)&7]);
 	I_WaitVBL(105);
     }
-    I_Quit ();
+
+    int num = W_CheckNumForName("ENDOOM");
+    unsigned char *endoom = W_CacheLumpNum(num, PU_CACHE);
+    size_t len = W_LumpLength(num);
+    I_QuitEndoom(endoom, len);
 }
 
 
