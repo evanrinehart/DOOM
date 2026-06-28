@@ -133,20 +133,6 @@ void I_Quit (void)
     exit(0);
 }
 
-void I_QuitEndoom(unsigned char *endoom, int len) {
-
-    if (len == 4000) {
-        for (int j = 0; j < 25; j++) {
-            for (int i = 0; i < 80; i++) {
-                int c = endoom[2*(80*j + i)];
-                putchar(0 <= c && c <= 127 ? c : ' ');
-            }
-            putchar('\n');
-        }
-    }
-
-    I_Quit();
-}
 
 void I_WaitVBL(int count)
 {

@@ -77,7 +77,8 @@ OBJS=				\
 		$(O)/s_sound.o		\
 		$(O)/z_zone.o			\
 		$(O)/info.o				\
-		$(O)/sounds.o
+		$(O)/sounds.o   \
+		$(O)/i_endoom.o
 
 all:	 $(O)/$(BINNAME)
 

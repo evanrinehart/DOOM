@@ -722,6 +722,8 @@ void D_DoomMain (void)
     // announce DOOM
     D_PrintStartup(game_title, F_GetString("STARTUP5"));
 
+    if (M_CheckParm("-endoom")) I_QuitEndoom(W_CacheLumpName("ENDOOM",PU_CACHE),4000);
+
     if (verbose) printf ("M_Init: Init miscellaneous info.\n");
     M_Init ();
 
@@ -955,6 +957,7 @@ void D_PrintHelp(void) {
     printf("Miscellaneous:\n");
     pr("-verbose", "print excessive amounts of details at startup and exit");
     pr("-nomusic", "disable music entirely");
+    pr("-endoom", "immediately exit and display ENDOOM");
     pr("-help", "display all command line options");
     printf("\n");
 }
