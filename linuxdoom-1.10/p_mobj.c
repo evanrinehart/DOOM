@@ -598,8 +598,8 @@ void P_RespawnSpecials (void)
 
     mthing = &itemrespawnque[iquetail];
 	
-    x = mthing->x << FRACBITS; 
-    y = mthing->y << FRACBITS; 
+    x = mthing->x * (1 << FRACBITS);
+    y = mthing->y * (1 << FRACBITS);
 	  
     // spawn a teleport fog at the new spot
     ss = R_PointInSubsector (x,y); 
