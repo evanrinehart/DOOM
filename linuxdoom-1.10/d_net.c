@@ -571,8 +571,14 @@ void D_CheckNetGame (void)
     if (netgame)
 	D_ArbitrateNetStart ();
 
-    printf ("startskill %i  deathmatch: %i  startmap: %i  startepisode: %i\n",
-	    startskill, deathmatch, startmap, startepisode);
+    printf("skill=%d ", startskill + 1);
+    if (deathmatch) printf("deathmatch=%d ", deathmatch);
+    if (nomonsters) printf("nomonsters=1 ");
+    if (fastparm) printf("fastmonsters=1 ");
+    if (respawnparm) printf("respawn=1 ");
+    if (pistolstart) printf("pistolstart=1 ");
+    printf("episode=%d ", startepisode);
+    printf("map=%d\n", startmap);
 	
     // read values out of doomcom
     ticdup = doomcom->ticdup;
