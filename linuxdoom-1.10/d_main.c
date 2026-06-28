@@ -652,7 +652,9 @@ void D_DoomMain (void)
 
     int sk = M_GetParmInt("-skill");
     if (sk) {
-        startskill = sk;
+        startskill = sk - 1;
+        if (startskill < 0) startskill = 0;
+        if (startskill > 4) startskill = 4;
         autostart = true;
     }
 
