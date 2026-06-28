@@ -58,7 +58,8 @@ boolean NetListen (void);
 // NETWORKING
 //
 
-int	DOOMPORT =	(IPPORT_USERRESERVED +0x1d );
+#define HISTORICAL_USERPORTS 5000
+int	DOOMPORT =	(HISTORICAL_USERPORTS + 0x1d);
 
 int			sendsocket;
 int			insocket;
@@ -237,7 +238,7 @@ void I_InitNetwork (void)
     int			i;
     int			p;
     struct hostent*	hostentry;	// host information entry
-	
+
     doomcom = malloc (sizeof (*doomcom) );
     memset (doomcom, 0, sizeof(*doomcom) );
     
