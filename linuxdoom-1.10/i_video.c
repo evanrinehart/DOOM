@@ -37,6 +37,7 @@ static int offset_x;
 static long frame_num = 0;
 
 static bool mouse_captured = 0;
+static bool mouse_walk = 1;
 
 void I_ShutdownGraphics(void) {
     if (!video_initialized) return;
@@ -191,7 +192,7 @@ void I_GetEvent(void) {
         ev.type = ev_mouse;
         ev.data1 = IsMouseButtonDown(0) | (IsMouseButtonDown(1) ? 2 : 0) | (IsMouseButtonDown(2) ? 4 : 0);
         ev.data2 = (int)delta.x;
-        ev.data3 = (int)-delta.y;
+        ev.data3 = mouse_walk ? (int)-delta.y : 0;
         D_PostEvent(&ev);
     }
 
@@ -383,5 +384,7 @@ void I_InitGraphics(char *title) {
     }
 
     if (verbose) DumpGamepads();
+
+    if (M_CheckParm("-nomousewalk")) mouse_walk = 0;
 
 }
