@@ -654,7 +654,7 @@ ST_Responder (event_t* ev)
       else if (cht_CheckCheat(&cheat_choppers, ev->data1))
       {
 	plyr->weaponowned[wp_chainsaw] = true;
-	plyr->powers[pw_invulnerability] = true;
+	plyr->powers[pw_invulnerability] = 1050;
 	plyr->message = F_GETSTRING(STSTR_CHOPPERS);
       }
       // 'mypos' for player position
