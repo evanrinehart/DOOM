@@ -693,6 +693,9 @@ S_AdjustSoundParams
   int*		sep,
   int*		pitch )
 {
+
+    (void)pitch;
+
     fixed_t	approx_dist;
     fixed_t	adx;
     fixed_t	ady;

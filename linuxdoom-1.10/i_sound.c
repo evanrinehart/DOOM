@@ -108,10 +108,6 @@ void I_SetChannels() {
     // had set up some conversion tables for volume and un/signed samples
 }	
  
-void I_SetSfxVolume(int volume) {
-    // apply the volume settings from the menu
-}
-
 void I_SetMusicVolume(int volume) {
     if (volume > 15) return;
 
@@ -143,6 +139,25 @@ I_StartSound
   int		pitch,
   int		priority )
 {
+
+    /*
+        Originally doom applied a random pitch to each sound.
+        The behavior was eventually disabled unintentionally.
+        After v1.4 all sfx played at their neutral pitch.
+
+        Some source ports restore the pitch bending. However
+        at one point, Romero's stated opinion on it was
+
+        >  We did not plan for pitch changing when designing
+        >  the sound effects for DOOM. When the feature was added
+        >  in v1.4 it was mostly experimental. After listening
+        >  to it for a while, I decided I wasn’t a fan of it.
+        >  I’m happy it was removed one way or another ...
+
+        https://www.doomworld.com/vb/post/1953235
+    */
+    (void)pitch;
+    (void)priority; // unused but this I'm not sure about
 
     int handle = -1;
     for (int i = 1; i < 64; i++) {
@@ -192,8 +207,8 @@ I_UpdateSoundParams
   int	sep,
   int	pitch)
 {
-    // called by s_sound
-    //printf("I_UpdateSoundParams(%d,%d,%d,%d)\n", handle, vol, sep, pitch);
+
+    (void)pitch; // see notes in I_StartSound
 
     if (!sound_slot_full[handle]) return;
 
