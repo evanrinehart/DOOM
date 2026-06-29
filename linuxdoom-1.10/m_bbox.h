@@ -22,8 +22,6 @@
 #ifndef __M_BBOX__
 #define __M_BBOX__
 
-#include <values.h>
-
 #include "m_fixed.h"
 
 

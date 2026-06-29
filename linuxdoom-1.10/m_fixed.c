@@ -20,10 +20,10 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "stdlib.h"
+#include <stdlib.h>
 
-#include "doomtype.h"
 #include "i_system.h"
+#include "common.h"
 
 #ifdef __GNUG__
 #pragma implementation "m_fixed.h"

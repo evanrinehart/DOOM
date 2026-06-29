@@ -27,6 +27,7 @@
 #pragma implementation "m_bbox.h"
 #endif
 #include "m_bbox.h"
+#include "common.h"
 
 
 
