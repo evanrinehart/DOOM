@@ -91,7 +91,7 @@ $(O)/$(BINNAME):	$(OBJS) $(O)/i_main.o $(RAYLIB_LIB) $(ADLMIDI_LIB)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) $(O)/i_main.o $(RAYLIB_LIB) $(ADLMIDI_LIB) \
 	-o $(O)/$(BINNAME) $(LIBS)
 
-$(O)/%.o:	%.c
+$(O)/%.o:	%.c | $(O)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(O)/i_video.o : i_video.c $(RAYLIB)
@@ -99,6 +99,9 @@ $(O)/i_video.o : i_video.c $(RAYLIB)
 
 $(O)/i_sound.o : i_sound.c $(ADLMIDI) $(RAYLIB)
 	$(CC) $(CFLAGS) -Iadlmidi/include -Iraylib/src -o $(O)/i_sound.o -c i_sound.c
+
+$(O):
+	mkdir -p $(O)
 
 #############################################################
 #
