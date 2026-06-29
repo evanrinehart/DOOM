@@ -735,10 +735,15 @@ void P_SpawnMapThing (mapthing_t* mthing)
 	return;
     }
 
-    // check for apropriate skill level
+    // netgame-only thing spawns only in netgame
     if (!netgame && (mthing->options & 16) )
 	return;
 		
+    // -spthings stops netgame-only things regardless
+    if (spthings && (mthing->options & 16))
+	return;
+
+    // check for apropriate skill level
     if (gameskill == sk_baby)
 	bit = 1;
     else if (gameskill == sk_nightmare)

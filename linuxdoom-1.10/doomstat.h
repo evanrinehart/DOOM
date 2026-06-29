@@ -50,6 +50,7 @@ extern  boolean	nomonsters;	// checkparm of -nomonsters
 extern  boolean	respawnparm;	// checkparm of -respawn
 extern  boolean	fastparm;	// checkparm of -fast
 extern  boolean	pistolstart;	// checkparm of -pistolstart
+extern  boolean	spthings;	// checkparm of -spthings
 
 
 

@@ -95,6 +95,7 @@ boolean         nomonsters;	// checkparm of -nomonsters
 boolean         respawnparm;	// checkparm of -respawn
 boolean         fastparm;	// checkparm of -fast
 boolean         pistolstart;	// checkparm of -pistolstart
+boolean         spthings; // checkparm of -spthings
 
 boolean         drone;
 
@@ -629,6 +630,7 @@ void D_DoomMain (void)
     fastparm = M_CheckParm("-fast");
     pistolstart = M_CheckParm("-pistolstart");
     deathmatch = M_CheckParm("-deathmatch") ? 1 : M_CheckParm ("-altdeath") ? 2 : 0;
+    spthings = M_CheckParm("-spthings");
 
     int scale = M_GetParmInt("-turbo"); if (scale) G_SetTurbo(scale);
     int count = M_GetParmInts("-wart", &val1, &val2); if (count >= 1) D_WartHack(val1, val2);
@@ -950,6 +952,7 @@ void D_PrintHelp(void) {
     pr("-extratic", "send more tics worth in a netgame packet for added redundancy");
     pr("-port", "change the port used by multiplayer doom");
     pr("-solo-net", "start a netgame by yourself for purposes");
+    pr("-spthings", "don't spawn netgame-only items and monsters");
     printf("\n");
 
     printf("Hacks:\n");
