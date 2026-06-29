@@ -234,7 +234,6 @@ void I_ShutdownSound(void) {
 
 Wave load_sound_from_wad(char *name) {
     int lumpnum;
-    int lumpsize;
 
     if (W_CheckNumForName(name) == -1) {
         lumpnum = W_GetNumForName("dspistol");
@@ -242,8 +241,6 @@ Wave load_sound_from_wad(char *name) {
     else {
         lumpnum = W_GetNumForName(name);
     }
-
-    lumpsize = W_LumpLength(lumpnum);
 
     unsigned char *data = W_CacheLumpNum(lumpnum, PU_STATIC);
     int format = *((unsigned short*)(data + 0));

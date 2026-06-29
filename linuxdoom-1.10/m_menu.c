@@ -524,6 +524,7 @@ void M_ReadSaveStrings(void)
 	    continue;
 	}
 	count = read (handle, &savegamestrings[i], SAVESTRINGSIZE);
+	if (count < SAVESTRINGSIZE) I_Error("M_ReadSaveStrings: can't read save strings");
 	close (handle);
 	LoadMenu[i].status = 1;
     }
