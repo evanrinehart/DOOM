@@ -497,6 +497,7 @@ void D_ArbitrateNetStart (void)
 		nomonsters = (netbuffer->retransmitfrom & 0x20) > 0;
 		respawnparm = (netbuffer->retransmitfrom & 0x10) > 0;
 		pistolstart = (netbuffer->retransmitfrom & 0x08) > 0;
+		spthings = (netbuffer->retransmitfrom & 0x40) > 0;
 		startmap = netbuffer->starttic & 0x3f;
 		startepisode = netbuffer->starttic >> 6;
 		return;
@@ -515,6 +516,8 @@ void D_ArbitrateNetStart (void)
 		netbuffer->retransmitfrom = startskill;
 		if (pistolstart)
 		    netbuffer->retransmitfrom |= 0x08;
+		if (spthings)
+		    netbuffer->retransmitfrom |= 0x40;
 		if (deathmatch)
 		    netbuffer->retransmitfrom |= (deathmatch<<6);
 		if (nomonsters)
@@ -580,6 +583,7 @@ void D_CheckNetGame (void)
     if (fastparm) printf("fastmonsters=1 ");
     if (respawnparm) printf("respawn=1 ");
     if (pistolstart) printf("pistolstart=1 ");
+    if (spthings) printf("spthings=1 ");
     printf("episode=%d ", startepisode);
     printf("map=%d\n", startmap);
 	
