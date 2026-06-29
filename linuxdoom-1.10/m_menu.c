@@ -970,8 +970,8 @@ void M_Options(int choice)
 //
 void M_ChangeMessages(int choice)
 {
-    // warning: unused parameter `int choice'
-    choice = 0;
+
+    (void)choice;
     showMessages = 1 - showMessages;
 	
     if (!showMessages)
@@ -998,7 +998,7 @@ void M_EndGameResponse(int ch)
 
 void M_EndGame(int choice)
 {
-    choice = 0;
+    (void)choice;
     if (!usergame)
     {
 	S_StartSound(NULL,sfx_oof);
@@ -1022,19 +1022,19 @@ void M_EndGame(int choice)
 //
 void M_ReadThis(int choice)
 {
-    choice = 0;
+    (void)choice;
     M_SetupNextMenu(&ReadDef1);
 }
 
 void M_ReadThis2(int choice)
 {
-    choice = 0;
+    (void)choice;
     M_SetupNextMenu(&ReadDef2);
 }
 
 void M_FinishReadThis(int choice)
 {
-    choice = 0;
+    (void)choice;
     M_SetupNextMenu(&MainDef);
 }
 
@@ -1149,7 +1149,7 @@ void M_ChangeSensitivity(int choice)
 
 void M_ChangeDetail(int choice)
 {
-    choice = 0;
+    (void)choice;
     detailLevel = 1 - detailLevel;
 
     // FIXME - does not work. Remove anyway?
