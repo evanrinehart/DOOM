@@ -924,7 +924,7 @@ void D_PrintHelp(void) {
     pr("-pistolstart", "each level begins with only a pistol and 50 rounds");
     pr("-timer N", "level ends automatically after number of minutes");
     pr("-avg", "level ends automatically after 20 minutes");
-    pr("-turbo <10-400>", "player movement is scaled by a percentage e.g. 130 is 30%% faster");
+    pr("-turbo <10-400>", "player movement is scaled by a percentage e.g. 130 is 30% faster");
     printf("\n");
 
     printf("Graphical options:\n");
