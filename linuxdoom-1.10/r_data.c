@@ -22,6 +22,7 @@
 //
 //-----------------------------------------------------------------------------
 
+#include <stdlib.h>
 #include <stdint.h>
 #include <strings.h>
 #include <stddef.h>
@@ -39,11 +40,6 @@
 
 #include "doomstat.h"
 #include "r_sky.h"
-
-#ifdef LINUX
-#include  <alloca.h>
-#endif
-
 
 #include "r_data.h"
 
@@ -141,6 +137,10 @@ int		numspritelumps;
 
 int		numtextures;
 texture_t**	textures;
+
+char *flatpresent;
+char *texturepresent;
+char* spritepresent = NULL;
 
 
 int*			texturewidthmask;
@@ -294,7 +294,8 @@ void R_GenerateComposite (int texnum)
 void R_GenerateLookup (int texnum)
 {
     texture_t*		texture;
-    byte*		patchcount;	// patchcount[texture->width]
+    static byte*	patchcount = NULL; // patchcount[texture->width]
+    static long		patchcountsize = 32;
     texpatch_t*		patch;	
     patch_t*		realpatch;
     int			x;
@@ -317,7 +318,11 @@ void R_GenerateLookup (int texnum)
     //  that are covered by more than one patch.
     // Fill in the lump / offset, so columns
     //  with only a single patch are all done.
-    patchcount = (byte *)alloca (texture->width);
+    if (patchcount==NULL) patchcount = malloc(patchcountsize);
+    if (patchcountsize < texture->width) {
+        patchcount = realloc(patchcount, texture->width);
+        patchcountsize = texture->width;
+    }
     memset (patchcount, 0, texture->width);
     patch = texture->patches;
 		
@@ -446,7 +451,8 @@ void R_InitTextures (void)
     names = W_CacheLumpName ("PNAMES", PU_STATIC);
     nummappatches = LONG ( *((int *)names) );
     name_p = names+4;
-    patchlookup = alloca (nummappatches*sizeof(*patchlookup));
+
+    patchlookup = malloc(nummappatches * sizeof *patchlookup);
     
     for (i=0 ; i<nummappatches ; i++)
     {
@@ -476,6 +482,7 @@ void R_InitTextures (void)
 	maxoff2 = 0;
     }
     numtextures = numtextures1 + numtextures2;
+    texturepresent = malloc(numtextures);
 	
     textures = Z_Malloc (numtextures * sizeof *textures, PU_STATIC, 0);
     texturecolumnlump = Z_Malloc (numtextures * sizeof *texturecolumnlump, PU_STATIC, 0);
@@ -571,6 +578,8 @@ void R_InitTextures (void)
     
     for (i=0 ; i<numtextures ; i++)
 	texturetranslation[i] = i;
+
+    free(patchlookup);
 }
 
 
@@ -585,6 +594,8 @@ void R_InitFlats (void)
     firstflat = W_GetNumForName ("F_START") + 1;
     lastflat = W_GetNumForName ("F_END") - 1;
     numflats = lastflat - firstflat + 1;
+
+    flatpresent = malloc(numflats);
 	
     // Create translation table for global animation.
     flattranslation = Z_Malloc ((numflats+1)*4, PU_STATIC, 0);
@@ -744,10 +755,6 @@ int		spritememory;
 
 void R_PrecacheLevel (void)
 {
-    char*		flatpresent;
-    char*		texturepresent;
-    char*		spritepresent;
-
     int			i;
     int			j;
     int			k;
@@ -761,7 +768,6 @@ void R_PrecacheLevel (void)
 	return;
     
     // Precache flats.
-    flatpresent = alloca(numflats);
     memset (flatpresent,0,numflats);	
 
     for (i=0 ; i<numsectors ; i++)
@@ -783,7 +789,6 @@ void R_PrecacheLevel (void)
     }
     
     // Precache textures.
-    texturepresent = alloca(numtextures);
     memset (texturepresent,0, numtextures);
 	
     for (i=0 ; i<numsides ; i++)
@@ -818,7 +823,7 @@ void R_PrecacheLevel (void)
     }
     
     // Precache sprites.
-    spritepresent = alloca(numsprites);
+    if (spritepresent == NULL) spritepresent = malloc(numsprites);
     memset (spritepresent,0, numsprites);
 	
     for (th = thinkercap.next ; th != &thinkercap ; th=th->next)
