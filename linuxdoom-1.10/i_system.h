@@ -83,9 +83,6 @@ void I_QuitEndoom(unsigned char *endoom, int len);
 // just mallocs under unix
 byte* I_AllocLow (int length);
 
-void I_Tactile (int on, int off, int total);
-
-
 void I_Error (char *error, ...);
 
 void I_Nanosleep(long sec, long nsec);
