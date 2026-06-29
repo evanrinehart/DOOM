@@ -205,11 +205,6 @@ extern int	showMessages;
 extern	int	numChannels;
 
 
-#ifdef LINUX
-char*		mousetype;
-char*		mousedev;
-#endif
-
 extern char*	chat_macros[];
 
 
@@ -244,11 +239,6 @@ default_t	defaults[] =
     {"key_use",&key_use, ' '},
     {"key_strafe",&key_strafe, KEY_RALT},
     {"key_speed",&key_speed, KEY_RSHIFT},
-#endif
-
-#ifdef LINUX
-    {"mousedev", &mousedev, (intptr_t)"/dev/ttyS0", 0, 0, 'S'},
-    {"mousetype", &mousetype, (intptr_t)"microsoft", 0, 0, 'S'},
 #endif
 
     {"use_mouse",&usemouse, 1},
