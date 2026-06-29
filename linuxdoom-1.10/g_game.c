@@ -432,8 +432,8 @@ void G_BuildTiccmd (ticcmd_t* cmd)
 
 int GetSkyForMap(int gamemode, int episode, int map) {
     if ( gamemode == commercial) {
-        if (gamemap < 12) return R_TextureNumForName ("SKY1");
-        else if (gamemap < 21) return R_TextureNumForName ("SKY2");
+        if (map < 12) return R_TextureNumForName ("SKY1");
+        else if (map < 21) return R_TextureNumForName ("SKY2");
         else return R_TextureNumForName ("SKY3");
     }
 
