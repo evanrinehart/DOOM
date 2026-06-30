@@ -176,7 +176,8 @@ void W_AddFile (char *filename)
     else 
     {
 	// WAD file
-	read (handle, &header, sizeof(header));
+	ssize_t headersize = sizeof header;
+	if (read (handle, &header, headersize) < headersize) I_Error("W_AddFile read");
 	if (strncmp(header.identification,"IWAD",4))
 	{
 	    // Homebrew levels?
@@ -192,7 +193,7 @@ void W_AddFile (char *filename)
 	length = header.numlumps*sizeof(filelump_t);
 	fileinfo = alloca (length);
 	lseek (handle, header.infotableofs, SEEK_SET);
-	read (handle, fileinfo, length);
+	if(read (handle, fileinfo, length) < length) I_Error("W_AddFile read");
 	numlumps += header.numlumps;
     }
 
@@ -243,13 +244,14 @@ void W_Reload (void)
     if ( (handle = open (reloadname,O_RDONLY | O_BINARY)) == -1)
 	I_Error ("W_Reload: couldn't open %s",reloadname);
 
-    read (handle, &header, sizeof(header));
+    ssize_t headersize = sizeof header;
+    if (read (handle, &header, headersize) < headersize) I_Error("W_Reload read");
     lumpcount = LONG(header.numlumps);
     header.infotableofs = LONG(header.infotableofs);
     length = lumpcount*sizeof(filelump_t);
     fileinfo = alloca (length);
     lseek (handle, header.infotableofs, SEEK_SET);
-    read (handle, fileinfo, length);
+    if (read (handle, fileinfo, length) < length) I_Error("W_Reload read");
     
     // Fill in lumpinfo
     lump_p = &lumpinfo[reloadlump];
