@@ -341,7 +341,7 @@ void I_InitGraphics(char *title) {
     screen_img = GenImageColor(SCREENWIDTH, SCREENHEIGHT, GREEN);
     screen_tex = LoadTextureFromImage(screen_img);
 
-    SetExitKey(KEY_HOME);
+    SetExitKey(0);
 
     add_key(KEY_SPACE, ' ');
 
