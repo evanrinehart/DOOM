@@ -664,7 +664,6 @@ void TryRunTics (bool singletic)
     int		realtics;
     int		availabletics;
     int		counts;
-    int		numplaying;
 
     if (singletic) {
         RunSingleTic();
@@ -680,12 +679,10 @@ void TryRunTics (bool singletic)
     NetUpdate ();
 	
     lowtic = MAXINT;
-    numplaying = 0;
     for (i=0 ; i<doomcom->numnodes ; i++)
     {
 	if (nodeingame[i])
 	{
-	    numplaying++;
 	    if (nettics[i] < lowtic)
 		lowtic = nettics[i];
 	}
