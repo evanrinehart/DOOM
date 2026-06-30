@@ -500,7 +500,7 @@ void AM_initVariables(void)
 void AM_loadPics(void)
 {
     int i;
-    char namebuf[9];
+    char namebuf[20];
   
     for (i=0;i<10;i++)
     {
