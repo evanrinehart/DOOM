@@ -463,8 +463,8 @@ EV_BuildStairs
 
     floormove_t*	floor;
     
-    fixed_t		stairsize;
-    fixed_t		speed;
+    fixed_t		stairsize = 8*FRACUNIT;
+    fixed_t		speed = FLOORSPEED/4;
 
     secnum = -1;
     rtn = 0;
