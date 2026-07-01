@@ -1,16 +1,12 @@
-################################################################
-#
-# $Id:$
-#
-# $Log:$
-#
-CC=  gcc  # gcc or g++
-
-CFLAGS=-g -Wall -Wextra -std=c11 -Wno-unused-parameter -Wno-missing-field-initializers -DNORMALUNIX
-LDFLAGS=-L/usr/X11R6/lib
-LIBS=-lXext -lX11 -lm -lstdc++
-
 BINNAME=doom
+
+CC=gcc  # gcc or clang
+
+BASE_CFLAGS = -Wall -Wextra -std=c11 -Wno-unused-parameter -Wno-missing-field-initializers -DNORMALUNIX
+CF ?= -O2
+CFLAGS=$(CF) $(BASE_CFLAGS)
+LDFLAGS=-L/usr/X11R6/lib
+LIBS=-lX11 -lm -lstdc++
 
 # subdirectory for objects
 O=out
@@ -20,6 +16,7 @@ OBJS=				\
 		$(O)/doomdef.o		\
 		$(O)/doomstat.o		\
 		$(O)/dstrings.o		\
+		$(O)/i_main.o		\
 		$(O)/i_system.o		\
 		$(O)/i_sound.o		\
 		$(O)/i_video.o		\
@@ -80,25 +77,12 @@ OBJS=				\
 		$(O)/sounds.o   \
 		$(O)/i_endoom.o
 
-all:	 $(O)/$(BINNAME)
+all:	 $(BINNAME)
 
 clean:
 	rm -f *.o *~ *.flc
 	rm -f $(O)/*.o
-	rm -f $(O)/$(BINNAME)
-
-$(O)/$(BINNAME):	$(OBJS) $(O)/i_main.o $(RAYLIB_LIB) $(ADLMIDI_LIB)
-	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) $(O)/i_main.o $(RAYLIB_LIB) $(ADLMIDI_LIB) \
-	-o $(O)/$(BINNAME) $(LIBS)
-
-$(O)/%.o:	%.c | $(O)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-$(O)/i_video.o : i_video.c $(RAYLIB)
-	$(CC) $(CFLAGS) -Iraylib/src -o $(O)/i_video.o -c i_video.c
-
-$(O)/i_sound.o : i_sound.c $(ADLMIDI) $(RAYLIB)
-	$(CC) $(CFLAGS) -Iadlmidi/include -Iraylib/src -o $(O)/i_sound.o -c i_sound.c
+	rm -f $(BINNAME)
 
 $(O):
 	mkdir -p $(O)
@@ -129,3 +113,29 @@ $(ADLMIDI) :
 $(ADLMIDI_LIB) : $(ADLMIDI)
 	mkdir -p adlmidi/build
 	cd adlmidi/build && cmake -DCMAKE_BUILD_TYPE=Release .. && make
+
+#############################################################
+#
+#############################################################
+
+GREEN := \033[1;32m
+CYAN  := \033[1;36m
+RED   := \033[1;31m
+RESET := \033[0m
+
+$(O)/%.o:	%.c | $(O)
+	@printf "$(CYAN)%-10s$(RESET) %s %10s -> %s\n" "compile" "$(CF)" "$<" "$@"
+	@$(CC) $(CFLAGS) -c -o $@ $<
+
+$(O)/i_video.o : i_video.c $(RAYLIB)
+	@printf "$(CYAN)%-10s$(RESET) %s %10s -> %s\n" "compile" "$(CF)" "$<" "$@"
+	@$(CC) $(CFLAGS) -c -o $@ -Iraylib/src i_video.c
+
+$(O)/i_sound.o : i_sound.c $(ADLMIDI) $(RAYLIB)
+	@printf "$(CYAN)%-10s$(RESET) %s %10s -> %s\n" "compile" "$(CF)" "$<" "$@"
+	@$(CC) $(CFLAGS) -c -o $@ -Iadlmidi/include -Iraylib/src i_sound.c
+
+$(BINNAME): $(OBJS) $(RAYLIB_LIB) $(ADLMIDI_LIB)
+	@printf "$(GREEN)%-10s$(RESET) %s %10s %s %s -> %s\n" "link" "$(LIBS)" "$(OBJS)" "$(RAYLIB_LIB)" "$(ADLMIDI_LIB)" "$@"
+	@$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) $(RAYLIB_LIB) $(ADLMIDI_LIB) \
+	-o $(BINNAME) $(LIBS)
