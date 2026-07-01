@@ -75,6 +75,7 @@ OBJS=				\
 		$(O)/z_zone.o			\
 		$(O)/info.o				\
 		$(O)/sounds.o   \
+		$(O)/x_mapinfo.o   \
 		$(O)/i_endoom.o
 
 all:	 $(BINNAME)

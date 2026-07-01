@@ -36,6 +36,8 @@
 
 #include "doomstat.h"
 
+#include "x_mapinfo.h"
+
 
 // Purpose?
 const char snd_prefixen[]
@@ -116,6 +118,7 @@ static boolean		mus_paused;
 
 // music currently being played
 static musicinfo_t*	mus_playing=0;
+static char*    musname_playing="";
 
 // following is set
 //  by the defaults code in M_misc:
@@ -164,7 +167,6 @@ void S_Init
   I_SetChannels();
   
   S_SetSfxVolume(sfxVolume);
-  // No music with Linux - another dummy.
   S_SetMusicVolume(musicVolume);
 
   // Allocating the internal channels for mixing
@@ -196,49 +198,25 @@ void S_Init
 void S_Start(void)
 {
   int cnum;
-  int mnum;
 
   // kill all playing sounds at start of level
   //  (trust me - a good idea)
-  for (cnum=0 ; cnum<numChannels ; cnum++)
-    if (channels[cnum].sfxinfo)
-      S_StopChannel(cnum);
-  
-  // start new music for the level
-  mus_paused = 0;
-  
-  if (gamemode == commercial)
-    mnum = mus_runnin + gamemap - 1;
-  else
-  {
-    int spmus[]=
-    {
-      // Song - Who? - Where?
-      
-      mus_e3m4,	// American	e4m1
-      mus_e3m2,	// Romero	e4m2
-      mus_e3m3,	// Shawn	e4m3
-      mus_e1m5,	// American	e4m4
-      mus_e2m7,	// Tim 	e4m5
-      mus_e2m4,	// Romero	e4m6
-      mus_e2m6,	// J.Anderson	e4m7 CHIRON.WAD
-      mus_e2m5,	// Shawn	e4m8
-      mus_e1m9	// Tim		e4m9
-    };
-    
-    if (gameepisode < 4)
-      mnum = mus_e1m1 + (gameepisode-1)*9 + gamemap-1;
-    else
-      mnum = spmus[gamemap-1];
-    }	
-  
-  // HACK FOR COMMERCIAL
-  //  if (commercial && mnum > mus_e3m9)	
-  //      mnum -= mus_e3m9;
-  
-  S_ChangeMusic(mnum, true);
-  
-  nextcleanup = 15;
+    for (cnum=0 ; cnum<numChannels ; cnum++)
+        if (channels[cnum].sfxinfo)
+            S_StopChannel(cnum);
+
+    // start new music for the level
+    mus_paused = 0;
+
+    char *name = X_GetMapSong(gameepisode, gamemap, /*doom*/ gamemode==commercial ? 2 : 1);
+
+    if (gameepisode == 4 && W_CheckNumForName(name) < 0) {
+        name = X_Episode4FallbackSong(gamemap);
+    }
+
+    S_ChangeMusicTo(name, true);
+
+    nextcleanup = 15;
 }	
 
 
@@ -619,6 +597,22 @@ S_ChangeMusic
     I_PlaySong(music->handle, looping);
 
     mus_playing = music;
+    musname_playing = music->name;
+}
+
+// Like S_ChangeMusic but takes a music lump name
+void S_ChangeMusicTo(char *name, int looping) {
+
+    if (strcmp(musname_playing, name)==0) return;
+
+    S_StopMusic();
+    int num = W_GetNumForName(name);
+    void *data = W_CacheLumpNum(num, PU_MUSIC);
+    int handle = I_RegisterSong(data, W_LumpLength(num));
+    I_PlaySong(handle, looping);
+
+    mus_playing = NULL;
+    musname_playing = name;
 }
 
 

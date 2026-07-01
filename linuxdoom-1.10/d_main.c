@@ -72,6 +72,7 @@
 #include "p_setup.h"
 #include "r_local.h"
 
+#include "x_mapinfo.h"
 
 #include "d_main.h"
 
@@ -720,6 +721,15 @@ void D_DoomMain (void)
         char *dehacked = W_CacheLumpNum(dehacked_num, PU_CACHE);
         int len = W_LumpLength(dehacked_num);
         F_SetCustomFinale(dehacked, len);
+    }
+
+    X_InitMapinfo();
+
+    int mapinfo_num = W_CheckNumForName("MAPINFO");
+    if (mapinfo_num >= 0) {
+        char *mapinfo = W_CacheLumpNum(mapinfo_num, PU_CACHE);
+        int len = W_LumpLength(mapinfo_num);
+        //X_LoadMapinfo(mapinfo, len);
     }
 
     // announce DOOM

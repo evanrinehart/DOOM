@@ -1,0 +1,4 @@
+void X_InitMapinfo();
+char *X_GetMapSong(int episode, int map, int doom);
+void X_SetMapSong(int episode, int map, int doom, char *name);
+char *X_Episode4FallbackSong(int map);
