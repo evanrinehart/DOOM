@@ -179,6 +179,10 @@ void I_GetEvent(void) {
     event_t ev;
 
     Vector2 delta = GetMouseDelta();
+    if (!mouse_captured) {
+        delta.x = 0.0f;
+        delta.y = 0.0f;
+    }
     int motion = delta.x || delta.y;
     int button =
         IsMouseButtonPressed(0) ||
