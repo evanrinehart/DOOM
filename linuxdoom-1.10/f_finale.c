@@ -861,7 +861,7 @@ void F_SetCustomFinale(char *dehacked, int len) {
     strings.count = 0;
 
     char *content = find_strings_section(dehacked_string);
-    if (content == NULL) return;
+    if (content == NULL) { free(dehacked_string); return; }
 
     while (*content) {
         if (*content == '#') { content = goto_next_line(content); continue; }
