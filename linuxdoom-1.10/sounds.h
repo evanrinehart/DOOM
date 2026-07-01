@@ -22,6 +22,14 @@
 #ifndef __SOUNDS__
 #define __SOUNDS__
 
+#define DOOM1_TITLE "D_INTRO"
+#define DOOM1_INTER "D_INTER"
+#define DOOM1_VICTORY "D_VICTOR"
+#define DOOM1_BUNNY "D_BUNNY"
+#define DOOM2_TITLE "D_DM2TTL"
+#define DOOM2_INTER "D_DM2INT"
+#define DOOM2_READTHIS "D_READ_M"
+#define DOOM2_CAST "D_EVIL"
 
 //
 // SoundFX struct.
@@ -63,110 +71,11 @@ struct sfxinfo_struct
 
 
 
-//
-// MusicInfo struct.
-//
-typedef struct
-{
-    // up to 6-character name
-    char*	name;
-
-    // lump number of music
-    int		lumpnum;
-    
-    // music data
-    void*	data;
-
-    // music handle once registered
-    int handle;
-    
-} musicinfo_t;
-
-
 
 
 // the complete set of sound effects
 extern sfxinfo_t	S_sfx[];
 
-// the complete set of music
-extern musicinfo_t	S_music[];
-
-//
-// Identifiers for all music in game.
-//
-
-typedef enum
-{
-    mus_None,
-    mus_e1m1,
-    mus_e1m2,
-    mus_e1m3,
-    mus_e1m4,
-    mus_e1m5,
-    mus_e1m6,
-    mus_e1m7,
-    mus_e1m8,
-    mus_e1m9,
-    mus_e2m1,
-    mus_e2m2,
-    mus_e2m3,
-    mus_e2m4,
-    mus_e2m5,
-    mus_e2m6,
-    mus_e2m7,
-    mus_e2m8,
-    mus_e2m9,
-    mus_e3m1,
-    mus_e3m2,
-    mus_e3m3,
-    mus_e3m4,
-    mus_e3m5,
-    mus_e3m6,
-    mus_e3m7,
-    mus_e3m8,
-    mus_e3m9,
-    mus_inter,
-    mus_intro,
-    mus_bunny,
-    mus_victor,
-    mus_introa,
-    mus_runnin,
-    mus_stalks,
-    mus_countd,
-    mus_betwee,
-    mus_doom,
-    mus_the_da,
-    mus_shawn,
-    mus_ddtblu,
-    mus_in_cit,
-    mus_dead,
-    mus_stlks2,
-    mus_theda2,
-    mus_doom2,
-    mus_ddtbl2,
-    mus_runni2,
-    mus_dead2,
-    mus_stlks3,
-    mus_romero,
-    mus_shawn2,
-    mus_messag,
-    mus_count2,
-    mus_ddtbl3,
-    mus_ampie,
-    mus_theda3,
-    mus_adrian,
-    mus_messg2,
-    mus_romer2,
-    mus_tense,
-    mus_shawn3,
-    mus_openin,
-    mus_evil,
-    mus_ultima,
-    mus_read_m,
-    mus_dm2ttl,
-    mus_dm2int,
-    NUMMUSIC
-} musicenum_t;
 
 
 //

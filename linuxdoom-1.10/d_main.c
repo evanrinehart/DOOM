@@ -450,9 +450,9 @@ void D_AdvanceDemo (void)
 	gamestate = GS_DEMOSCREEN;
 	pagename = "TITLEPIC";
 	if ( gamemode == commercial )
-	  S_StartMusic(mus_dm2ttl);
+	  S_ChangeMusicTo(DOOM2_TITLE, 0);
 	else
-	  S_StartMusic (mus_intro);
+	  S_ChangeMusicTo(DOOM1_TITLE, 0);
 	break;
       case 1:
 	G_DeferedPlayDemo ("demo1");
@@ -471,7 +471,7 @@ void D_AdvanceDemo (void)
 	{
 	    pagetic = 35 * 11;
 	    pagename = "TITLEPIC";
-	    S_StartMusic(mus_dm2ttl);
+	    S_ChangeMusicTo(DOOM2_TITLE, 0);
 	}
 	else
 	{

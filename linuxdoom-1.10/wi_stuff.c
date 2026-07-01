@@ -1501,9 +1501,9 @@ void WI_Ticker(void)
     {
 	// intermission music
   	if ( gamemode == commercial )
-	  S_ChangeMusic(mus_dm2int, true);
+	  S_ChangeMusicTo(DOOM2_INTER, true);
 	else
-	  S_ChangeMusic(mus_inter, true); 
+	  S_ChangeMusicTo(DOOM1_INTER, true);
     }
 
     WI_checkForAccelerate();

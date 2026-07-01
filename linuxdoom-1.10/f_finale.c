@@ -109,7 +109,7 @@ void F_StartFinale (void)
       case registered:
       case retail:
       {
-	S_ChangeMusic(mus_victor, true);
+	S_ChangeMusicTo(DOOM1_VICTORY, true);
 	
 	switch (gameepisode)
 	{
@@ -139,7 +139,7 @@ void F_StartFinale (void)
       // DOOM II and missions packs with E1, M34
       case commercial:
       {
-	  S_ChangeMusic(mus_read_m, true);
+	  S_ChangeMusicTo(DOOM2_READTHIS, true);
 
 	  switch (gamemap)
 	  {
@@ -177,7 +177,7 @@ void F_StartFinale (void)
    
       // Indeterminate.
       default:
-	S_ChangeMusic(mus_read_m, true);
+	S_ChangeMusicTo(DOOM2_READTHIS, true);
 	finaleflat = "F_SKY1"; // Not used anywhere else.
 	finaletext = c1text;  // FIXME - other text, music?
 	break;
@@ -242,7 +242,7 @@ void F_Ticker (void)
 	finalestage = 1;
 	wipegamestate = -1;		// force a wipe
 	if (gameepisode == 3)
-	    S_StartMusic (mus_bunny);
+	    S_ChangeMusicTo(DOOM1_BUNNY, 0);
     }
 }
 
@@ -383,7 +383,7 @@ void F_StartCast (void)
     castframes = 0;
     castonmelee = 0;
     castattacking = false;
-    S_ChangeMusic(mus_evil, true);
+    S_ChangeMusicTo(DOOM2_CAST, true);
 }
 
 

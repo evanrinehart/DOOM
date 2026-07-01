@@ -117,8 +117,7 @@ int 		snd_MusicVolume = 15;
 static boolean		mus_paused;	
 
 // music currently being played
-static musicinfo_t*	mus_playing=0;
-static char*    musname_playing="";
+static char*    musname_playing = NULL;
 
 // following is set
 //  by the defaults code in M_misc:
@@ -461,18 +460,18 @@ void S_StopSound(void *origin)
 //
 void S_PauseSound(void)
 {
-    if (mus_playing && !mus_paused)
+    if (musname_playing && !mus_paused)
     {
-	I_PauseSong(mus_playing->handle);
+	I_PauseSong(1);
 	mus_paused = true;
     }
 }
 
 void S_ResumeSound(void)
 {
-    if (mus_playing && mus_paused)
+    if (musname_playing && mus_paused)
     {
-	I_ResumeSong(mus_playing->handle);
+	I_ResumeSong(1);
 	mus_paused = false;
     }
 }
@@ -545,83 +544,32 @@ void S_SetSfxVolume(int volume)
 
 }
 
-//
-// Starts some music with the music id found in sounds.h.
-//
-void S_StartMusic(int m_id)
-{
-    S_ChangeMusic(m_id, false);
-}
-
-void
-S_ChangeMusic
-( int			musicnum,
-  int			looping )
-{
-    musicinfo_t*	music = NULL;
-    char		namebuf[9];
-
-    if ( (musicnum <= mus_None)
-	 || (musicnum >= NUMMUSIC) )
-    {
-	I_Error("Bad music number %d", musicnum);
-    }
-    else
-	music = &S_music[musicnum];
-
-    if (mus_playing == music)
-	return;
-
-    // shutdown old music
-    S_StopMusic();
-
-    // get lumpnum if neccessary
-    if (!music->lumpnum)
-    {
-	sprintf(namebuf, "d_%s", music->name);
-	music->lumpnum = W_GetNumForName(namebuf);
-    }
-
-    // load & register it
-    music->data = (void *) W_CacheLumpNum(music->lumpnum, PU_MUSIC);
-    music->handle = I_RegisterSong(music->data, W_LumpLength(music->lumpnum));
-
-    // play it
-    I_PlaySong(music->handle, looping);
-
-    mus_playing = music;
-    musname_playing = music->name;
-}
 
 // Like S_ChangeMusic but takes a music lump name
 void S_ChangeMusicTo(char *name, int looping) {
 
-    if (strcmp(musname_playing, name)==0) return;
+    if (musname_playing && strcmp(musname_playing, name)==0) return;
 
     S_StopMusic();
     int num = W_GetNumForName(name);
-    void *data = W_CacheLumpNum(num, PU_MUSIC);
+    void *data = W_CacheLumpNum(num, PU_CACHE);
     int handle = I_RegisterSong(data, W_LumpLength(num));
     I_PlaySong(handle, looping);
 
-    mus_playing = NULL;
     musname_playing = name;
 }
 
 
 void S_StopMusic(void)
 {
-    if (mus_playing)
+    if (musname_playing)
     {
 	if (mus_paused)
-	    I_ResumeSong(mus_playing->handle);
+	    I_ResumeSong(1);
 
-	I_StopSong(mus_playing->handle);
-	I_UnRegisterSong(mus_playing->handle);
-	Z_ChangeTag(mus_playing->data, PU_CACHE);
-	
-	mus_playing->data = 0;
-	mus_playing = 0;
+	I_StopSong(1);
+	I_UnRegisterSong(1);
+	musname_playing = NULL;
     }
 }
 

@@ -73,17 +73,9 @@ S_StartSoundAtVolume
 void S_StopSound(void* origin);
 
 
-// Start music using <music_id> from sounds.h
-void S_StartMusic(int music_id);
-
-void S_ChangeMusicTo(char *name, int looping);
-
-// Start music using <music_id> from sounds.h,
+// Start music using lump name
 //  and set whether looping
-void
-S_ChangeMusic
-( int		music_id,
-  int		looping );
+void S_ChangeMusicTo(char *name, int looping);
 
 // Stops the music fer sure.
 void S_StopMusic(void);
