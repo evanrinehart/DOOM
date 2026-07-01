@@ -480,7 +480,7 @@ fixed_t R_ScaleFromGlobalAngle (angle_t visangle)
     // both sines are allways positive
     sinea = finesine[anglea>>ANGLETOFINESHIFT];	
     sineb = finesine[hp_angleb>>ANGLETOFINESHIFT];
-    num = FixedMul(projection,sineb) * (1 << detailshift);
+    num = FixedMul(projection,sineb);
     den = FixedMul(rw_distance,sinea);
 
     if (den > num>>16)
@@ -688,7 +688,7 @@ void R_ExecuteSetViewSize (void)
     }
     
     detailshift = setdetail;
-    viewwidth = scaledviewwidth>>detailshift;
+    viewwidth = scaledviewwidth;
 	
     centery = viewheight/2;
     centerx = viewwidth/2;
@@ -728,7 +728,7 @@ void R_ExecuteSetViewSize (void)
     {
 	dy = ((i-viewheight/2) * FRACUNIT)+FRACUNIT/2;
 	dy = abs(dy);
-	yslope[i] = FixedDiv ( (viewwidth<<detailshift)/2*FRACUNIT, dy);
+	yslope[i] = FixedDiv ( viewwidth/2*FRACUNIT, dy);
     }
 	
     for (i=0 ; i<viewwidth ; i++)
@@ -744,7 +744,7 @@ void R_ExecuteSetViewSize (void)
 	startmap = ((LIGHTLEVELS-1-i)*2)*NUMCOLORMAPS/LIGHTLEVELS;
 	for (j=0 ; j<MAXLIGHTSCALE ; j++)
 	{
-	    level = startmap - j*SCREENWIDTH/(viewwidth<<detailshift)/DISTMAP;
+	    level = startmap - j*SCREENWIDTH/viewwidth/DISTMAP;
 	    
 	    if (level < 0)
 		level = 0;

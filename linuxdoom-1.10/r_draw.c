@@ -211,6 +211,8 @@ void R_DrawColumnLow (void)
     byte*		dest2;
     fixed_t		frac;
     fixed_t		fracstep;	 
+
+    if (dc_x % 2 == 1) return;
  
     count = dc_yh - dc_yl; 
 
@@ -224,12 +226,10 @@ void R_DrawColumnLow (void)
 	|| dc_yh >= SCREENHEIGHT)
     {
 	
-	I_Error ("R_DrawColumn: %i to %i at %i", dc_yl, dc_yh, dc_x);
+	I_Error ("R_DrawColumnLow: %i to %i at %i", dc_yl, dc_yh, dc_x);
     }
     //	dccount++; 
 #endif 
-    // Blocky mode, need to multiply by 2.
-    dc_x <<= 1;
     
     dest = ylookup[dc_yl] + columnofs[dc_x];
     dest2 = ylookup[dc_yl] + columnofs[dc_x+1];
@@ -239,7 +239,6 @@ void R_DrawColumnLow (void)
     
     do 
     {
-	// Hack. Does not work corretly.
 	*dest2 = *dest = dc_colormap[dc_source[(frac>>FRACBITS)&127]];
 	dest += SCREENWIDTH;
 	dest2 += SCREENWIDTH;
@@ -643,7 +642,7 @@ void R_DrawSpanLow (void)
 	|| ds_x2>=SCREENWIDTH  
 	|| (unsigned)ds_y>SCREENHEIGHT)
     {
-	I_Error( "R_DrawSpan: %i to %i at %i",
+	I_Error( "R_DrawSpanLow: %i to %i at %i",
 		 ds_x1,ds_x2,ds_y);
     }
 //	dscount++; 
@@ -651,27 +650,40 @@ void R_DrawSpanLow (void)
 	 
     xfrac = ds_xfrac; 
     yfrac = ds_yfrac; 
-
-    // Blocky mode, need to multiply by 2.
-    ds_x1 <<= 1;
-    ds_x2 <<= 1;
     
     dest = ylookup[ds_y] + columnofs[ds_x1];
-  
-    
-    count = ds_x2 - ds_x1; 
-    do 
-    { 
-	spot = ((yfrac>>(16-6))&(63*64)) + ((xfrac>>16)&63);
-	// Lowres/blocky mode does it twice,
-	//  while scale is adjusted appropriately.
-	*dest++ = ds_colormap[ds_source[spot]]; 
-	*dest++ = ds_colormap[ds_source[spot]];
-	
-	xfrac += ds_xstep; 
-	yfrac += ds_ystep; 
+    byte *rowlimit = ylookup[ds_y] + viewwindowx + viewwidth - 1;
 
-    } while (count--); 
+    count = ds_x2 - ds_x1 + 1;
+
+    count++; // extra pixel hack to cover gaps
+
+    while (count > 0) {
+        // if extra pixel hack goes out of bounds, don't
+        if (dest > rowlimit) break;
+
+	// Current texture index in u,v.
+	spot = ((yfrac>>(16-6))&(63*64)) + ((xfrac>>16)&63);
+
+	// Lookup pixel from flat texture tile,
+	//  re-index using light/colormap.
+	byte color = ds_colormap[ds_source[spot]];
+	*dest++ = color;
+
+	// Next step in u,v.
+	xfrac += ds_xstep;
+	yfrac += ds_ystep;
+
+	if (count == 1) break;
+
+	// In Lowrez / blocky mode we use the same color twice
+	*dest++ = color;
+	xfrac += ds_xstep;
+	yfrac += ds_ystep;
+
+	count -= 2;
+    }
+
 }
 
 //
