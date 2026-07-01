@@ -77,9 +77,6 @@ fixed_t			viewsin;
 
 player_t*		viewplayer;
 
-// 0 = high, 1 = low
-int			detailshift;	
-
 //
 // precalculated math tables
 //
@@ -687,7 +684,6 @@ void R_ExecuteSetViewSize (void)
 	viewheight = (setblocks*168/10)&~7;
     }
     
-    detailshift = setdetail;
     viewwidth = scaledviewwidth;
 	
     centery = viewheight/2;
@@ -696,7 +692,7 @@ void R_ExecuteSetViewSize (void)
     centeryfrac = centery<<FRACBITS;
     projection = centerxfrac;
 
-    if (!detailshift)
+    if (!setdetail)
     {
 	colfunc = basecolfunc = R_DrawColumn;
 	fuzzcolfunc = R_DrawFuzzColumn;
