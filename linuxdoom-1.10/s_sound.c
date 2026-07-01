@@ -552,6 +552,8 @@ void S_ChangeMusicTo(char *name, int looping) {
 
     S_StopMusic();
     int num = W_GetNumForName(name);
+    if (num < 0) I_Error("S_ChangeMusicTo: can't find music %s\n", name);
+
     void *data = W_CacheLumpNum(num, PU_CACHE);
     int handle = I_RegisterSong(data, W_LumpLength(num));
     I_PlaySong(handle, looping);
