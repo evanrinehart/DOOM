@@ -207,15 +207,8 @@ void S_Start(void)
 
     // start new music for the level
     mus_paused = 0;
-
     char *name = X_GetMapSong(gameepisode, gamemap, /*doom*/ gamemode==commercial ? 2 : 1);
-
-    if (gameepisode == 4 && W_CheckNumForName(name) < 0) {
-        name = X_Episode4FallbackSong(gamemap);
-    }
-
     S_ChangeMusicTo(name, true);
-
     nextcleanup = 15;
 }	
 

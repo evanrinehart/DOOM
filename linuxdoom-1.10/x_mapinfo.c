@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "i_system.h"
+#include "w_wad.h"
 
 struct mapinfo {
     char music[16];
@@ -12,11 +13,17 @@ static struct mapinfo mapinfo_doom1[4][9];
 static struct mapinfo mapinfo_doom2[32];
 
 void populate_doom2_music(void);
+char *episode4_fallback(int map);
 
 void X_InitMapinfo() {
     for (int e = 1; e <= 4; e++) {
         for (int m = 1; m <= 9; m++) {
-            sprintf(mapinfo_doom1[e-1][m-1].music, "D_E%dM%d", e, m);
+            struct mapinfo *info = &mapinfo_doom1[e-1][m-1];
+            sprintf(info->music, "D_E%dM%d", e, m);
+
+            if (e==4 && W_CheckNumForName(info->music) < 0) {
+                strcpy(info->music, episode4_fallback(m));
+            }
         }
     }
 
@@ -24,6 +31,10 @@ void X_InitMapinfo() {
 }
 
 char *X_GetMapSong(int episode, int map, int doom) {
+    if (doom==1 && (episode < 1 || episode > 4)) return NULL;
+    if (doom==1 && (map < 1 || map > 9)) return NULL;
+    if (doom==2 && (map < 1 || map > 32)) return NULL;
+
     switch (doom) {
         case 1: return mapinfo_doom1[episode-1][map-1].music;
         case 2: return mapinfo_doom2[map-1].music;
@@ -38,22 +49,6 @@ void X_SetMapSong(int episode, int map, int doom, char *name) {
         case 2: strcpy(mapinfo_doom2[map].music, name); break;
         case 3: I_Error("doom 3 not supported");
         default: I_Error("X_GetMapSong: bad doom (%d)", doom);
-    }
-}
-
-char *X_Episode4FallbackSong(int map) {
-    switch (map) {
-        // Song - Who? - Where?
-        case 1: return "D_E3M4"; // American	e4m1
-        case 2: return "D_E3M2"; // Romero	e4m2
-        case 3: return "D_E4M3"; // Shawn	e4m3
-        case 4: return "D_E1M5"; // American	e4m4
-        case 5: return "D_E2M7"; // Tim 	e4m5
-        case 6: return "D_E2M4"; // Romero	e4m6
-        case 7: return "D_E2M6"; // J.Anderson	e4m7 CHIRON.WAD
-        case 8: return "D_E2M5"; // Shawn	e4m8
-        case 9: return "D_E1M9"; // Tim 	e4m9
-        default: return "D_E1M1";
     }
 }
 
@@ -98,6 +93,23 @@ void populate_doom2_music(void) {
     strcpy(mapinfo_doom2[31 - 1].music, "D_EVIL");
     strcpy(mapinfo_doom2[32 - 1].music, "D_ULTIMA");
 }
+
+char *episode4_fallback(int map) {
+    switch (map) {
+        // Song - Who? - Where?
+        case 1: return "D_E3M4"; // American	e4m1
+        case 2: return "D_E3M2"; // Romero	e4m2
+        case 3: return "D_E3M3"; // Shawn	e4m3
+        case 4: return "D_E1M5"; // American	e4m4
+        case 5: return "D_E2M7"; // Tim 	e4m5
+        case 6: return "D_E2M4"; // Romero	e4m6
+        case 7: return "D_E2M6"; // J.Anderson	e4m7 CHIRON.WAD
+        case 8: return "D_E2M5"; // Shawn	e4m8
+        case 9: return "D_E1M9"; // Tim 	e4m9
+        default: return "D_E1M1";
+    }
+}
+
 
 
 void X_LoadMapinfo(char *data, int len) {

@@ -57,6 +57,7 @@
 #include "sounds.h"
 
 #include "f_finale.h"
+#include "x_mapinfo.h"
 
 //
 // STATUS BAR DATA
@@ -593,30 +594,35 @@ ST_Responder (event_t* ev)
       {
 	
 	char	buf[3];
-	int		musnum;
 	
 	plyr->message = F_GETSTRING(STSTR_MUS);
 	cht_GetParam(&cheat_mus, buf);
 	
 	if (gamemode == commercial)
 	{
-	  musnum = mus_runnin + (buf[0]-'0')*10 + buf[1]-'0' - 1;
-	  
-	  if (((buf[0]-'0')*10 + buf[1]-'0') > 35)
-	    plyr->message = F_GETSTRING(STSTR_NOMUS);
-	  else
-	    S_ChangeMusic(musnum, 1);
+		int map = (buf[0]-'0')*10 + buf[1]-'0';
+		char *name = X_GetMapSong(1, map, /*doom*/ 2);
+		if (name == NULL) {
+		    plyr->message = F_GETSTRING(STSTR_NOMUS);
+		}
+		else {
+		    S_ChangeMusicTo(name, 1);
+		}
 	}
 	else
 	{
-	  musnum = mus_e1m1 + (buf[0]-'1')*9 + (buf[1]-'1');
-	  
-	  if (((buf[0]-'1')*9 + buf[1]-'1') > 31)
-	    plyr->message = F_GETSTRING(STSTR_NOMUS);
-	  else
-	    S_ChangeMusic(musnum, 1);
+		int episode = buf[0] - '0';
+		int map = buf[1] - '0';
+		char *name = X_GetMapSong(episode, map, /*doom*/ 1);
+		if (name == NULL) {
+		    plyr->message = F_GETSTRING(STSTR_NOMUS);
+		}
+		else {
+		    S_ChangeMusicTo(name, 1);
+		}
 	}
       }
+
       // Simplified, accepting both "noclip" and "idspispopd".
       // no clipping mode cheat
       else if ( cht_CheckCheat(&cheat_noclip, ev->data1) 
