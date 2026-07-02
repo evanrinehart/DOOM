@@ -354,6 +354,54 @@ void R_DrawFuzzColumn (void)
 
     } while (count--); 
 } 
+
+void R_DrawFuzzColumnLow (void)
+{
+    int			count;
+    byte*		dest1;
+    byte*		dest2;
+
+    if (dc_x % 2 == 0) return;
+
+    // Adjust borders. Low...
+    if (!dc_yl)
+	dc_yl = 1;
+
+    // .. and high.
+    if (dc_yh == viewheight-1)
+	dc_yh = viewheight - 2;
+
+    count = dc_yh - dc_yl;
+
+    // Zero length.
+    if (count < 0)
+	return;
+
+#ifdef RANGECHECK
+    if ((unsigned)dc_x >= SCREENWIDTH
+	|| dc_yl < 0 || dc_yh >= SCREENHEIGHT)
+    {
+	I_Error ("R_DrawFuzzColumnLow: %i to %i at %i",
+		 dc_yl, dc_yh, dc_x);
+    }
+#endif
+
+    dest1 = ylookup[dc_yl] + columnofs[dc_x];
+    dest2 = dest1 + 1;
+
+    do
+    {
+	*dest1 = colormaps[6*256+dest1[fuzzoffset[fuzzpos]]];
+	*dest2 = *dest1;
+
+	if (++fuzzpos == FUZZTABLE)
+	    fuzzpos = 0;
+
+	dest1 += SCREENWIDTH;
+	dest2 += SCREENWIDTH;
+
+    } while (count--);
+}
  
   
  
