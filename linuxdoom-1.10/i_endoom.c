@@ -33,8 +33,7 @@ void detect_term(int *rev, int *color, int *unicode) {
 
 char *encode_color(int color, int bg) {
     switch (color) {
-        // in case of "black" bg, reset to normal background
-        case 0: return bg ? "0" : "30";
+        case 0: return bg ? "40" : "30"; // black
         case 1: return bg ? "44" : "34"; // blue
         case 2: return bg ? "42" : "32"; // green
         case 3: return bg ? "46" : "36"; // cyan
@@ -146,7 +145,7 @@ void reverse_endoom(unsigned char *endoom, int unicode) {
                 printf("%s", encode_ext(c, unicode));
             p += 2;
         }
-        putchar('\n');
+        printf("\x1b[0m\n");
     }
 }
 
@@ -179,7 +178,7 @@ void color_endoom(unsigned char *endoom, int unicode) {
             else
                 printf("%s", encode_ext(c, unicode));
         }
-        putchar('\n');
+        printf("\x1b[0m\n");
     }
     printf("\x1b[0m");
 }
