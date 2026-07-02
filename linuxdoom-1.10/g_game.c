@@ -66,7 +66,7 @@
 #include "g_game.h"
 
 
-#define SAVEGAMESIZE	0x2c000
+#define SAVEGAMESIZE	(1 << 20) // 1 Meg
 #define SAVESTRINGSIZE	24
 
 
@@ -134,8 +134,7 @@ wbstartstruct_t wminfo;               	// parms for world map / intermission
  
 short		consistancy[MAXPLAYERS][BACKUPTICS]; 
  
-byte*		savebuffer;
- 
+extern boolean verbose;
  
 // 
 // controls (have defaults) 
@@ -1198,6 +1197,8 @@ void G_DoLoadGame (void)
     char	vcheck[VERSIONSIZE]; 
 	 
     gameaction = ga_nothing; 
+
+    byte *savebuffer;
 	 
     M_ReadFile (savename, &savebuffer);
     save_p = savebuffer + SAVESTRINGSIZE;
@@ -1266,11 +1267,13 @@ void G_DoSaveGame (void)
     char*	description; 
     int		length; 
     int		i; 
+    static byte *savebuffer = NULL;
 	
 	sprintf (name,SAVEGAMENAME"%d.dsg",savegameslot); 
     description = savedescription; 
 	 
-    save_p = savebuffer = screens[1]+0x4000; 
+    if (savebuffer == NULL) savebuffer = malloc(SAVEGAMESIZE);
+    save_p = savebuffer;
 	 
     memcpy (save_p, description, SAVESTRINGSIZE); 
     save_p += SAVESTRINGSIZE; 
@@ -1296,6 +1299,7 @@ void G_DoSaveGame (void)
     *save_p++ = 0x1d;		// consistancy marker 
 	 
     length = save_p - savebuffer; 
+    if (verbose) printf("G_SaveGame: save size = %d\n", length);
     if (length > SAVEGAMESIZE) 
 	I_Error ("Savegame buffer overrun"); 
     M_WriteFile (name, savebuffer, length); 
