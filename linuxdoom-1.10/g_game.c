@@ -1299,7 +1299,7 @@ void G_DoSaveGame (void)
     *save_p++ = 0x1d;		// consistancy marker 
 	 
     length = save_p - savebuffer; 
-    if (verbose) printf("G_SaveGame: save size = %d\n", length);
+    if (verbose) printf("G_DoSaveGame: save size = %d\n", length);
     if (length > SAVEGAMESIZE) 
 	I_Error ("Savegame buffer overrun"); 
     M_WriteFile (name, savebuffer, length); 
