@@ -52,6 +52,7 @@ void I_ReadScreen (byte* scr);
 void I_BeginRead (void);
 void I_EndRead (void);
 
+void I_ReleaseMouse(void);
 
 
 #endif

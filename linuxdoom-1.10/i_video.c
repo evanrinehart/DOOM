@@ -226,8 +226,10 @@ void I_GetEvent(void) {
     poll_multi_key(&mkdel);
     poll_multi_key(&mkequal);
 
-    if (IsKeyDown(KEY_GRAVE)) { EnableCursor(); mouse_captured = false; }
-    if (IsMouseButtonDown(1)) { DisableCursor(); mouse_captured = true; }
+    if (!mouse_captured && (IsMouseButtonDown(0) || IsMouseButtonDown(1))) {
+        DisableCursor();
+        mouse_captured = true;
+    }
 
 }
 
@@ -391,4 +393,11 @@ void I_InitGraphics(char *title) {
 
     if (M_CheckParm("-nomousewalk")) mouse_walk = 0;
 
+}
+
+void I_ReleaseMouse(void) {
+    if (mouse_captured) {
+        EnableCursor();
+        mouse_captured = false;
+    }
 }
