@@ -72,9 +72,10 @@
 #include "p_setup.h"
 #include "r_local.h"
 
-#include "x_mapinfo.h"
-
 #include "d_main.h"
+
+#include "x_mapinfo.h"
+#include "x_hooks.h"
 
 //
 // D-DoomLoop()
@@ -271,8 +272,17 @@ void D_Display (void)
     I_UpdateNoBlit ();
     
     // draw the view directly
-    if (gamestate == GS_LEVEL && !automapactive && gametic)
-	R_RenderPlayerView (&players[displayplayer]);
+    if (gamestate == GS_LEVEL && !automapactive && gametic) {
+        player_t *player = &players[displayplayer];
+        if (X_AlternateRender) {
+            struct canvas cv = {screens[0], viewwindowx, viewwidth, viewwindowy, viewheight};
+            struct viewpoint vp = R_SetupViewpoint(player);
+            X_AlternateRender(cv, vp);
+        }
+        else {
+            R_RenderPlayerView (player);
+        }
+    }
 
     if (gamestate == GS_LEVEL && gametic)
 	HU_Drawer ();

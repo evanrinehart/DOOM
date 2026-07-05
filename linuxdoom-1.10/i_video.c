@@ -24,6 +24,10 @@
 #include "m_argv.h"
 #include "d_main.h"
 
+#include "x_hooks.h"
+
+void (*X_AlternateRender)(struct canvas, struct viewpoint) = NULL;
+
 extern boolean verbose;
 
 static bool video_initialized = false;
@@ -299,6 +303,17 @@ void I_SetPalette (byte* palette) {
         current_palette[i].a = 255;
     }
 
+}
+
+void null_render(struct canvas cv, struct viewpoint vp) {
+    byte *p = cv.screen + cv.top * SCREENWIDTH + cv.left;
+    int skip = SCREENWIDTH - cv.width;
+    for (int j = 0; j < cv.height; j++) {
+        for (int i = 0; i < cv.width; i++) {
+            *p++ = 0;
+        }
+        p += skip;
+    }
 }
 
 void I_InitGraphics(char *title) {

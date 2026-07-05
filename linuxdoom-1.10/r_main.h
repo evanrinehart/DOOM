@@ -163,4 +163,7 @@ void R_Init (void);
 // Called by M_Responder.
 void R_SetViewSize (int blocks, int detail);
 
+// Called by G_Drawer.
+struct viewpoint R_SetupViewpoint(player_t *player);
+
 #endif

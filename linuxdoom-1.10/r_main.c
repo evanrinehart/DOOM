@@ -23,6 +23,7 @@
 //-----------------------------------------------------------------------------
 
 #include <stdlib.h>
+#include <limits.h>
 #include <math.h>
 
 
@@ -34,8 +35,7 @@
 #include "r_local.h"
 #include "r_sky.h"
 
-
-
+#include "x_hooks.h"
 
 
 // Fineangles in the SCREENWIDTH wide window.
@@ -815,6 +815,21 @@ R_PointInSubsector
     return &subsectors[nodenum & ~NF_SUBSECTOR];
 }
 
+
+struct viewpoint R_SetupViewpoint(player_t *player) {
+    struct viewpoint vp;
+    vp.x = player->mo->x;
+    vp.y = player->mo->y;
+    vp.z = player->mo->z;
+    vp.bearing = (double)player->mo->angle / UINT_MAX;
+    vp.half_fovx = (double)viewangleoffset / UINT_MAX;
+    vp.inclination = 0.0f;
+    vp.roll = 0.0f;
+    vp.subsectornum = player->mo->subsector - subsectors;
+    vp.extralight = player->extralight;
+    vp.fixedcolormap = player->fixedcolormap;
+    return vp;
+}
 
 
 //
