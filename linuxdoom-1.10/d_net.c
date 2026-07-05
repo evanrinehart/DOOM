@@ -37,6 +37,7 @@
 #define	NCMD_KILL		0x10000000	// kill game
 #define	NCMD_CHECKSUM	 	0x0fffffff
 
+#define MIN(A,B) ((A) < (B) ? (A) : (B))
  
 doomcom_t*	doomcom;	
 doomdata_t*	netbuffer;		// points inside doomcom
@@ -690,13 +691,8 @@ void TryRunTics (bool singletic)
     availabletics = lowtic - gametic/ticdup;
     
     // decide how many tics to run
-    if (realtics < availabletics-1)
-	counts = realtics+1;
-    else if (realtics < availabletics)
-	counts = realtics;
-    else
-	counts = availabletics;
-    
+    counts = MIN(realtics, availabletics) + (/* 1 if */ realtics < availabletics);
+
     if (counts < 1)
 	counts = 1;
 		
