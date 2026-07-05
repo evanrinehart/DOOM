@@ -750,6 +750,8 @@ void TryRunTics (bool singletic)
 	    M_Ticker ();
 	    return;
 	} 
+
+        I_Sleep(0.001);
     }
     
     // run the count * ticdup dics
