@@ -69,7 +69,7 @@ int is_start(char c) {
     return !((c & 0xc0) == 0x80);
 }
 
-char *nextchar(char *p) {
+static char *nextchar(char *p) {
     p++;
     while (*p && !is_start(*p)) p++;
     return p;
