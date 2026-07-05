@@ -310,6 +310,7 @@ void I_InitGraphics(char *title) {
 
     SetTraceLogLevel(verbose ? LOG_INFO : LOG_NONE);
 
+    SetConfigFlags(FLAG_WINDOW_HIGHDPI);
     InitWindow(320, 240, title);
 
     if (!IsWindowReady()) {
