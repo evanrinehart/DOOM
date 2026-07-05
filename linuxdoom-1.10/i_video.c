@@ -1,3 +1,9 @@
+/*
+ *  Platform specific window and graphics backend
+ */
+
+#define _POSIX_C_SOURCE 200809L
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -113,6 +119,8 @@ void add_key(int rlkey, int doomkey) {
 }
 
 void poll_single_key(bool *state, int rlkey, int doomkey) {
+    if (rlkey == KEY_GRAVE) return;
+
     event_t ev;
     if (IsKeyDown(rlkey) && !*state) {
         *state = true;
@@ -321,7 +329,6 @@ void I_InitGraphics(char *title) {
     else {
         int multiply = 1;
         int monitor = GetCurrentMonitor();
-        int monitor_w = GetMonitorWidth(monitor);
         int monitor_h = GetMonitorHeight(monitor);
 
         if (M_CheckParm("-1")) multiply = 1;
@@ -340,7 +347,6 @@ void I_InitGraphics(char *title) {
         window_h = 240 * multiply;
         offset_x = 0;
 
-        SetWindowPosition(monitor_w/2 - window_w/2, monitor_h/2 - window_h/2);
         SetWindowSize(window_w, window_h);
     }
 
