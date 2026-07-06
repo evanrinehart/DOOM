@@ -28,8 +28,8 @@
 #include <math.h>
 
 #include <stdarg.h>
-#include <sys/time.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include "doomdef.h"
 #include "m_misc.h"
@@ -81,22 +81,54 @@ byte* I_ZoneBase (int*	size)
 }
 
 
+static const long BILLION = 1000L*1000L*1000L;
+static struct timespec timebase;
+static bool timebase_set = false;
+
+// Return time in 1/35 second ticks with subtick precision
+double I_GetMonotime(void) {
+
+    if (!timebase_set) {
+        int e = clock_gettime(CLOCK_MONOTONIC, &timebase);
+        if (e < 0) I_Error("clock_gettime: %s\n", strerror(errno));
+        timebase_set = true;
+    }
+
+    struct timespec now;
+    int e = clock_gettime(CLOCK_MONOTONIC, &now);
+    if (e < 0) I_Error("clock_gettime: %s\n", strerror(errno));
+
+    double t0 = timebase.tv_sec + (double)timebase.tv_nsec / BILLION;
+    double t1 = now.tv_sec + (double)now.tv_nsec / BILLION;
+    double diff = t1 - t0;
+    return TICRATE * diff;
+
+}
+
+long I_GetMonotimeLong(float *frac) {
+
+    double t = I_GetMonotime();
+
+    if (frac == NULL) {
+        return (long)t;
+    }
+    else {
+        double dwhole;
+        *frac = modf(t, &dwhole);
+        return (long)dwhole;
+    }
+
+}
+
+
 
 //
 // I_GetTime
-// returns time in 1/70th second tics
+// returns time in 1/35th second tics
 //
 int  I_GetTime (void)
 {
-    struct timeval	tp;
-    int			newtics;
-    static int		basetime=0;
-  
-    gettimeofday(&tp, NULL);
-    if (!basetime)
-	basetime = tp.tv_sec;
-    newtics = (tp.tv_sec-basetime)*TICRATE + tp.tv_usec*TICRATE/1000000;
-    return newtics;
+    return I_GetMonotimeLong(NULL);
 }
 
 

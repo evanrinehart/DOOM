@@ -87,6 +87,8 @@ _Noreturn void I_Error (char *error, ...);
 
 void I_Nanosleep(long sec, long nsec);
 void I_Sleep(float delta_t);
+double I_GetMonotime(void);
+long I_GetMonotimeLong(float *);
 
 char *GetDoomWadDir();
 char *GetHomeDir();
