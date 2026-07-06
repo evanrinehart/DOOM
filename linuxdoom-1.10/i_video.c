@@ -190,6 +190,8 @@ void I_GetEvent(void) {
     // get events and post them with D_PostEvent
     // also updated mousemoved
 
+    PollInputEvents();
+
     for (int i = 0; i < 8; i++) {
         if (IsGamepadAvailable(i) && gamepads[i]==NULL) {
             printf("NOTICE gamepad %d = \"%s\" appeared!\n", i, GetGamepadName(i));
@@ -305,6 +307,8 @@ void I_FinishUpdate (void) {
     //DrawFPS(1,1);
 
     EndDrawing();
+
+    SwapScreenBuffer();
 
     frame_num++;
 }

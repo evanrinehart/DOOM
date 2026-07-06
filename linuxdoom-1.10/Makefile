@@ -100,6 +100,8 @@ RAYLIB_LIB = raylib/src/libraylib.a
 
 $(RAYLIB) :
 	git clone --depth=1 --branch=$(RAYLIB_VERSION) $(RAYLIB_URL) raylib
+	perl -i -ne 'print; print "RL_FREE(alias.stream.buffer->converterResidual);\n" if $$. == 1049' raylib/src/raudio.c
+	perl -i -pe 's/^.*#define SUPPORT_CUSTOM_FRAME_CONTROL.*$$/#define SUPPORT_CUSTOM_FRAME_CONTROL 1/' raylib/src/config.h
 
 $(RAYLIB_LIB) : $(RAYLIB)
 	$(MAKE) -C raylib/src
