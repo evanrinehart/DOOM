@@ -61,6 +61,7 @@
 
 #include "f_finale.h"
 
+#include "x_hooks.h"
 
 extern patch_t*		hu_font[HU_FONTSIZE];
 extern boolean		message_dontfuckwithme;
@@ -1627,7 +1628,7 @@ boolean M_Responder (event_t* ev)
 	{
 	    M_StartControlPanel ();
 	    S_StartSound(NULL,sfx_swtchn);
-	    I_ReleaseMouse();
+	    X_AfterSummonMenu();
 	    return true;
 	}
 	return false;
@@ -1697,6 +1698,7 @@ boolean M_Responder (event_t* ev)
 	currentMenu->lastOn = itemOn;
 	M_ClearMenus ();
 	S_StartSound(NULL,sfx_swtchx);
+	X_AfterUnsummonMenu();
 	return true;
 		
       case KEY_BACKSPACE:

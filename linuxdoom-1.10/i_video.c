@@ -46,8 +46,25 @@ static int offset_x;
 
 static long frame_num = 0;
 
+static bool fullscreen = 0;
+static bool window_focused = 1;
+static bool mouse_affinity = 0;
+static bool mouse_residual = 0;
 static bool mouse_captured = 0;
-static bool mouse_walk = 1;
+static bool mouse_walk = 1; /* should be in "defaults" */
+
+void I_ReleaseMouse(void) {
+    if (!mouse_captured) return;
+    EnableCursor();
+    mouse_captured = false;
+}
+
+void I_CaptureMouse(void) {
+    if (mouse_captured) return;
+    DisableCursor();
+    mouse_captured = true;
+    mouse_residual = true;
+}
 
 void I_ShutdownGraphics(void) {
     if (!video_initialized) return;
@@ -190,21 +207,21 @@ void I_GetEvent(void) {
 
     event_t ev;
 
+    Vector2 mouse = {GetMouseX(), GetMouseY()};
     Vector2 delta = GetMouseDelta();
     if (!mouse_captured) {
         delta.x = 0.0f;
         delta.y = 0.0f;
     }
     int motion = delta.x || delta.y;
-    int button =
-        IsMouseButtonPressed(0) ||
-        IsMouseButtonPressed(1) ||
-        IsMouseButtonPressed(2) ||
-        IsMouseButtonReleased(0) ||
-        IsMouseButtonReleased(1) ||
-        IsMouseButtonReleased(2);
+    int mousepress = IsMouseButtonPressed(0) || IsMouseButtonPressed(1) || IsMouseButtonPressed(2);
+    int mouserelease = IsMouseButtonReleased(0) || IsMouseButtonReleased(1) || IsMouseButtonReleased(2);
+    int mousebutton = mousepress || mouserelease;
 
-    if (mouse_captured && (button || motion)) {
+    Rectangle winrect = {0, 0, window_w, window_h};
+    if (!mouse_captured && mousepress && CheckCollisionPointRec(mouse, winrect)) I_CaptureMouse();
+
+    if (mouse_captured && (mousebutton || motion)) {
         ev.type = ev_mouse;
         ev.data1 = IsMouseButtonDown(0) | (IsMouseButtonDown(1) ? 2 : 0) | (IsMouseButtonDown(2) ? 4 : 0);
         ev.data2 = (int)delta.x;
@@ -238,9 +255,14 @@ void I_GetEvent(void) {
     poll_multi_key(&mkdel);
     poll_multi_key(&mkequal);
 
-    if (!mouse_captured && (IsMouseButtonDown(0) || IsMouseButtonDown(1))) {
-        DisableCursor();
-        mouse_captured = true;
+    if (IsWindowFocused() && !window_focused) {
+        window_focused = 1;
+        if (mouse_affinity) I_CaptureMouse();
+    }
+
+    if (!IsWindowFocused() && window_focused) {
+        window_focused = 0;
+        I_ReleaseMouse();
     }
 
 }
@@ -341,6 +363,9 @@ void I_InitGraphics(char *title) {
         offset_x = GetMonitorWidth(monitor)/2 - window_w/2;
         SetWindowSize(window_w, window_h);
         ToggleBorderlessWindowed();
+        mouse_affinity = true;
+        fullscreen = true;
+        I_CaptureMouse();
     }
     else {
         int multiply = 1;
@@ -413,13 +438,18 @@ void I_InitGraphics(char *title) {
 
     if (verbose) DumpGamepads();
 
-    if (M_CheckParm("-nomousewalk")) mouse_walk = 0;
+    if (M_CheckParm("-nomousewalk")) mouse_walk = 0; /* should be a "default" instead */
 
 }
 
-void I_ReleaseMouse(void) {
-    if (mouse_captured) {
-        EnableCursor();
-        mouse_captured = false;
-    }
+void X_OnEvent(int type, int data1, int data2, int data3) {
+    printf("processing event = %d %d %d %d\n", type, data1, data2, data3);
+}
+
+void X_AfterSummonMenu(void) {
+    if (!fullscreen && mouse_captured) I_ReleaseMouse();
+}
+
+void X_AfterUnsummonMenu(void) {
+    if (!fullscreen && mouse_residual) I_CaptureMouse();
 }

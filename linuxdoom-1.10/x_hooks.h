@@ -20,3 +20,8 @@ struct canvas {
 };
 
 extern void (*X_AlternateRender)(struct canvas, struct viewpoint);
+
+
+void X_AfterSummonMenu(void);
+void X_AfterUnsummonMenu(void);
+void X_OnEvent(int type, int data1, int data2, int data3);
