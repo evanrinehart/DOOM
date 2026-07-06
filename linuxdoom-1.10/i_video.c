@@ -350,25 +350,20 @@ void I_InitGraphics(char *title) {
     SetConfigFlags(FLAG_WINDOW_HIGHDPI);
     InitWindow(320, 240, title);
 
-    if (!IsWindowReady()) {
+    if (!IsWindowReady())
         I_Error("I_InitGraphics: InitWindow failed\n");
-    }
 
-    video_initialized = true;
+    int multiply = 1;
 
     if (M_CheckParm("-fullscreen")) {
         int monitor = GetCurrentMonitor();
         window_h = GetMonitorHeight(monitor);
         window_w = window_h * 4 / 3;
         offset_x = GetMonitorWidth(monitor)/2 - window_w/2;
-        SetWindowSize(window_w, window_h);
-        ToggleBorderlessWindowed();
         mouse_affinity = true;
         fullscreen = true;
-        I_CaptureMouse();
     }
     else {
-        int multiply = 1;
         int monitor = GetCurrentMonitor();
         int monitor_h = GetMonitorHeight(monitor);
 
@@ -387,9 +382,26 @@ void I_InitGraphics(char *title) {
         window_w = 320 * multiply;
         window_h = 240 * multiply;
         offset_x = 0;
-
-        SetWindowSize(window_w, window_h);
     }
+
+    // close the window we got and try again, giving WM a chance to position it better
+    if (fullscreen || multiply > 1) {
+
+        CloseWindow();
+        SetConfigFlags(FLAG_WINDOW_HIGHDPI);
+        InitWindow(window_w, window_h, title);
+
+        if (!IsWindowReady())
+            I_Error("I_InitGraphics: InitWindow failed (switching to larger window)\n");
+
+        if (fullscreen) {
+            ToggleBorderlessWindowed();
+            I_CaptureMouse();
+        }
+
+    }
+
+    video_initialized = true;
 
     screen_img = GenImageColor(SCREENWIDTH, SCREENHEIGHT, GREEN);
     screen_tex = LoadTextureFromImage(screen_img);
@@ -443,7 +455,7 @@ void I_InitGraphics(char *title) {
 }
 
 void X_OnEvent(int type, int data1, int data2, int data3) {
-    printf("processing event = %d %d %d %d\n", type, data1, data2, data3);
+    //printf("processing event = %d %d %d %d\n", type, data1, data2, data3);
 }
 
 void X_AfterSummonMenu(void) {
