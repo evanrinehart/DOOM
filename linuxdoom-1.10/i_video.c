@@ -48,8 +48,8 @@ static long frame_num = 0;
 
 static bool fullscreen = 0;
 static bool window_focused = 1;
-static bool mouse_affinity = 0;
-static bool mouse_residual = 0;
+static bool mouse_affinity = 0; // capture the mouse if you have the chance
+static bool mouse_residual = 0; // mouse was captured at some point
 static bool mouse_captured = 0;
 static bool mouse_walk = 1; /* should be in "defaults" */
 
