@@ -35,7 +35,7 @@
 #include "r_local.h"
 #include "r_sky.h"
 
-#include "x_hooks.h"
+#include "hooks.h"
 
 
 // Fineangles in the SCREENWIDTH wide window.

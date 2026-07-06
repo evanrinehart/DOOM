@@ -75,7 +75,7 @@
 #include "d_main.h"
 
 #include "x_mapinfo.h"
-#include "x_hooks.h"
+#include "hooks.h"
 
 //
 // D-DoomLoop()

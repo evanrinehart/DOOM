@@ -24,7 +24,7 @@
 #include "m_argv.h"
 #include "d_main.h"
 
-#include "x_hooks.h"
+#include "hooks.h"
 
 void (*X_AlternateRender)(struct canvas, struct viewpoint) = NULL;
 

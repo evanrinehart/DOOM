@@ -61,7 +61,7 @@
 
 #include "f_finale.h"
 
-#include "x_hooks.h"
+#include "hooks.h"
 
 extern patch_t*		hu_font[HU_FONTSIZE];
 extern boolean		message_dontfuckwithme;
