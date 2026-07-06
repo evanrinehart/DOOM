@@ -691,11 +691,9 @@ void TryRunTics (bool singletic)
     availabletics = lowtic - gametic/ticdup;
     
     // decide how many tics to run
-    counts = MIN(realtics, availabletics) + (/* 1 if */ realtics < availabletics);
+    counts = MIN(realtics + 1, availabletics) - (/* 1 if */ realtics + 1 == availabletics);
+    if (counts < 1) counts = 1;
 
-    if (counts < 1)
-	counts = 1;
-		
     frameon++;
 
     if (debugfile)
