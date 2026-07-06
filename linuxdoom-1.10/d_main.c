@@ -559,6 +559,7 @@ struct iwad known_iwads[] = {
     {"doom1.wad",     shareware,  doom,      english, "DOOM", "DOOM - Shareware"},
     {"freedoom1.wad", retail,     doom,      english, "FreeDOOM: Phase 1", "FreeDOOM"},
     {"freedoom2.wad", commercial, doom2,     english, "FreeDOOM: Phase 2", "FreeDOOM"},
+    {"CHEX.WAD",      retail,     doom,      english, "CHEX QUEST"},
     {NULL, 0, 0, 0, NULL}
 };
 
@@ -597,6 +598,7 @@ void IdentifyVersion (void)
 
     for (struct iwad *info = known_iwads; info->filename; info++) {
         if (chosen_iwad && strcmp(info->filename, chosen_iwad) != 0) continue;
+        if (strcmp(info->filename, "CHEX.WAD") == 0 && !M_CheckParm("-chex")) continue;
         if (TryIWAD(info)) return;
     }
 
