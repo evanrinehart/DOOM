@@ -273,7 +273,7 @@ void I_StartTic (void) {
     // called from d_net, d_main
     // calls I_GetEvent repeatedly
 
-    I_GetEvent();
+    if (video_initialized) I_GetEvent();
 }
 
 void I_UpdateNoBlit (void) {
