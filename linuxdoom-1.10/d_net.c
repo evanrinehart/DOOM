@@ -101,7 +101,7 @@ void N_ServiceNode(int i) {
     // resendto[i] determines how much we're sending
     int start = resendto[i] - (doomcom->extratics ? 1 : 0);
     int end = maketic - 1;
-    int N = start - end + 1;
+    int N = end - start + 1;
 
     if (N > BACKUPTICS) I_Error ("NetUpdate: netbuffer->numtics > BACKUPTICS");
 
@@ -302,15 +302,13 @@ void N_Adaptive(void) {
 
     // if we're not ahead, speed up
     if (nettics[0] <= nettics[keynode]) {
-        printf("+\n");
         netgame_nitro++;
     }
 
     // if we're consistently ahead, slow down
     frameon++;
-    frameskip[frameon & 3] = (nettics[0] > nettics[keynode]);
+    frameskip[frameon & 3] = (nettics[0] > nettics[keynode] + 2);
     if (frameskip[0] && frameskip[1] && frameskip[2] && frameskip[3]) {
-        printf("-\n");
         netgame_brakes++;
     }
 
