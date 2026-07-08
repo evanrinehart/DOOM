@@ -276,6 +276,10 @@ void I_StartTic (void) {
     if (video_initialized) I_GetEvent();
 }
 
+void I_PumpEvents(void) {
+    if (video_initialized) I_GetEvent();
+}
+
 void I_UpdateNoBlit (void) {
     // called from d_main
 }

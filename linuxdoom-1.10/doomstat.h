@@ -181,6 +181,7 @@ extern  boolean	demorecording;
 
 // Quit after playing a demo from cmdline.
 extern  boolean		singledemo;	
+extern  boolean		timingdemo;
 
 
 

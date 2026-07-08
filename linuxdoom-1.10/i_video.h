@@ -34,9 +34,9 @@
 // determines the hardware configuration
 // and sets up the video mode
 void I_InitGraphics (char *title);
-
-
 void I_ShutdownGraphics(void);
+
+void I_PumpEvents(void);
 
 // Takes full 8 bit values.
 void I_SetPalette (byte* palette);
