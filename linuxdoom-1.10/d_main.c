@@ -198,6 +198,7 @@ gamestate_t     wipegamestate = GS_DEMOSCREEN;
 extern  boolean setsizeneeded;
 extern  int             showMessages;
 void R_ExecuteSetViewSize (void);
+extern int netgame_prevtime;
 
 void D_Display (void)
 {
@@ -331,7 +332,6 @@ void D_Display (void)
 
     // menus go directly to the screen
     M_Drawer ();          // menu is drawn even on top of everything
-    NetUpdate ();         // send out any new accumulation
 
 
     // normal update
@@ -360,6 +360,10 @@ void D_Display (void)
 	M_Drawer ();                            // menu is drawn even on top of wipes
 	I_FinishUpdate ();                      // page flip or blit buffer
     } while (!done);
+
+    // fix netgame's clock state so we don't do 40 gametics suddenly
+    netgame_prevtime = I_GetTime() / ticdup;
+
 }
 
 
@@ -384,13 +388,10 @@ void D_DoomLoop (void)
 	
     I_InitGraphics (window_title==NULL ? game_title : window_title);
 
-    while (1)
-    {
-	I_StartFrame (); // frame syncronous IO operations
-	TryRunTics(singletics); // process one or more tics
-	S_UpdateSounds(players[consoleplayer].mo); // move positional sounds
-	D_Display (); // Update display, next frame, with current state.
-    }
+    if (timingdemo)
+        TimeCore();
+    else
+        NetgameCore();
 }
 
 

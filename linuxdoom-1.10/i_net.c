@@ -167,13 +167,6 @@ void PacketGet (void)
 	return;
     }
 
-    {
-	static int first=1;
-	if (first)
-	    printf("len=%d:p=[0x%x 0x%x] \n", c, *(int*)&sw, *((int*)&sw+1));
-	first = 0;
-    }
-
     // find remote node number
     for (i=0 ; i<doomcom->numnodes ; i++)
 	if ( fromaddress.sin_addr.s_addr == sendaddress[i].sin_addr.s_addr )
