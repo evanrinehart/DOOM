@@ -558,7 +558,7 @@ void render_netstatus(struct netstatus *s) {
 
     int brakes_age = (s->maketic - s->recent_brakes + 3);
     if (brakes_age < 40) {
-        Color color = RED;
+        Color color = ORANGE;
         color.a = 255 - brakes_age*5;
         DrawText("BRAKES", right_side + brakes_age/2, 30 - brakes_age/6, 10, color);
     }
@@ -570,6 +570,15 @@ void render_netstatus(struct netstatus *s) {
         DrawText("NITRO", right_side + nitro_age/2, 40 + nitro_age/6, 10, color);
     }
 
+    int botch_age = (s->maketic - s->recent_botch + 3);
+    if (botch_age < 12) {
+        Color color = PINK;
+        DrawText("OUT OF ORDER!", right_side + 2, 30 + botch_age*10, 10, color);
+    }
+
+    if (s->wayahead) {
+        DrawText("WAY AHEAD", right_side + 2, 30, 10, ORANGE);
+    }
 }
 
 void show_netstatus(struct netstatus *s) {

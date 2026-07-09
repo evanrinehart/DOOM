@@ -196,6 +196,7 @@ int N_Solidify(void) {
     if (realstart > nettics[netnode]) {
         netstatus->botch_start[netnode] = realstart;
         netstatus->botch_num[netnode] = netbuffer->numtics;
+        netstatus->recent_botch = realstart;
         remoteresend[netnode] = true;
         return 1;
     }
@@ -357,9 +358,10 @@ void NetgameCore(void) {
         int ticks = now - netgame_prevtime;
         netgame_prevtime = now;
 
-        if (netgame_nitro) netstatus->recent_nitro = maketic;
-        int wayahead = maketic - gametic/ticdup >= BACKUPTICS/2 - 1; // originally from the evil eye
+        bool wayahead = maketic - gametic/ticdup >= BACKUPTICS/2 - 1; // originally from the evil eye
         int produce = ticks + netgame_nitro; netgame_nitro = 0; // if any, nitro injected
+        if (netgame_nitro) netstatus->recent_nitro = maketic;
+        netstatus->wayahead = wayahead;
 
         for (int i = 0; i < produce; i++) {
             if (wayahead) { continue; }
