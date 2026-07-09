@@ -15,7 +15,7 @@ struct netstatus {
     int recent_brakes;
     int recent_botch;
     bool wayahead;
-    
+
     // botchstart not zero means prior missing packet
     int botch_start[8];
     int botch_num[8];
