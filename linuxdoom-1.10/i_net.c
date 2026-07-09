@@ -227,6 +227,28 @@ int GetLocalAddress (void)
     return *(int *)hostentry->h_addr_list[0];
 }
 
+struct in_addr resolve(char *name, int noisy) {
+    struct in_addr addr;
+    if (noisy) printf("resolving \"%s\" -> ", name);
+    if (name[0] == '.') {
+        addr.s_addr = inet_addr(name + 1);
+        if (noisy) printf("verbatim %s\n", inet_ntoa(addr));
+        return addr;
+    }
+    else {
+        struct hostent *ent = gethostbyname(name);
+        if (!ent) I_Error("gethostbyname: couldn't find %s\n", name);
+        int count = 0;
+        char **p = ent->h_addr_list;
+        if (noisy) {
+            while (*p) { memcpy(&addr, *p, sizeof addr); printf("%s ", inet_ntoa(addr)); count++; p++; }
+            printf("(%d results)\n", count);
+        }
+        memcpy(&addr, ent->h_addr_list[0], sizeof addr);
+        return addr;
+    }
+}
+
 
 //
 // I_InitNetwork
@@ -236,7 +258,6 @@ void I_InitNetwork (void)
     boolean		trueval = true;
     int			i;
     int			p;
-    struct hostent*	hostentry;	// host information entry
 
     doomcom = malloc (sizeof (*doomcom) );
     memset (doomcom, 0, sizeof(*doomcom) );
@@ -302,26 +323,21 @@ void I_InitNetwork (void)
     doomcom->consoleplayer = myargv[i+1][0]-'1';
 
     doomcom->numnodes = 1;	// this node for sure
+
+    int port = DOOMPORT; // should be configurable
 	
     i++;
     while (++i < myargc && myargv[i][0] != '-')
     {
 	sendaddress[doomcom->numnodes].sin_family = AF_INET;
-	sendaddress[doomcom->numnodes].sin_port = htons(DOOMPORT);
-	if (myargv[i][0] == '.')
-	{
-	    sendaddress[doomcom->numnodes].sin_addr.s_addr 
-		= inet_addr (myargv[i]+1);
-	}
-	else
-	{
-	    hostentry = gethostbyname (myargv[i]);
-	    if (!hostentry)
-		I_Error ("gethostbyname: couldn't find %s", myargv[i]);
-	    sendaddress[doomcom->numnodes].sin_addr.s_addr 
-		= *(int *)hostentry->h_addr_list[0];
-	}
+	sendaddress[doomcom->numnodes].sin_port = htons(port);
+	sendaddress[doomcom->numnodes].sin_addr = resolve(myargv[i], 1);
 	doomcom->numnodes++;
+    }
+
+    for (int i = 0; i < doomcom->numnodes; i++) {
+        if (i==0) printf("node %d: YOU (port=%d)\n", i, port);
+        else printf("node %d: %s:%d\n", i, inet_ntoa(sendaddress[i].sin_addr), port);
     }
 	
     doomcom->id = DOOMCOM_ID;
@@ -329,11 +345,12 @@ void I_InitNetwork (void)
     
     // build message to receive
     insocket = UDPsocket ();
-    BindToLocalPort (insocket,htons(DOOMPORT));
+    BindToLocalPort (insocket,htons(port));
     ioctl (insocket, FIONBIO, &trueval);
 
     sendsocket = UDPsocket ();
 }
+
 
 
 void I_NetCmd (void)
