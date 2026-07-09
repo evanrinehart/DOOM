@@ -161,6 +161,7 @@ int N_Solidify(void) {
         if (!nodeingame[netnode]) return 1;
         nodeingame[netnode] = false;
         playeringame[netconsole] = false;
+        printf("Player %d left the game\n", netconsole + 1);
         strcpy (exitmsg, "Player 1 left the game");
         exitmsg[7] += netconsole;
         players[consoleplayer].message = exitmsg;
@@ -597,13 +598,14 @@ void CheckAbort (void)
     } 
 }
 
+const char *stringify_doomdata(doomdata_t *dd);
+const char *stringify_doomdata_setup(doomdata_t *dd);
 
 //
 // D_ArbitrateNetStart
 //
 void D_ArbitrateNetStart (void)
 {
-    int		i;
     boolean	gotinfo[MAXNETNODES];
 	
     autostart = true;
@@ -612,7 +614,8 @@ void D_ArbitrateNetStart (void)
     if (doomcom->consoleplayer)
     {
 	// listen for setup info from key player
-	printf ("listening for network start info...\n");
+	printf ("Arbiter: begin doomshake as player %d (subordinate)\n", doomcom->consoleplayer + 1);
+	printf ("Arbiter: listening for network start info...\n");
 	while (1)
 	{
 	    CheckAbort ();
@@ -620,8 +623,10 @@ void D_ArbitrateNetStart (void)
 		continue;
 	    if (netbuffer->checksum & NCMD_SETUP)
 	    {
+		printf("Arbiter: got setup packet, version = %d, ", netbuffer->player);
 		if (netbuffer->player != VERSION)
 		    I_Error ("Different DOOM versions cannot play a net game!");
+		printf("matching our own\n");
 		startskill = netbuffer->retransmitfrom & 7;
 		deathmatch = (netbuffer->retransmitfrom & 0xc0) >> 6;
 		nomonsters = (netbuffer->retransmitfrom & 0x20) > 0;
@@ -630,6 +635,8 @@ void D_ArbitrateNetStart (void)
 		spthings = (netbuffer->retransmitfrom & 0x40) > 0;
 		startmap = netbuffer->starttic & 0x3f;
 		startepisode = netbuffer->starttic >> 6;
+		printf("Arbiter: got game config %s\n", stringify_doomdata_setup(netbuffer));
+		printf("Arbiter: done here. Continuing with game bootup.\n");
 		return;
 	    }
 	}
@@ -637,34 +644,53 @@ void D_ArbitrateNetStart (void)
     else
     {
 	// key player, send the setup info
-	printf ("sending network start info...\n");
-	do
-	{
+        doomdata_t setup;
+        setup.retransmitfrom = startskill;
+        if (pistolstart) setup.retransmitfrom |= 0x08;
+        if (spthings) setup.retransmitfrom |= 0x40;
+        if (deathmatch) setup.retransmitfrom |= (deathmatch<<6);
+        if (nomonsters) setup.retransmitfrom |= 0x20;
+        if (respawnparm) setup.retransmitfrom |= 0x10;
+        setup.starttic = startepisode * 64 + startmap;
+        setup.player = VERSION;
+        setup.numtics = 0;
+
+        char who[64];
+
+        printf ("Arbiter: begin doomshake as player %d (leader)\n", doomcom->consoleplayer + 1);
+        printf ("Arbiter: spamming network start info... %s\n", stringify_doomdata_setup(&setup));
+        int spam = 0;
+        int left = doomcom->numnodes - 1;
+        while (left > 0) {
 	    CheckAbort ();
-	    for (i=0 ; i<doomcom->numnodes ; i++)
+
+            char *p = who;
+            for (int n = 0; n < doomcom->numnodes; n++) p += sprintf(who, "%s%d", n?"":", ", n);
+            int count = 0;
+            for (int n = 1; n < doomcom->numnodes; n++) { if (gotinfo[n]) count++; }
+
+            for (int i=0 ; i<doomcom->numnodes ; i++)
 	    {
-		netbuffer->retransmitfrom = startskill;
-		if (pistolstart)
-		    netbuffer->retransmitfrom |= 0x08;
-		if (spthings)
-		    netbuffer->retransmitfrom |= 0x40;
-		if (deathmatch)
-		    netbuffer->retransmitfrom |= (deathmatch<<6);
-		if (nomonsters)
-		    netbuffer->retransmitfrom |= 0x20;
-		if (respawnparm)
-		    netbuffer->retransmitfrom |= 0x10;
-		netbuffer->starttic = startepisode * 64 + startmap;
-		netbuffer->player = VERSION;
-		netbuffer->numtics = 0;
+		spam++;
+		printf("Arbiter: sending setup to node %s. %d/%d nodes responding. spam = %-20d\r",
+		    who, count, doomcom->numnodes-1, spam);
+		*netbuffer = setup;
 		HSendPacket (i, NCMD_SETUP);
 	    }
 
 #if 1
+	    int i;
 	    for(i = 10 ; i  &&  HGetPacket(); --i)
 	    {
-		if((netbuffer->player&0x7f) < MAXNETNODES)
-		    gotinfo[netbuffer->player&0x7f] = true;
+		int node = netbuffer->player & 0x7f; // in setup only, this is node not player
+		if(node < MAXNETNODES) {
+		    if (gotinfo[node]) continue;
+
+		    gotinfo[node] = true;
+		    if (spam > 0) { printf("\n"); spam = 0; }
+		    left--;
+		    printf("Arbiter: got packet from node %d. %d left to go.\n", node, left);
+		}
 	    }
 #else
 	    while (HGetPacket ())
@@ -673,10 +699,8 @@ void D_ArbitrateNetStart (void)
 	    }
 #endif
 
-	    for (i=1 ; i<doomcom->numnodes ; i++)
-		if (!gotinfo[i])
-		    break;
-	} while (i < doomcom->numnodes);
+	}
+	printf("Arbiter: all nodes are trying to play! D_ArbitrateNetStart done\n");
     }
 }
 
@@ -761,3 +785,51 @@ void D_QuitNetGame (void)
     }
 }
 
+
+
+char ticcmd_string[256];
+const char *stringify_ticcmd(ticcmd_t *cmd) {
+    char *p = ticcmd_string;
+    p += sprintf(p, "Cmd{");
+    p += sprintf(p, "fwd=%d ", cmd->forwardmove);
+    p += sprintf(p, "side=%d ", cmd->sidemove);
+    p += sprintf(p, "turn=%d ", cmd->angleturn);
+    p += sprintf(p, "con=%d ", cmd->consistancy);
+    p += sprintf(p, "char=%u ", cmd->chatchar);
+    p += sprintf(p, "buttons=%08x", cmd->buttons);
+    p += sprintf(p, "}");
+    return ticcmd_string;
+}
+
+char doomdata_string[1024];
+const char *stringify_doomdata(doomdata_t *dd) {
+    char *p = doomdata_string;
+    p += sprintf(p, "Doomdata{");
+    p += sprintf(p, "chk=%x ", dd->checksum);
+    p += sprintf(p, "ret=%u ", dd->retransmitfrom);
+    p += sprintf(p, "strt=%u ", dd->starttic);
+    p += sprintf(p, "plyr=%u ", dd->player);
+    p += sprintf(p, "num=%u ", dd->numtics);
+    p += sprintf(p, "cmds=[");
+    for (int i = 0; i < dd->numtics; i++)
+        p += sprintf(p, "%s%s", i?" ":"", stringify_ticcmd(&dd->cmds[i]));
+    p += sprintf(p, "]");
+    p += sprintf(p, "}");
+    return doomdata_string;
+}
+
+const char *stringify_doomdata_setup(doomdata_t *dd) {
+    char *p = doomdata_string;
+    p += sprintf(p, "Doomdata{");
+    p += sprintf(p, "ver=%d ", dd->player);
+    p += sprintf(p, "skill=%d ", 1 + (dd->retransmitfrom & 7));
+    p += sprintf(p, "deth=%d ", (dd->retransmitfrom & 0xc0) >> 6);
+    p += sprintf(p, "nomon=%d ", (dd->retransmitfrom & 0x20) > 0);
+    p += sprintf(p, "resp=%d ", (dd->retransmitfrom & 0x10) > 0);
+    p += sprintf(p, "pistol=%d ", (dd->retransmitfrom & 0x08) > 0);
+    p += sprintf(p, "spthings=%d ", (dd->retransmitfrom & 0x40) > 0);
+    p += sprintf(p, "epi=%d ", dd->starttic >> 6);
+    p += sprintf(p, "map=%d", dd->starttic & 0x3f);
+    p += sprintf(p, "}");
+    return doomdata_string;
+}
