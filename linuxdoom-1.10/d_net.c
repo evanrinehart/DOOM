@@ -32,6 +32,8 @@
 #include "doomdef.h"
 #include "doomstat.h"
 
+#include "netscope.h"
+
 #define	NCMD_EXIT		0x80000000
 #define	NCMD_RETRANSMIT		0x40000000
 #define	NCMD_SETUP		0x20000000
@@ -87,6 +89,9 @@ doomdata_t	reboundstore;
 extern	boolean	advancedemo;
 
 char    exitmsg[80];
+
+struct netstatus netstatus_object;
+struct netstatus *netstatus = &netstatus_object;
 
 boolean HGetPacket (void);
 void HSendPacket (int node, int flags);
@@ -168,6 +173,9 @@ int N_Solidify(void) {
 
     // learn node for player if we don't already know
     nodeforplayer[netconsole] = netnode;
+    netstatus->players[netnode] = netconsole;
+    netstatus->num_nodes = doomcom->numnodes;
+    netstatus->contact_time[netnode] = I_GetMonotime();
 
     // check for retransmit request
     if ( resendcount[netnode] <= 0 && (netbuffer->checksum & NCMD_RETRANSMIT) )
@@ -184,7 +192,14 @@ int N_Solidify(void) {
     if (realend < nettics[netnode]) return 1;
 
     // check for a missed packet
-    if (realstart > nettics[netnode]) { remoteresend[netnode] = true; return 1; }
+    if (realstart > nettics[netnode]) {
+        netstatus->botch_start[netnode] = realstart;
+        netstatus->botch_num[netnode] = netbuffer->numtics;
+        remoteresend[netnode] = true;
+        return 1;
+    }
+
+    netstatus->botch_start[netnode] = 0;
 
     // a good packet, copy into netcmds
     remoteresend[netnode] = false;
@@ -197,7 +212,16 @@ int N_Solidify(void) {
         nettics[netnode]++;
     }
 
+    netstatus->nettics[netnode] = nettics[netnode];
+
     return 1;
+}
+
+
+void MenuOnlyTic(void) {
+    I_PumpEvents();
+    D_ProcessEvents();
+    M_Ticker();
 }
 
 // Evil Eye
@@ -208,6 +232,7 @@ void MakeTic(ticcmd_t *cmdbuf) {
     D_ProcessEvents();
     G_BuildTiccmd(&cmdbuf[maketic % BACKUPTICS]);
     maketic++;
+    netstatus->maketic = maketic;
 }
 
 // Dreameater
@@ -217,6 +242,7 @@ void GameTic(void) {
     M_Ticker();
     G_Ticker();
     gametic++;
+    netstatus->gametic = gametic / ticdup;
 }
 
 // when -dup N is given, the same cmd is applied N times
@@ -305,11 +331,13 @@ void N_Adaptive(void) {
         netgame_nitro++;
     }
 
+    int lag = 2;
+
     // if we're consistently ahead, slow down
     frameon++;
-    frameskip[frameon & 3] = (nettics[0] > nettics[keynode] + 2);
+    frameskip[frameon & 3] = (nettics[0] > nettics[keynode] + lag);
     if (frameskip[0] && frameskip[1] && frameskip[2] && frameskip[3]) {
-        netgame_brakes++;
+        netgame_brakes = 1;
     }
 
 }
@@ -321,17 +349,21 @@ void NetgameCore(void) {
 
     for (;;) {
 
+        netstatus->current_time = I_GetMonotime();
+
         // use clock to drive the production of localcmds which are immediately sent off
         int now = I_GetTime() / ticdup;
         int ticks = now - netgame_prevtime;
         netgame_prevtime = now;
 
+        if (netgame_nitro) netstatus->recent_nitro = maketic;
         int wayahead = maketic - gametic/ticdup >= BACKUPTICS/2 - 1; // originally from the evil eye
         int produce = ticks + netgame_nitro; netgame_nitro = 0; // if any, nitro injected
 
         for (int i = 0; i < produce; i++) {
+            if (wayahead) { continue; }
+            if (netgame_brakes > 0) netstatus->recent_brakes = maketic;
             if (netgame_brakes > 0) { netgame_brakes--; continue; }
-            if (wayahead) continue;
             MakeTic(localcmds); // poll user input, cache, assemble cmd, maketic++
             N_Vomit();          // broadcast cmd to all nodes
             N_Solidify();       // receive your own packet precisely
@@ -347,6 +379,8 @@ void NetgameCore(void) {
             for (int i = 0; i < consume; i++) { GameTicDuplicated(ticdup); }
         }
 
+        netstatus->lowtic = N_Lowtic();
+
         // occasionally render something
         if (ticks > 0) {
             I_StartFrame (); // frame syncronous IO operations
@@ -355,6 +389,9 @@ void NetgameCore(void) {
 
             N_Adaptive(); // judge if nitro or brakes are needed
         }
+
+        // don't freeze menu if we're way ahead for a long time
+        if (ticks > 0 && wayahead) MenuOnlyTic();
 
         // don't hammer the CPU
         I_Sleep(0.001);

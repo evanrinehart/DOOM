@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -25,8 +26,15 @@
 #include "d_main.h"
 
 #include "hooks.h"
+#include "netscope.h"
+
+#define MIN(A,B) ((A) < (B) ? (A) : (B))
+#define MAX(A,B) ((A) > (B) ? (A) : (B))
 
 void (*X_AlternateRender)(struct canvas, struct viewpoint) = NULL;
+
+extern struct netstatus *netstatus;
+void render_netstatus(struct netstatus *s);
 
 extern boolean verbose;
 
@@ -52,6 +60,8 @@ static bool mouse_affinity = 0; // capture the mouse if you have the chance
 static bool mouse_residual = 0; // mouse was captured at some point
 static bool mouse_captured = 0;
 static bool mouse_walk = 1; /* should be in "defaults" */
+
+static bool show_debug = true;
 
 void I_ReleaseMouse(void) {
     if (!mouse_captured) return;
@@ -267,6 +277,8 @@ void I_GetEvent(void) {
         I_ReleaseMouse();
     }
 
+    if (IsKeyPressed(KEY_GRAVE)) show_debug = !show_debug;
+
 }
 
 void I_StartTic (void) {
@@ -285,6 +297,9 @@ void I_UpdateNoBlit (void) {
 }
 
 extern boolean noblit;
+
+double frame_times[8];
+double fps;
 
 void I_FinishUpdate (void) {
     // called from d_main
@@ -308,13 +323,20 @@ void I_FinishUpdate (void) {
     Vector2 zero = {0,0};
     DrawTexturePro(screen_tex, src, dst, zero, 0.0f, WHITE);
 
-    //DrawFPS(1,1);
+    if (show_debug) {
+        render_netstatus(netstatus);
+        DrawText(TextFormat("%d FPS", (int)fps), window_w - 50, 1, 10, MAGENTA);
+    }
 
     EndDrawing();
 
     SwapScreenBuffer();
 
     frame_num++;
+    frame_times[frame_num % 8] = I_GetMonotime() / 35.0;
+    double min_time = INFINITY; for (int i = 0; i < 8; i++) min_time = MIN(min_time, frame_times[i]);
+    double max_time = -INFINITY; for (int i = 0; i < 8; i++) max_time = MAX(max_time, frame_times[i]);
+    fps = 7.0 / (max_time - min_time);
 }
 
 void I_ReadScreen (byte* scr) {
@@ -472,4 +494,107 @@ void X_AfterSummonMenu(void) {
 
 void X_AfterUnsummonMenu(void) {
     if (!fullscreen && mouse_residual) I_CaptureMouse();
+}
+
+
+void render_netstatus(struct netstatus *s) {
+
+    int right_side = 28 + 11 + 11 * s->num_nodes;
+
+    for (int i = 0; i < 15; i++) {
+        int label = s->maketic - i + 3;
+        Color color = label == s->maketic ? GREEN : RAYWHITE;
+        DrawText(TextFormat("%d", label % 10000), 2, i*10, 10, color);
+    }
+
+    for (int i = 0; i < 15; i++) {
+        int label = s->maketic - i + 3;
+        int filled = label < s->maketic;
+        if (filled)
+            DrawRectangle(28, i*10, 10, 8, GOLD);
+        else
+            DrawRectangleLines(28, i*10, 10, 8, GOLD);
+    }
+
+    for (int n = 0; n < s->num_nodes; n++) {
+        for (int i = 0; i < 15; i++) {
+            int label = s->maketic - i + 3;
+            int filled = label < s->nettics[n];
+            if (filled)
+                DrawRectangle(28 + 11 + 11*n, i*10, 10, 8, SKYBLUE);
+            else
+                DrawRectangleLines(28 + 11 + 11*n, i*10, 10, 8, SKYBLUE);
+        }
+
+        const char *text = TextFormat("%d", 1 + s->players[n]);
+        int width = MeasureText(text, 10);
+        int adjust = (10 - width) / 2;
+        DrawText(text, 28 + 11 + 11*n + adjust, 15*10, 10, RAYWHITE);
+
+        text = TextFormat("%d", n);
+        width = MeasureText(text, 10);
+        adjust = (10 - width) / 2;
+        DrawText(text, 28 + 11 + 11*n + adjust, 16*10, 10, RAYWHITE);
+    }
+
+    for (int n = 0; n < s->num_nodes; n++) {
+        if (s->botch_start[n] == 0) continue;
+        for (int i = 0; i < 15; i++) {
+            int label = s->maketic - i + 3;
+            int botch_end = s->botch_start[n] + s->botch_num[n] - 1;
+            int filled = label >= s->botch_start[n] && label <= botch_end;
+            if (filled) DrawRectangle(28 + 11 + 11*n, i*10, 10, 8, RED);
+        }
+    }
+
+    DrawText("plyr", 2, 15*10, 10, RAYWHITE);
+    DrawText("node", 2, 16*10, 10, RAYWHITE);
+
+    int lowtic_line = (s->maketic - s->lowtic + 4)*10 - 1;
+    DrawLine(28, lowtic_line, 100, lowtic_line, RED);
+
+    int gametic_line = (s->maketic - s->gametic + 4)*10;
+    DrawLine(28, gametic_line, 100, gametic_line, BLUE);
+
+    int brakes_age = (s->maketic - s->recent_brakes + 3);
+    if (brakes_age < 40) {
+        Color color = RED;
+        color.a = 255 - brakes_age*5;
+        DrawText("BRAKES", right_side + brakes_age/2, 30 - brakes_age/6, 10, color);
+    }
+
+    int nitro_age = (s->maketic - s->recent_nitro + 3);
+    if (nitro_age < 40) {
+        Color color = SKYBLUE;
+        color.a = 255 - nitro_age*5;
+        DrawText("NITRO", right_side + nitro_age/2, 40 + nitro_age/6, 10, color);
+    }
+
+}
+
+void show_netstatus(struct netstatus *s) {
+    int N = s->num_nodes;
+    printf("netstatus {\n");
+    printf("\tgametic = %d\n", s->gametic);
+    printf("\tmaketic = %d\n", s->maketic);
+    printf("\tlowtic = %d\n", s->lowtic);
+    printf("\tnettics[] = {");
+        for(int i = 0; i < N; i++) printf("%d ", s->nettics[i]);
+        printf("}\n");
+    printf("\tplayers[] = {");
+        for(int i = 0; i < N; i++) printf("%d ", s->players[i]);
+        printf("}\n");
+    printf("\tcurrent_time = %g\n", s->current_time);
+    printf("\tcontact_time[] = {");
+        for(int i = 0; i < N; i++) printf("%g ", s->contact_time[i]);
+        printf("}\n");
+    printf("\trecent_nitro = %d\n", s->recent_nitro);
+    printf("\trecent_brakes = %d\n", s->recent_brakes);
+    printf("\tbotch_start[] = {");
+        for(int i = 0; i < N; i++) printf("%d ", s->botch_start[i]);
+        printf("}\n");
+    printf("\tbotch_num[] = {");
+        for(int i = 0; i < N; i++) printf("%d ", s->botch_num[i]);
+        printf("}\n");
+    printf("}\n");
 }
