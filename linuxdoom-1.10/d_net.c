@@ -359,9 +359,9 @@ void NetgameCore(void) {
         netgame_prevtime = now;
 
         bool wayahead = maketic - gametic/ticdup >= BACKUPTICS/2 - 1; // originally from the evil eye
-        int produce = ticks + netgame_nitro; netgame_nitro = 0; // if any, nitro injected
-        if (netgame_nitro) netstatus->recent_nitro = maketic;
         netstatus->wayahead = wayahead;
+        if (netgame_nitro) netstatus->recent_nitro = maketic;
+        int produce = ticks + netgame_nitro; netgame_nitro = 0; // if any, nitro injected
 
         for (int i = 0; i < produce; i++) {
             if (wayahead) { continue; }
