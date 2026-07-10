@@ -59,9 +59,10 @@ static bool window_focused = 1;
 static bool mouse_affinity = 0; // capture the mouse if you have the chance
 static bool mouse_residual = 0; // mouse was captured at some point
 static bool mouse_captured = 0;
-static bool mouse_walk = 1; /* should be in "defaults" */
 
-static bool show_debug = true;
+// updated at a distance by m_misc.c "defaults"
+bool mouse_walk = true;
+bool show_debug = true;
 
 void I_ReleaseMouse(void) {
     if (!mouse_captured) return;
@@ -479,8 +480,6 @@ void I_InitGraphics(char *title) {
     }
 
     if (verbose) DumpGamepads();
-
-    if (M_CheckParm("-nomousewalk")) mouse_walk = 0; /* should be a "default" instead */
 
 }
 

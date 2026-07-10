@@ -23,7 +23,10 @@
 //
 //-----------------------------------------------------------------------------
 
+#define _POSIX_C_SOURCE 200809L
+
 #include <stdint.h>
+#include <string.h>
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -207,75 +210,117 @@ extern	int	numChannels;
 
 extern char*	chat_macros[];
 
+extern bool mouse_walk;
+extern bool show_debug;
 
-
-typedef struct
-{
-    char*       name;
-    void*       location;
-    intptr_t    defaultvalue;
-    int         scantranslate;		// PC scan code hack
-    int         untranslated;		// lousy hack
-    char        is_string;
-} default_t;
-
-default_t	defaults[] =
-{
-    {"mouse_sensitivity",&mouseSensitivity, 5},
-    {"sfx_volume",&snd_SfxVolume, 8},
-    {"music_volume",&snd_MusicVolume, 8},
-    {"show_messages",&showMessages, 1},
-    
-
-#ifdef NORMALUNIX
-    {"key_right",&key_right, KEY_RIGHTARROW},
-    {"key_left",&key_left, KEY_LEFTARROW},
-    {"key_up",&key_up, KEY_UPARROW},
-    {"key_down",&key_down, KEY_DOWNARROW},
-    {"key_strafeleft",&key_strafeleft, ','},
-    {"key_straferight",&key_straferight, '.'},
-
-    {"key_fire",&key_fire, KEY_RCTRL},
-    {"key_use",&key_use, ' '},
-    {"key_strafe",&key_strafe, KEY_RALT},
-    {"key_speed",&key_speed, KEY_RSHIFT},
-#endif
-
-    {"use_mouse",&usemouse, 1},
-    {"mouseb_fire",&mousebfire,0},
-    {"mouseb_strafe",&mousebstrafe,1},
-    {"mouseb_forward",&mousebforward,2},
-
-    {"use_joystick",&usejoystick, 0},
-    {"joyb_fire",&joybfire,0},
-    {"joyb_strafe",&joybstrafe,1},
-    {"joyb_use",&joybuse,3},
-    {"joyb_speed",&joybspeed,2},
-
-    {"screenblocks",&screenblocks, 9},
-    {"detaillevel",&detailLevel, 0},
-
-    {"snd_channels",&numChannels, 3},
-
-
-
-    {"usegamma",&usegamma, 0},
-
-    {"chatmacro0", &chat_macros[0], (intptr_t)HUSTR_CHATMACRO0 , 0, 0, 'S'},
-    {"chatmacro1", &chat_macros[1], (intptr_t)HUSTR_CHATMACRO1 , 0, 0, 'S'},
-    {"chatmacro2", &chat_macros[2], (intptr_t)HUSTR_CHATMACRO2 , 0, 0, 'S'},
-    {"chatmacro3", &chat_macros[3], (intptr_t)HUSTR_CHATMACRO3 , 0, 0, 'S'},
-    {"chatmacro4", &chat_macros[4], (intptr_t)HUSTR_CHATMACRO4 , 0, 0, 'S'},
-    {"chatmacro5", &chat_macros[5], (intptr_t)HUSTR_CHATMACRO5 , 0, 0, 'S'},
-    {"chatmacro6", &chat_macros[6], (intptr_t)HUSTR_CHATMACRO6 , 0, 0, 'S'},
-    {"chatmacro7", &chat_macros[7], (intptr_t)HUSTR_CHATMACRO7 , 0, 0, 'S'},
-    {"chatmacro8", &chat_macros[8], (intptr_t)HUSTR_CHATMACRO8 , 0, 0, 'S'},
-    {"chatmacro9", &chat_macros[9], (intptr_t)HUSTR_CHATMACRO9 , 0, 0, 'S'}
-
+struct config_entry {
+    char *keyword;
+    void *global;
+    void (*splat)(FILE *file, char *, /* same type as global */ void *);
 };
 
-int	numdefaults;
-char*	defaultfile;
+static struct config_entry config_entries[64];
+static size_t numentries;
+
+static char* config_path;
+
+static void splat_int(FILE *file, char *keyword, void *global_int) {
+    int *v = global_int;
+    fprintf(file, "%-24s %d\n", keyword, *v);
+}
+
+static void splat_bool(FILE *file, char *keyword, void *global_bool) {
+    bool *v = global_bool;
+    fprintf(file, "%-24s %s\n", keyword, *v ? "true" : "false");
+}
+
+static void splat_string(FILE *file, char *keyword, void *global_string) {
+    char **to_string = global_string;
+    char *p = *to_string;
+    fprintf(file, "%-24s \"", keyword);
+    while (*p) {
+        if (*p == '"') fprintf(file, "\\\"");
+        else if (*p == '\\') fprintf(file, "\\\\");
+        else fprintf(file, "%c", *p);
+        p++;
+    }
+    fprintf(file, "\"");
+    fprintf(file, "\n");
+}
+
+char *parse_keyword(char *str, char *pat) {
+    while (*str==' ' || *str=='\t') str++;
+    while (*str == *pat && *pat) { str++; pat++; }
+    return *pat || isgraph((unsigned char) *str) ? NULL : str;
+}
+
+void LoadConfigInt(FILE *file, char *keyword, int *global_int, int def) {
+    rewind(file);
+    char line[256];
+    int v = def;
+    while (fgets(line, 256, file)) {
+        char *p = line;
+        p = parse_keyword(p, keyword); if (p==NULL) continue;
+        v = atoi(p);
+        break;
+    }
+    *global_int = v;
+    struct config_entry *ent = &config_entries[numentries++];
+    ent->keyword = keyword;
+    ent->splat = splat_int;
+    ent->global = global_int;
+}
+
+void LoadConfigString(FILE *file, char *keyword, char **global_string, char *def) {
+    rewind(file);
+    char line[256];
+    char *out = def;
+    while (fgets(line, 256, file)) {
+        char *p = line;
+        p = parse_keyword(p, keyword); if (p==NULL) continue;
+        while (*p == ' ' || *p == '\t') p++;
+
+        out = malloc(strlen(p));
+        char *dest = out;
+        if (*p == '"') {
+            p++;
+            while (*p != '"' && *p != '\n' && *p != '\r' && *p) {
+                if (*p == '\\' && *(p+1) == '"') { *dest++ = '"'; p += 2; }
+                else if (*p == '\\' && *(p+1) == '\\') { *dest++ = '\\'; p += 2; }
+                else { *dest++ = *p; p++; }
+            }
+        }
+        else {
+            while (*p && *p != '\n' && *p != '\r') *dest++ = *p++;
+        }
+        *dest = 0;
+        break;
+    }
+    *global_string = out;
+    struct config_entry *ent = &config_entries[numentries++];
+    ent->keyword = keyword;
+    ent->splat = splat_string;
+    ent->global = global_string;
+}
+
+void LoadConfigBool(FILE *file, char *keyword, bool *global_bool, bool def) {
+    rewind(file);
+    char line[256];
+    bool v = def;
+    while (fgets(line, 256, file)) {
+        char *p = line;
+        p = parse_keyword(p, keyword); if (p==NULL) continue;
+        while (*p == ' ' || *p == '\t') p++;
+        if (*p == 't' || *p == 'y' || *p == '1') v = true;
+        else v = false;
+        break;
+    }
+    *global_bool = v;
+    struct config_entry *ent = &config_entries[numentries++];
+    ent->keyword = keyword;
+    ent->splat = splat_bool;
+    ent->global = global_bool;
+}
 
 
 //
@@ -283,27 +328,12 @@ char*	defaultfile;
 //
 void M_SaveDefaults (void)
 {
-    int		i;
-    int		v;
-    FILE*	f;
-	
-    f = fopen (defaultfile, "w");
-    if (!f)
-	return; // can't write the file, but don't complain
-		
-    for (i=0 ; i<numdefaults ; i++)
-    {
-	if (!defaults[i].is_string)
-	{
-	    v = *(int *)defaults[i].location;
-	    fprintf (f,"%s\t\t%i\n",defaults[i].name,v);
-	} else {
-	    fprintf (f,"%s\t\t\"%s\"\n",defaults[i].name,
-		     * (char **) (defaults[i].location));
-	}
+    FILE *file = fopen (config_path, "w"); if (!file) return;
+    for (size_t i = 0; i < numentries; i++) {
+        struct config_entry *ent = &config_entries[i];
+        ent->splat(file, ent->keyword, ent->global);
     }
-	
-    fclose (f);
+    fclose(file);
 }
 
 
@@ -315,72 +345,66 @@ extern boolean verbose;
 
 void M_LoadDefaults (void)
 {
-    int		i;
-    int		len;
-    FILE*	f;
-    char	def[80];
-    char	strparm[100];
-    char*	newstring;
-    int		parm;
-    boolean	isstring;
+    config_path = malloc(1024);
+    int i = M_CheckParm ("-config");
+    if (i && i < myargc - 1) strcpy(config_path, myargv[i+1]);
+    else sprintf(config_path, "%s/%s", GetHomeDir(), ".doomrc");
+
+    if (verbose) printf ("	config file: %s\n", config_path);
+
+    FILE *file = fopen(config_path, "r");
+    if (file == NULL) I_Error("can't open config %s\n", config_path);
+
+    LoadConfigInt(file, "mouse_sensitivity", &mouseSensitivity, 5);
+    LoadConfigInt(file, "sfx_volume", &snd_SfxVolume, 8);
+    LoadConfigInt(file, "music_volume", &snd_MusicVolume, 8);
+    LoadConfigInt(file, "show_messages", &showMessages, 1);
+
+    LoadConfigInt(file, "key_right", &key_right, KEY_RIGHTARROW);
+    LoadConfigInt(file, "key_left", &key_left, KEY_LEFTARROW);
+    LoadConfigInt(file, "key_up", &key_up, KEY_UPARROW);
+    LoadConfigInt(file, "key_down", &key_down, KEY_DOWNARROW);
+    LoadConfigInt(file, "key_strafeleft", &key_strafeleft, ',');
+    LoadConfigInt(file, "key_straferight", &key_straferight, '.');
+
+    LoadConfigInt(file, "key_fire", &key_fire, KEY_RCTRL);
+    LoadConfigInt(file, "key_use", &key_use, ' ');
+    LoadConfigInt(file, "key_strafe", &key_strafe, KEY_RALT);
+    LoadConfigInt(file, "key_speed", &key_speed, KEY_RSHIFT);
     
-    // set everything to base values
-    numdefaults = sizeof(defaults)/sizeof(defaults[0]);
-    for (i=0 ; i<numdefaults ; i++) {
-        if (defaults[i].is_string) *(char **)defaults[i].location = (char *)defaults[i].defaultvalue;
-        else *(int *)defaults[i].location = defaults[i].defaultvalue;
-    }
-    
-    // check for a custom default file
-    i = M_CheckParm ("-config");
-    if (i && i<myargc-1)
-    {
-	defaultfile = myargv[i+1];
-    }
-    else {
-	char *home = GetHomeDir();
-	char *buf = malloc(1024);
-	sprintf(buf, "%s/.doomrc", home);
-	defaultfile = buf;
-    }
-    if (verbose) printf ("	default file: %s\n",defaultfile);
-    
-    // read the file in, overriding any set defaults
-    f = fopen (defaultfile, "r");
-    if (f)
-    {
-	while (!feof(f))
-	{
-	    isstring = false;
-	    if (fscanf (f, "%79s %[^\n]\n", def, strparm) == 2)
-	    {
-		if (strparm[0] == '"')
-		{
-		    // get a string default
-		    isstring = true;
-		    len = strlen(strparm);
-		    newstring = (char *) malloc(len);
-		    strparm[len-1] = 0;
-		    strcpy(newstring, strparm+1);
-		}
-		else if (strparm[0] == '0' && strparm[1] == 'x')
-		    sscanf(strparm+2, "%x", &parm);
-		else
-		    sscanf(strparm, "%i", &parm);
-		for (i=0 ; i<numdefaults ; i++)
-		    if (!strcmp(def, defaults[i].name))
-		    {
-			if (!isstring)
-			    *(int *)defaults[i].location = parm;
-			else
-			    *(char **)defaults[i].location = newstring;
-			break;
-		    }
-	    }
-	}
-		
-	fclose (f);
-    }
+    LoadConfigInt(file, "use_mouse", &usemouse, 1);
+    LoadConfigInt(file, "mouseb_fire", &mousebfire, 0);
+    LoadConfigInt(file, "mouseb_strafe", &mousebstrafe, 1);
+    LoadConfigInt(file, "mouseb_strafe", &mousebforward, 2);
+
+    LoadConfigInt(file, "use_joystick", &usejoystick, 0);
+    LoadConfigInt(file, "joyb_fire", &joybfire, 0);
+    LoadConfigInt(file, "joyb_strafe", &joybstrafe, 1);
+    LoadConfigInt(file, "joyb_use", &joybuse, 2);
+    LoadConfigInt(file, "joyb_speed", &joybspeed, 3);
+
+    LoadConfigInt(file, "screenblocks", &screenblocks, 9);
+    LoadConfigInt(file, "detaillevel", &detailLevel, 0);
+
+    LoadConfigInt(file, "snd_channels", &numChannels, 3);
+
+    LoadConfigInt(file, "usegamma", &usegamma, 0);
+
+    LoadConfigString(file, "chatmacro0", &chat_macros[0], HUSTR_CHATMACRO0);
+    LoadConfigString(file, "chatmacro1", &chat_macros[1], HUSTR_CHATMACRO1);
+    LoadConfigString(file, "chatmacro2", &chat_macros[2], HUSTR_CHATMACRO2);
+    LoadConfigString(file, "chatmacro3", &chat_macros[3], HUSTR_CHATMACRO3);
+    LoadConfigString(file, "chatmacro4", &chat_macros[4], HUSTR_CHATMACRO4);
+    LoadConfigString(file, "chatmacro5", &chat_macros[5], HUSTR_CHATMACRO5);
+    LoadConfigString(file, "chatmacro6", &chat_macros[6], HUSTR_CHATMACRO6);
+    LoadConfigString(file, "chatmacro7", &chat_macros[7], HUSTR_CHATMACRO7);
+    LoadConfigString(file, "chatmacro8", &chat_macros[8], HUSTR_CHATMACRO8);
+    LoadConfigString(file, "chatmacro9", &chat_macros[9], HUSTR_CHATMACRO9);
+
+    LoadConfigBool(file, "show_debug", &show_debug, false);
+    LoadConfigBool(file, "mousewalk", &mouse_walk, true);
+
+    fclose(file);
 }
 
 
