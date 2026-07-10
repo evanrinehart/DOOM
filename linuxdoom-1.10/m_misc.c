@@ -375,7 +375,7 @@ void M_LoadDefaults (void)
     LoadConfigInt(file, "use_mouse", &usemouse, 1);
     LoadConfigInt(file, "mouseb_fire", &mousebfire, 0);
     LoadConfigInt(file, "mouseb_strafe", &mousebstrafe, 1);
-    LoadConfigInt(file, "mouseb_strafe", &mousebforward, 2);
+    LoadConfigInt(file, "mouseb_forward", &mousebforward, 2);
 
     LoadConfigInt(file, "use_joystick", &usejoystick, 0);
     LoadConfigInt(file, "joyb_fire", &joybfire, 0);
