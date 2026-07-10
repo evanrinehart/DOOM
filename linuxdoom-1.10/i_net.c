@@ -52,16 +52,17 @@
 void	NetSend (void);
 boolean NetListen (void);
 
+int GetNodeByAddr(struct sockaddr_in fromaddr);
 
 //
 // NETWORKING
 //
 
 #define HISTORICAL_USERPORTS 5000
-int	DOOMPORT =	(HISTORICAL_USERPORTS + 0x1d);
+#define DOOMPORT	(HISTORICAL_USERPORTS + 0x1d)
+int			listenport;
 
-int			sendsocket;
-int			insocket;
+int			bisocket;
 
 struct	sockaddr_in	sendaddress[MAXNETNODES];
 
@@ -136,7 +137,7 @@ void PacketSend (void)
     }
 		
     //printf ("sending %i\n",gametic);		
-    c = sendto (sendsocket , &sw, doomcom->datalength
+    c = sendto (bisocket , &sw, doomcom->datalength
 		,0,(void *)&sendaddress[doomcom->remotenode]
 		,sizeof(sendaddress[doomcom->remotenode]));
 	
@@ -157,7 +158,7 @@ void PacketGet (void)
     doomdata_t      sw;
 				
     fromlen = sizeof(fromaddress);
-    c = recvfrom (insocket, &sw, sizeof(sw), 0
+    c = recvfrom (bisocket, &sw, sizeof(sw), 0
 		  , (struct sockaddr *)&fromaddress, &fromlen );
     if (c == -1 )
     {
@@ -167,10 +168,7 @@ void PacketGet (void)
 	return;
     }
 
-    // find remote node number
-    for (i=0 ; i<doomcom->numnodes ; i++)
-	if ( fromaddress.sin_addr.s_addr == sendaddress[i].sin_addr.s_addr )
-	    break;
+    i = GetNodeByAddr(fromaddress);
 
     if (i == doomcom->numnodes)
     {
@@ -242,6 +240,14 @@ struct in_addr resolve(char *name, int noisy) {
     }
 }
 
+char *parse_peerstring(char *string, int *port, int fallback) {
+    static char buf[256];
+    char *s = string;
+    char *dest = buf;
+    while (*s && *s != ':') { *dest++ = *s++; } *dest = 0;
+    *port = (*s == ':') ? atoi(s+1) : fallback;
+    return buf;
+}
 
 //
 // I_InitNetwork
@@ -276,8 +282,11 @@ void I_InitNetwork (void)
     p = M_CheckParm ("-port");
     if (p && p<myargc-1)
     {
-	DOOMPORT = atoi (myargv[p+1]);
-	printf ("using alternate port %i\n",DOOMPORT);
+	listenport = atoi (myargv[p+1]);
+	printf ("using alternate port %i\n", listenport);
+    }
+    else {
+        listenport = DOOMPORT;
     }
 
     i = M_CheckParm ("-solo-net");
@@ -316,32 +325,31 @@ void I_InitNetwork (void)
     doomcom->consoleplayer = myargv[i+1][0]-'1';
 
     doomcom->numnodes = 1;	// this node for sure
-
-    int port = DOOMPORT; // should be configurable
 	
     i++;
     while (++i < myargc && myargv[i][0] != '-')
     {
+	// parse the peer string to get <host>(:<port>)? and use DOOMPORT as fallback
+	int port;
+	char *hostname = parse_peerstring(myargv[i], &port, DOOMPORT);
 	sendaddress[doomcom->numnodes].sin_family = AF_INET;
 	sendaddress[doomcom->numnodes].sin_port = htons(port);
-	sendaddress[doomcom->numnodes].sin_addr = resolve(myargv[i], 1);
+	sendaddress[doomcom->numnodes].sin_addr = resolve(hostname, 1);
 	doomcom->numnodes++;
     }
 
     for (int i = 0; i < doomcom->numnodes; i++) {
-        if (i==0) printf("node %d: YOU (port=%d)\n", i, port);
-        else printf("node %d: %s:%d\n", i, inet_ntoa(sendaddress[i].sin_addr), port);
+        if (i==0) printf("node %d: YOU (port=%d)\n", i, listenport);
+        else printf("node %d: %s:%d\n", i, inet_ntoa(sendaddress[i].sin_addr), ntohs(sendaddress[i].sin_port));
     }
 	
     doomcom->id = DOOMCOM_ID;
     doomcom->numplayers = doomcom->numnodes;
     
     // build message to receive
-    insocket = UDPsocket ();
-    BindToLocalPort (insocket,htons(port));
-    ioctl (insocket, FIONBIO, &trueval);
-
-    sendsocket = UDPsocket ();
+    bisocket = UDPsocket ();
+    BindToLocalPort (bisocket,htons(listenport));
+    ioctl (bisocket, FIONBIO, &trueval);
 }
 
 
@@ -360,3 +368,29 @@ void I_NetCmd (void)
 	I_Error ("Bad net cmd: %i\n",doomcom->command);
 }
 
+
+
+int GetNodeByAddr(struct sockaddr_in fromaddress) {
+    in_addr_t a1 = fromaddress.sin_addr.s_addr;
+    in_addr_t a2;
+    int p1 = fromaddress.sin_port;
+    int p2;
+    int i;
+
+    // first try to match address and port to identify sender's node
+    for (i=1 ; i<doomcom->numnodes ; i++) {
+        a2 = sendaddress[i].sin_addr.s_addr;
+        p2 = sendaddress[i].sin_port;
+	if ( a1==a2 && p1==p2 ) break;
+    }
+
+    if (i < doomcom->numnodes) return i;
+
+    // if it doesn't work, just look for address (they might be using 2 sockets)
+    for (i=1 ; i<doomcom->numnodes ; i++) {
+        a2 = sendaddress[i].sin_addr.s_addr;
+        if ( a1==a2 ) break;
+    }
+
+    return i;
+}
