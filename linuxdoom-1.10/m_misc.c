@@ -213,6 +213,7 @@ extern char*	chat_macros[];
 extern bool mouse_walk;
 extern bool show_debug;
 extern bool show_endoom;
+extern bool show_slowding;
 
 struct config_entry {
     char *keyword;
@@ -405,6 +406,7 @@ void M_LoadDefaults (void)
     LoadConfigBool(file, "show_debug", &show_debug, false);
     LoadConfigBool(file, "mousewalk", &mouse_walk, true);
     LoadConfigBool(file, "show_endoom", &show_endoom, true);
+    LoadConfigBool(file, "show_slowding", &show_slowding, true);
 
     fclose(file);
 }

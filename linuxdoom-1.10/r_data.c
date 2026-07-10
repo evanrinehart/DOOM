@@ -43,6 +43,7 @@
 
 #include "r_data.h"
 
+int show_slowding = true;
 extern boolean verbose;
 
 //
@@ -439,10 +440,6 @@ void R_InitTextures (void)
     int			numtextures2;
 
     int*		directory;
-    
-    int			temp1;
-    int			temp2;
-    int			temp3;
 
     // Load the patch names from pnames.lmp.
     name[8] = 0;	
@@ -490,22 +487,23 @@ void R_InitTextures (void)
     texturewidthmask = Z_Malloc (numtextures * sizeof *texturewidthmask, PU_STATIC, 0);
     textureheight = Z_Malloc (numtextures * sizeof *textureheight, PU_STATIC, 0);
 
-    //	Really complex printing shit...
-    temp1 = W_GetNumForName ("S_START");  // P_???????
-    temp2 = W_GetNumForName ("S_END") - 1;
-    temp3 = ((temp2-temp1+63)/64) + ((numtextures+63)/64);
-    printf("[");
-    for (i = 0; i < temp3; i++)
-	printf(" ");
-    printf("         ]");
-    for (i = 0; i < temp3; i++)
-	printf("\x8");
-    printf("\x8\x8\x8\x8\x8\x8\x8\x8\x8\x8");	
+    {
+        int sprite1 = W_GetNumForName ("S_START") + 1;
+        int spriteN = W_GetNumForName ("S_END") - 1;
+        int N = (spriteN - sprite1 + 1) + numtextures;
+        int S = (N+63)/64;
+
+        //	Really complex printing shit...
+        if (show_slowding) {
+            printf("["); for (i = 0; i < S; i++) { printf(" "); } printf("]");
+            printf("\b"); for (i = 0; i < S; i++) printf("\b");
+        }
+    }
 	
     for (i=0 ; i<numtextures ; i++, directory++)
     {
-	if (!(i&63))
-	    printf (".");
+	if (show_slowding && !(i&63))
+	    { printf ("."); I_Sleep(0.01); }
 
 	if (i == numtextures1)
 	{
@@ -621,8 +619,8 @@ void R_InitSpriteLumps (void)
 	
     for (i=0 ; i< numspritelumps ; i++)
     {
-	if (!(i&63))
-	    printf (".");
+	if (show_slowding && !(i&63))
+	    { printf ("."); I_Sleep(0.03); }
 
 	patch = W_CacheLumpNum (firstspritelump+i, PU_CACHE);
 	spritewidth[i] = SHORT(patch->width)<<FRACBITS;
@@ -668,7 +666,7 @@ void R_InitData (void)
     R_InitColormaps ();
     if (verbose) printf ("\nInitColormaps");
 
-    printf("\n");
+    if (show_slowding) printf("\n");
 }
 
 
