@@ -448,6 +448,8 @@ int GetSkyForMap(int gamemode, int episode, int map) {
 }
  
 
+char *HU_GetMapName(int gamemode, int gamemission, int gameepisode, int gamemap);
+
 //
 // G_DoLoadLevel 
 //
@@ -499,6 +501,9 @@ void G_DoLoadLevel (void)
     //memset (joybuttons, 0, sizeof(joybuttons)); ??
     memset (mousearray, 0, sizeof mousearray);
     memset (joyarray, 0, sizeof joyarray);
+
+    char *mapname = HU_GetMapName(gamemode, gamemission, gameepisode, gamemap);
+    printf("%s\n", mapname);
 } 
  
  
