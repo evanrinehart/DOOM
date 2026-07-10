@@ -502,8 +502,14 @@ void G_DoLoadLevel (void)
     memset (mousearray, 0, sizeof mousearray);
     memset (joyarray, 0, sizeof joyarray);
 
+    // Hack to print out map name on entry
     char *mapname = HU_GetMapName(gamemode, gamemission, gameepisode, gamemap);
-    printf("%s\n", mapname);
+    while (*mapname && *mapname != ':') { mapname++; } mapname++;
+    while (*mapname && *mapname == ' ') { mapname++; }
+    if (gamemode == commercial)
+        printf("MAP%2d: %s\n", gamemap, mapname);
+    else
+        printf("E%dM%d: %s\n", gameepisode, gamemap, mapname);
 } 
  
  
