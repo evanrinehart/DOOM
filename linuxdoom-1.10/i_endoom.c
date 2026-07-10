@@ -5,11 +5,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include <unistd.h>
 
 #include <locale.h>
 #include <langinfo.h>
+
+bool show_endoom = true;
 
 void I_Quit (void);
 
@@ -185,11 +188,12 @@ void color_endoom(unsigned char *endoom, int unicode) {
 
 void I_QuitEndoom(unsigned char *endoom, int len) {
 
+    if (!show_endoom) goto quit;
+    if (len != 4000) goto quit;
+
     int unicode;
     int color;
     int rev;
-
-    if (len != 4000) I_Quit();
 
     detect_term(&rev, &color, &unicode);
 
@@ -197,6 +201,6 @@ void I_QuitEndoom(unsigned char *endoom, int len) {
     else if (!color)    reverse_endoom(endoom, unicode);
     else                color_endoom(endoom, unicode);
 
-    I_Quit();
+    quit: I_Quit();
 
 }
