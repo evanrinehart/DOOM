@@ -692,6 +692,8 @@ void D_DoomMain (void)
         autostart = true;
     }
 
+    char *title = M_GetParm("-title");
+    if (title) window_title = title;
 
     // setup a normal demo or time demo (fast demo)
     char *name1 = M_GetParm("-playdemo");
@@ -986,6 +988,7 @@ void D_PrintHelp(void) {
     pr("-verbose", "print excessive amounts of details at startup and exit");
     pr("-nomusic", "disable music entirely");
     pr("-endoom", "immediately exit and display ENDOOM");
+    pr("-title <string>", "force a particular window title");
     pr("-help", "display all command line options");
     printf("\n");
 }
