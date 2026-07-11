@@ -386,7 +386,14 @@ void D_DoomLoop (void)
 	printf ("debug output to: %s\n",filename);
 	debugfile = fopen (filename,"w");
     }
-	
+
+    if (verbose) printf ("I_Init: Setting up sound and music backends.\n");
+    I_Init ();
+
+    if (verbose) printf ("S_Init: Setting up sfx manager.\n");
+    S_Init (snd_SfxVolume /* *8 */, snd_MusicVolume /* *8*/ );
+
+    if (verbose) printf ("I_InitGraphics: Setting up video.\n");
     I_InitGraphics (window_title==NULL ? game_title : window_title);
 
     if (timingdemo)
@@ -764,14 +771,9 @@ void D_DoomMain (void)
     if (verbose) printf ("\nP_Init: Init Playloop state.\n");
     P_Init ();
 
-    if (verbose) printf ("I_Init: Setting up machine state.\n");
-    I_Init ();
-
     if (verbose) printf ("D_CheckNetGame: Checking network game status.\n");
     D_CheckNetGame ();
 
-    if (verbose) printf ("S_Init: Setting up sound.\n");
-    S_Init (snd_SfxVolume /* *8 */, snd_MusicVolume /* *8*/ );
 
     if (verbose) printf ("HU_Init: Setting up heads up display.\n");
     HU_Init ();

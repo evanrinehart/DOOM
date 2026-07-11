@@ -148,10 +148,10 @@ void I_Init (void)
 void I_Quit (void)
 {
     D_QuitNetGame ();
+    I_ShutdownGraphics();
     I_ShutdownMusic();
     I_ShutdownSound();
     M_SaveDefaults ();
-    I_ShutdownGraphics();
     exit(0);
 }
 
