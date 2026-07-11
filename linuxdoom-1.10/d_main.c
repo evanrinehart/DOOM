@@ -387,15 +387,6 @@ void D_DoomLoop (void)
 	debugfile = fopen (filename,"w");
     }
 
-    if (verbose) printf ("I_Init: Setting up sound and music backends.\n");
-    I_Init ();
-
-    if (verbose) printf ("S_Init: Setting up sfx manager.\n");
-    S_Init (snd_SfxVolume /* *8 */, snd_MusicVolume /* *8*/ );
-
-    if (verbose) printf ("I_InitGraphics: Setting up video.\n");
-    I_InitGraphics (window_title==NULL ? game_title : window_title);
-
     if (timingdemo)
         TimeCore();
     else
@@ -780,6 +771,15 @@ void D_DoomMain (void)
 
     if (verbose) printf ("ST_Init: Init status bar.\n");
     ST_Init ();
+
+    if (verbose) printf ("I_Init: Setting up sound and music backends.\n");
+    I_Init ();
+
+    if (verbose) printf ("S_Init: Setting up sfx manager.\n");
+    S_Init (snd_SfxVolume /* *8 */, snd_MusicVolume /* *8*/ );
+
+    if (verbose) printf ("I_InitGraphics: Setting up video.\n");
+    I_InitGraphics (window_title==NULL ? game_title : window_title);
     
     // start the apropriate game based on parms
     name = M_GetParm("-record");
