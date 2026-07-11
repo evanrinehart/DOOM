@@ -38,6 +38,8 @@
 
 #include "x_mapinfo.h"
 
+extern boolean nosound;
+extern boolean nomusic;
 
 // Purpose?
 const char snd_prefixen[]
@@ -160,6 +162,7 @@ void S_Init
 {  
   int		i;
 
+  if (nosound) return;
   if (verbose) printf("S_Init: default sfx volume %d\n", sfxVolume);
 
   // Whatever these did with DMX, these are rather dummies now.
@@ -196,6 +199,9 @@ void S_Init
 //
 void S_Start(void)
 {
+
+  if (nosound) return;
+
   int cnum;
 
   // kill all playing sounds at start of level
@@ -363,6 +369,9 @@ S_StartSound
 ( void*		origin,
   int		sfx_id )
 {
+
+    if (nosound) return;
+
 #ifdef SAWDEBUG
     // if (sfx_id == sfx_sawful)
     // sfx_id = sfx_itemup;
@@ -435,6 +444,7 @@ S_StartSound
 void S_StopSound(void *origin)
 {
 
+    if (nosound) return;
     int cnum;
 
     for (cnum=0 ; cnum<numChannels ; cnum++)
@@ -513,6 +523,7 @@ void S_UpdateSoundChannel(int cnum, mobj_t *listener) {
 //
 void S_UpdateSounds(void* listener_p)
 {
+    if (nosound) return;
     for (int cnum = 0; cnum < numChannels; cnum++) {
         S_UpdateSoundChannel(cnum, listener_p);
     }
@@ -547,6 +558,8 @@ void S_SetSfxVolume(int volume)
 
 // Like S_ChangeMusic but takes a music lump name
 void S_ChangeMusicTo(char *name, int looping) {
+
+    if (nomusic) return;
 
     if (musname_playing && strcmp(musname_playing, name)==0) return;
 

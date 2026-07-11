@@ -141,8 +141,6 @@ I_StartSound
   int		priority )
 {
 
-    if (nosound) return 0;
-
     /*
         Originally doom applied a random pitch to each sound.
         The behavior was eventually disabled unintentionally.
@@ -210,7 +208,6 @@ I_UpdateSoundParams
   int	sep,
   int	pitch)
 {
-
     (void)pitch; // see notes in I_StartSound
 
     if (!sound_slot_full[handle]) return;
@@ -220,8 +217,10 @@ I_UpdateSoundParams
 }
 
 void I_ShutdownSound(void) {
-    // called by I_Quit
 
+    if (nosound) return;
+
+    // called by I_Quit
     for (int i = 0; i < 64; i++) {
         if (sound_slot_full[i]) {
             UnloadSoundAlias(sound_slot[i]);
@@ -279,6 +278,8 @@ Wave load_sound_from_wad(char *name) {
 
 
 void I_InitSound() {
+
+    if (nosound) return;
 
     if (verbose) printf("I_InitSound...\n");
 
