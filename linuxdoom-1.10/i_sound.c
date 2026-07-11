@@ -19,6 +19,7 @@
 
 extern boolean verbose;
 extern boolean nomusic;
+extern boolean nosound;
 
 static AudioStream main_stream;
 static struct ADL_MIDIPlayer *midi_player = NULL;
@@ -140,6 +141,8 @@ I_StartSound
   int		priority )
 {
 
+    if (nosound) return 0;
+
     /*
         Originally doom applied a random pitch to each sound.
         The behavior was eventually disabled unintentionally.
@@ -182,6 +185,7 @@ I_StartSound
 }
 
 void I_StopSound (int handle) {
+    if (nosound) return;
     if (!sound_slot_full[handle]) return;
     StopSound(sound_slot[handle]);
     UnloadSoundAlias(sound_slot[handle]);
@@ -189,6 +193,7 @@ void I_StopSound (int handle) {
 }
 
 int I_SoundIsPlaying(int handle) {
+    if (nosound) return 0;
     if (!sound_slot_full[handle]) return 0;
     if (!IsSoundPlaying(sound_slot[handle])) {
         UnloadSoundAlias(sound_slot[handle]);
@@ -208,6 +213,8 @@ I_UpdateSoundParams
   int	pitch)
 {
 
+    if (nosound) return;
+
     (void)pitch; // see notes in I_StartSound
 
     if (!sound_slot_full[handle]) return;
@@ -218,6 +225,7 @@ I_UpdateSoundParams
 
 void I_ShutdownSound(void) {
     // called by I_Quit
+    if (nosound) return;
 
     for (int i = 0; i < 64; i++) {
         if (sound_slot_full[i]) {
@@ -276,6 +284,11 @@ Wave load_sound_from_wad(char *name) {
 
 void I_InitSound() {
 
+    if (nosound) {
+        if (verbose) printf("I_InitSound: *all sound disabled*\n");
+        return;
+    }
+
     if (verbose) printf("I_InitSound...\n");
 
     SetTraceLogLevel(verbose ? LOG_INFO : LOG_NONE);
@@ -310,11 +323,15 @@ void I_InitSound() {
 
 
 void I_InitMusic(void) {
-    if (verbose) printf("I_InitMusic()\n");
+
+    if (nosound) return;
+
     if (nomusic) {
         if (verbose) printf("I_InitMusic: music disabled\n");
         return;
     }
+
+    if (verbose) printf("I_InitMusic()\n");
 
     midi_player = adl_init(SAMPLERATE);
     if (!midi_player) {

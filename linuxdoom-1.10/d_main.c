@@ -123,6 +123,7 @@ char *game_title = "DOOM";
 char *window_title = "DOOM";
 boolean verbose = false;
 boolean nomusic = false;
+boolean nosound = false;
 
 
 char		wadfile[1024];		// primary wad file
@@ -636,6 +637,7 @@ void D_DoomMain (void)
 
     verbose = M_CheckParm("-verbose") || M_CheckParm("-v") || M_CheckParm("--verbose");
     nomusic = M_CheckParm("-nomusic");
+    nosound = M_CheckParm("-nosound");
 
     IdentifyVersion ();
 
@@ -986,7 +988,8 @@ void D_PrintHelp(void) {
 
     printf("Miscellaneous:\n");
     pr("-verbose", "print excessive amounts of details at startup and exit");
-    pr("-nomusic", "disable music entirely");
+    pr("-nomusic", "disable the music system");
+    pr("-nosound", "disable sound and music entirely");
     pr("-endoom", "immediately exit and display ENDOOM");
     pr("-title <string>", "force a particular window title");
     pr("-help", "display all command line options");
