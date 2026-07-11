@@ -1631,8 +1631,8 @@ boolean G_CheckDemoStatus (void)
     if (timingdemo) 
     { 
 	endtime = I_GetTime (); 
-	I_Error ("timed %i gametics in %i realtics",gametic 
-		 , endtime-starttime); 
+	printf("TimingDemo: timed %i gametics in %i realtics\n", gametic, endtime-starttime);
+	I_Quit();
     } 
 	 
     if (demoplayback) 

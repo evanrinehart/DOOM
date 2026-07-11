@@ -124,7 +124,9 @@ char *window_title = "DOOM";
 boolean verbose = false;
 boolean nomusic = false;
 boolean nosound = false;
-
+boolean nostartup = false;
+boolean noconfig = false;
+extern bool show_endoom;
 
 char		wadfile[1024];		// primary wad file
 char		mapdir[1024];           // directory of development maps
@@ -622,7 +624,6 @@ void D_DoomMain (void)
 {
 
     int val1, val2;
-    char                    file[256];
 
     if (M_CheckParm("--help") || M_CheckParm("-help") || M_CheckParm("-h")) {
         D_PrintHelp();
@@ -631,11 +632,16 @@ void D_DoomMain (void)
 
     setbuf (stdout, NULL);
 
+    if (verbose) printf ("M_LoadDefaults: Load system defaults.\n");
+    M_LoadDefaults (); // load before initing other systems
+
     /* many command line args, but not all, processed here */
 
     verbose = M_CheckParm("-verbose") || M_CheckParm("-v") || M_CheckParm("--verbose");
     nosound = M_CheckParm("-nosound");
     nomusic = nosound || M_CheckParm("-nomusic");
+    nostartup = M_CheckParm("-nostartup");
+    if (M_CheckParm("-noendoom")) show_endoom = false;
 
     IdentifyVersion ();
 
@@ -700,11 +706,10 @@ void D_DoomMain (void)
     char *name2 = M_GetParm("-timedemo");
     char *name = name1 ? name1 : name2;
     if (name) {
+        char file[256];
         sprintf(file,"%s.lmp", name);
         D_AddFile(file);
-        printf("Playing demo %s.lmp.\n", name);
     }
-
 
     // D_AddFile for each PWAD file mentioned after -file
     char **args = M_GetParmArgs("-file", &count);
@@ -713,13 +718,9 @@ void D_DoomMain (void)
         for (int i = 0; i < count; i++) D_AddFile(args[i]);
     }
 
-
     // init subsystems
     if (verbose) printf ("V_Init: allocate screens.\n");
     V_Init ();
-
-    if (verbose) printf ("M_LoadDefaults: Load system defaults.\n");
-    M_LoadDefaults ();              // load before initing other systems
 
     if (verbose) printf ("Z_Init: Init zone memory allocation daemon. \n");
     Z_Init ();
@@ -749,7 +750,7 @@ void D_DoomMain (void)
     }
 
     // announce DOOM
-    D_PrintStartup(game_title, F_GetString("STARTUP5"));
+    if (!nostartup) D_PrintStartup(game_title, F_GetString("STARTUP5"));
 
     if (M_CheckParm("-endoom")) I_QuitEndoom(W_CacheLumpName("ENDOOM",PU_CACHE),4000);
 
@@ -791,6 +792,7 @@ void D_DoomMain (void)
     name = M_GetParm("-playdemo");
     if (name) {
         singledemo = true;              // quit after one demo
+        printf("Playing demo %s\n", name);
         G_DeferedPlayDemo(name);
         D_DoomLoop ();  // never returns
     }
@@ -803,6 +805,7 @@ void D_DoomMain (void)
 	
     name = M_GetParm("-loadgame"); // argument usually 0 to 5 but could be a letter
     if (name) {
+        char file[256];
         sprintf(file, SAVEGAMENAME"%c.dsg", name[0]);
         G_LoadGame (file);
     }
@@ -994,6 +997,9 @@ void D_PrintHelp(void) {
     pr("-nosound", "disable sound and music entirely");
     pr("-endoom", "immediately exit and display ENDOOM");
     pr("-title <string>", "force a particular window title");
+    pr("-nostartup", "hide startup banner");
+    pr("-noendoom", "hide ENDOOM regardless of config settings");
+    pr("-noconfig", "don't use a config file, don't save settings");
     pr("-help", "display all command line options");
     printf("\n");
 }

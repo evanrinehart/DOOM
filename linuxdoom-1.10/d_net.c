@@ -733,15 +733,18 @@ void D_CheckNetGame (void)
     if (netgame)
 	D_ArbitrateNetStart ();
 
-    printf("skill=%d ", startskill + 1);
-    if (deathmatch) printf("deathmatch=%d ", deathmatch);
-    if (nomonsters) printf("nomonsters=1 ");
-    if (fastparm) printf("fastmonsters=1 ");
-    if (respawnparm) printf("respawn=1 ");
-    if (pistolstart) printf("pistolstart=1 ");
-    if (spthings) printf("spthings=1 ");
-    printf("episode=%d ", startepisode);
-    printf("map=%d\n", startmap);
+    if (netgame) {
+        printf("Netgame: ");
+        printf("skill=%d ", startskill + 1);
+        if (deathmatch) printf("deathmatch=%d ", deathmatch);
+        if (nomonsters) printf("nomonsters=1 ");
+        if (fastparm) printf("fastmonsters=1 ");
+        if (respawnparm) printf("respawn=1 ");
+        if (pistolstart) printf("pistolstart=1 ");
+        if (spthings) printf("spthings=1 ");
+        printf("episode=%d ", startepisode);
+        printf("map=%d\n", startmap);
+    }
 	
     // read values out of doomcom
     ticdup = doomcom->ticdup;
@@ -754,9 +757,7 @@ void D_CheckNetGame (void)
     for (i=0 ; i<doomcom->numnodes ; i++)
 	nodeingame[i] = true;
 	
-    printf ("player %i of %i (%i nodes)\n",
-	    consoleplayer+1, doomcom->numplayers, doomcom->numnodes);
-
+    if (netgame) printf ("Netgame: player %i of %i (%i nodes)\n", consoleplayer+1, doomcom->numplayers, doomcom->numnodes);
 }
 
 

@@ -213,7 +213,6 @@ extern char*	chat_macros[];
 extern bool mouse_walk;
 extern bool show_debug;
 extern bool show_endoom;
-extern bool show_slowding;
 
 struct config_entry {
     char *keyword;
@@ -330,12 +329,33 @@ void LoadConfigBool(FILE *file, char *keyword, bool *global_bool, bool def) {
 //
 void M_SaveDefaults (void)
 {
+    if (M_CheckParm("-noconfig")) return;
     FILE *file = fopen (config_path, "w"); if (!file) return;
     for (size_t i = 0; i < numentries; i++) {
         struct config_entry *ent = &config_entries[i];
         ent->splat(file, ent->keyword, ent->global);
     }
     fclose(file);
+}
+
+FILE *openconfig(const char *config_path) {
+    if (M_CheckParm("-noconfig")) {
+        FILE *file = tmpfile();
+        if (file == NULL) I_Error("Can't create tmpfile\n");
+        return file;
+    }
+
+    {
+        FILE *file = fopen(config_path, "r");
+        if (file) return file;
+    }
+
+    {
+        FILE *file = fopen(config_path, "w+");
+        if (file) return file;
+    }
+
+    I_Error("Can't open (or create) config %s\n", config_path);
 }
 
 
@@ -352,10 +372,8 @@ void M_LoadDefaults (void)
     if (i && i < myargc - 1) strcpy(config_path, myargv[i+1]);
     else sprintf(config_path, "%s/%s", GetHomeDir(), ".doomrc");
 
-    if (verbose) printf ("	config file: %s\n", config_path);
-
-    FILE *file = fopen(config_path, "r");
-    if (file == NULL) I_Error("can't open config %s\n", config_path);
+    FILE *file = openconfig(config_path);
+    if (!M_CheckParm("-noconfig")) printf("Using config file %s\n", config_path);
 
     LoadConfigInt(file, "mouse_sensitivity", &mouseSensitivity, 5);
     LoadConfigInt(file, "sfx_volume", &snd_SfxVolume, 8);
@@ -406,7 +424,6 @@ void M_LoadDefaults (void)
     LoadConfigBool(file, "show_debug", &show_debug, false);
     LoadConfigBool(file, "mousewalk", &mouse_walk, true);
     LoadConfigBool(file, "show_endoom", &show_endoom, true);
-    LoadConfigBool(file, "show_slowding", &show_slowding, true);
 
     fclose(file);
 }

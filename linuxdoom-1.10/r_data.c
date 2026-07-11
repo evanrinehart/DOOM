@@ -43,7 +43,6 @@
 
 #include "r_data.h"
 
-int show_slowding = true;
 extern boolean verbose;
 
 //
@@ -494,7 +493,7 @@ void R_InitTextures (void)
         int S = (N+63)/64;
 
         //	Really complex printing shit...
-        if (show_slowding) {
+        if (verbose) {
             printf("["); for (i = 0; i < S; i++) { printf(" "); } printf("]");
             printf("\b"); for (i = 0; i < S; i++) printf("\b");
         }
@@ -502,7 +501,7 @@ void R_InitTextures (void)
 	
     for (i=0 ; i<numtextures ; i++, directory++)
     {
-	if (show_slowding && !(i&63))
+	if (verbose && !(i&63))
 	    { printf ("."); I_Sleep(0.04); }
 
 	if (i == numtextures1)
@@ -619,7 +618,7 @@ void R_InitSpriteLumps (void)
 	
     for (i=0 ; i< numspritelumps ; i++)
     {
-	if (show_slowding && !(i&63))
+	if (verbose && !(i&63))
 	    { printf ("."); I_Sleep(0.004); }
 
 	patch = W_CacheLumpNum (firstspritelump+i, PU_CACHE);
@@ -658,15 +657,9 @@ void R_InitColormaps (void)
 void R_InitData (void)
 {
     R_InitTextures ();
-    if (verbose) printf ("\nInitTextures");
     R_InitFlats ();
-    if (verbose) printf ("\nInitFlats");
     R_InitSpriteLumps ();
-    if (verbose) printf ("\nInitSprites");
     R_InitColormaps ();
-    if (verbose) printf ("\nInitColormaps");
-
-    if (show_slowding) printf("\n");
 }
 
 
