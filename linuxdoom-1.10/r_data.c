@@ -503,7 +503,7 @@ void R_InitTextures (void)
     for (i=0 ; i<numtextures ; i++, directory++)
     {
 	if (show_slowding && !(i&63))
-	    { printf ("."); I_Sleep(0.01); }
+	    { printf ("."); I_Sleep(0.04); }
 
 	if (i == numtextures1)
 	{
@@ -620,7 +620,7 @@ void R_InitSpriteLumps (void)
     for (i=0 ; i< numspritelumps ; i++)
     {
 	if (show_slowding && !(i&63))
-	    { printf ("."); I_Sleep(0.03); }
+	    { printf ("."); I_Sleep(0.004); }
 
 	patch = W_CacheLumpNum (firstspritelump+i, PU_CACHE);
 	spritewidth[i] = SHORT(patch->width)<<FRACBITS;
