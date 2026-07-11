@@ -636,8 +636,8 @@ void D_DoomMain (void)
     /* many command line args, but not all, processed here */
 
     verbose = M_CheckParm("-verbose") || M_CheckParm("-v") || M_CheckParm("--verbose");
-    nomusic = M_CheckParm("-nomusic");
     nosound = M_CheckParm("-nosound");
+    nomusic = nosound || M_CheckParm("-nomusic");
 
     IdentifyVersion ();
 
