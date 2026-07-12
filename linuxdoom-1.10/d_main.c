@@ -785,6 +785,7 @@ void D_DoomMain (void)
     // start the apropriate game based on parms
     name = M_GetParm("-record");
     if (name) {
+        printf("Recording demo %s\n", name);
         G_RecordDemo(name);
         autostart = true;
     }
@@ -799,6 +800,7 @@ void D_DoomMain (void)
 	
     name = M_GetParm("-timedemo");
     if (name) {
+        printf("Playing demo %s\n", name);
         G_TimeDemo(name);
         D_DoomLoop ();  // never returns
     }
