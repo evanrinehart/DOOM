@@ -86,6 +86,11 @@ clean:
 	rm -f $(O)/*.o
 	rm -f $(BINNAME)
 
+test: $(BINNAME)
+	@tmpdir=$$(mktemp -d); \
+	trap 'rm -rf "$$tmpdir"' EXIT; \
+	HOME="$$tmpdir" xvfb-run -s "-screen 0 1024x768x24" ./$(BINNAME) -1 -timedemo demo1 -nosound -nostartup
+
 $(O):
 	mkdir -p $(O)
 
