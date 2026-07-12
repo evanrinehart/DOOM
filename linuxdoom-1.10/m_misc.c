@@ -235,6 +235,13 @@ static void splat_bool(FILE *file, char *keyword, void *global_bool) {
     fprintf(file, "%-24s %s\n", keyword, *v ? "true" : "false");
 }
 
+int parse_doomkey(char *symbol);
+char *stringify_doomkey(int key);
+static void splat_doomkey(FILE *file, char *keyword, void *global_key) {
+    int *v = global_key;
+    fprintf(file, "%-24s %s\n", keyword, stringify_doomkey(*v));
+}
+
 static void splat_string(FILE *file, char *keyword, void *global_string) {
     char **to_string = global_string;
     char *p = *to_string;
@@ -323,6 +330,30 @@ void LoadConfigBool(FILE *file, char *keyword, bool *global_bool, bool def) {
     ent->global = global_bool;
 }
 
+static void chop(char *s) {
+    if (s[strlen(s)-1] == '\n') s[strlen(s)-1] = 0;
+    if (s[strlen(s)-1] == '\r') s[strlen(s)-1] = 0;
+}
+
+void LoadConfigDoomKey(FILE *file, char *keyword, int *global_key, int def) {
+    rewind(file);
+    char line[256];
+    int key = def;
+    while (fgets(line, 256, file)) {
+        char *p = line;
+        p = parse_keyword(p, keyword); if (p==NULL) continue;
+        while (*p == ' ' || *p == '\t') p++;
+        chop(p);
+        key = parse_doomkey(p);
+        break;
+    }
+    *global_key = key;
+    struct config_entry *ent = &config_entries[numentries++];
+    ent->keyword = keyword;
+    ent->splat = splat_doomkey;
+    ent->global = global_key;
+}
+
 
 //
 // M_SaveDefaults
@@ -380,17 +411,17 @@ void M_LoadDefaults (void)
     LoadConfigInt(file, "music_volume", &snd_MusicVolume, 8);
     LoadConfigInt(file, "show_messages", &showMessages, 1);
 
-    LoadConfigInt(file, "key_right", &key_right, KEY_RIGHTARROW);
-    LoadConfigInt(file, "key_left", &key_left, KEY_LEFTARROW);
-    LoadConfigInt(file, "key_up", &key_up, KEY_UPARROW);
-    LoadConfigInt(file, "key_down", &key_down, KEY_DOWNARROW);
-    LoadConfigInt(file, "key_strafeleft", &key_strafeleft, ',');
-    LoadConfigInt(file, "key_straferight", &key_straferight, '.');
+    LoadConfigDoomKey(file, "key_right", &key_right, KEY_RIGHTARROW);
+    LoadConfigDoomKey(file, "key_left", &key_left, KEY_LEFTARROW);
+    LoadConfigDoomKey(file, "key_up", &key_up, KEY_UPARROW);
+    LoadConfigDoomKey(file, "key_down", &key_down, KEY_DOWNARROW);
+    LoadConfigDoomKey(file, "key_strafeleft", &key_strafeleft, ',');
+    LoadConfigDoomKey(file, "key_straferight", &key_straferight, '.');
 
-    LoadConfigInt(file, "key_fire", &key_fire, KEY_RCTRL);
-    LoadConfigInt(file, "key_use", &key_use, ' ');
-    LoadConfigInt(file, "key_strafe", &key_strafe, KEY_RALT);
-    LoadConfigInt(file, "key_speed", &key_speed, KEY_RSHIFT);
+    LoadConfigDoomKey(file, "key_fire", &key_fire, KEY_RCTRL);
+    LoadConfigDoomKey(file, "key_use", &key_use, ' ');
+    LoadConfigDoomKey(file, "key_strafe", &key_strafe, KEY_RALT);
+    LoadConfigDoomKey(file, "key_speed", &key_speed, KEY_RSHIFT);
     
     LoadConfigInt(file, "use_mouse", &usemouse, 1);
     LoadConfigInt(file, "mouseb_fire", &mousebfire, 0);
