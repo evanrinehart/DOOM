@@ -153,7 +153,8 @@ void add_key(int rlkey, int doomkey) {
 void poll_single_key(bool *state, int rlkey, int doomkey) {
     if (rlkey == KEY_GRAVE) return;
 
-    event_t ev;
+    event_t ev = {0};
+
     if (IsKeyDown(rlkey) && !*state) {
         *state = true;
         ev.type = ev_keydown;
@@ -169,7 +170,9 @@ void poll_single_key(bool *state, int rlkey, int doomkey) {
 }
 
 void poll_multi_key(struct multi_key *mk) {
-    event_t ev;
+
+    event_t ev = {0};
+
     if (!mk->state && (IsKeyDown(mk->rlkey[0]) || IsKeyDown(mk->rlkey[1]))) {
         mk->state = true;
         ev.type = ev_keydown;
@@ -218,7 +221,24 @@ void I_GetEvent(void) {
         }
     }
 
-    event_t ev;
+    event_t ev = {0};
+
+    // chat char input event
+    for (;;) {
+        int codepoint = GetCharPressed();
+        if (!codepoint) break;
+
+        int size;
+        const char *src = CodepointToUTF8(codepoint, &size);
+
+        ev.type = ev_character;
+        ev.data1 = codepoint;
+        ev.data2 = size;
+        memcpy(ev.data4, src, size);
+
+        D_PostEvent(&ev);
+    }
+
 
     Vector2 mouse = {GetMouseX(), GetMouseY()};
     Vector2 delta = GetMouseDelta();
@@ -483,7 +503,7 @@ void I_InitGraphics(char *title) {
 
 }
 
-void X_OnEvent(int type, int data1, int data2, int data3) {
+void X_OnEvent(int type, int data1, int data2, int data3, unsigned char data4[4]) {
     //printf("processing event = %d %d %d %d\n", type, data1, data2, data3);
 }
 

@@ -181,7 +181,7 @@ void D_ProcessEvents (void)
     for ( ; eventtail != eventhead ; eventtail = (eventtail)&(MAXEVENTS-1) )
     {
 	ev = &events[eventtail++];
-	X_OnEvent(ev->type, ev->data1, ev->data2, ev->data3);
+	X_OnEvent(ev->type, ev->data1, ev->data2, ev->data3, ev->data4);
 	if (M_Responder (ev))
 	    continue;               // menu ate the event
 	G_Responder (ev);
