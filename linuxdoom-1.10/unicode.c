@@ -43,3 +43,11 @@ int measure_last_utf8_sequence(const unsigned char *buf, size_t len) {
     while (n < 4 && i > 0 && (buf[i] & 0xC0) == 0x80) { i--; n++; }
     return n;
 }
+
+int get_utf8_size(unsigned char c) {
+    if (c <= 0x7F) return 1;
+    else if (c >= 0xC2 && c <= 0xDF) return 2;
+    else if (c >= 0xE0 && c <= 0xEF) return 3;
+    else if (c >= 0xF0 && c <= 0xF4) return 4;
+    else return -1;
+}

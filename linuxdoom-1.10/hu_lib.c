@@ -96,38 +96,42 @@ boolean HUlib_delCharFromTextLine(hu_textline_t* t)
 
 }
 
+int splat_glyph(hu_textline_t *l, int x, unsigned char c) {
+    patch_t *patch = l->f[c - l->sc];
+    int w = SHORT(patch->width);
+    V_DrawPatchDirect(x, l->y, FG, patch);
+    return x + w;
+}
+
+int get_utf8_size(unsigned char);
 void
 HUlib_drawTextLine
 ( hu_textline_t*	l,
   boolean		drawcursor )
 {
 
-    int			i;
-    int			w;
-    int			x;
-    unsigned char	c;
-
     // draw the new stuff
-    x = l->x;
-    for (i=0;i<l->len;i++)
-    {
-	c = toupper(l->l[i]);
-	if (c != ' '
-	    && c >= l->sc
-	    && c <= '_')
-	{
-	    w = SHORT(l->f[c - l->sc]->width);
-	    if (x+w > SCREENWIDTH)
-		break;
-	    V_DrawPatchDirect(x, l->y, FG, l->f[c - l->sc]);
-	    x += w;
-	}
-	else
-	{
-	    x += 4;
-	    if (x >= SCREENWIDTH)
-		break;
-	}
+    int x = l->x;
+    int i = 0;
+    int left = l->len;
+    while (left > 0) {
+
+        int n = get_utf8_size(l->l[i]);
+        unsigned char c = ' ';
+
+        if (n == 1) c = toupper(l->l[i]);
+        else if (n > 1) c = '?';
+        else c = '!';
+
+        if (n==1 && (c==' ' || c < l->sc || c > '_'))
+            x += 4;
+        else
+            x = splat_glyph(l, x, c);
+
+        if (x >= SCREENWIDTH) break;
+        if (left <= n) break;
+        i += n;
+        left -= n;
     }
 
     // draw the cursor if requested
