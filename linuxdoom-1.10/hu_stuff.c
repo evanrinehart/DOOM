@@ -747,12 +747,12 @@ void HU_Ticker(void)
 
 #define QUEUESIZE		128
 
-static char	chatchars[QUEUESIZE];
+static int	chatchars[QUEUESIZE];
 static int	head = 0;
 static int	tail = 0;
 
 
-void HU_queueChatChar(char c)
+void HU_queueChatChar(int c)
 {
     if (((head + 1) & (QUEUESIZE-1)) == tail)
     {
@@ -765,9 +765,9 @@ void HU_queueChatChar(char c)
     }
 }
 
-char HU_dequeueChatChar(void)
+int HU_dequeueChatChar(void)
 {
-    char c;
+    int c;
 
     if (head != tail)
     {
