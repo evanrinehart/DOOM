@@ -129,6 +129,8 @@ unsigned char spanish(const char *src, size_t len) {
     if (strcmp(buf, "Í")==0) return 'I';
     if (strcmp(buf, "Ó")==0) return 'O';
     if (strcmp(buf, "Ú")==0) return 'U';
+    if (strcmp(buf, "ü")==0) return 'U';
+    if (strcmp(buf, "Ü")==0) return 'U';
     return '?';
 }
 
