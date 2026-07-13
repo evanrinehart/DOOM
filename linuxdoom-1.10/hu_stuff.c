@@ -752,7 +752,7 @@ static int	head = 0;
 static int	tail = 0;
 
 
-void HU_queueChatChar(int c)
+void HU_queueChatChar(byte c)
 {
     if (((head + 1) & (QUEUESIZE-1)) == tail)
     {
@@ -765,9 +765,9 @@ void HU_queueChatChar(int c)
     }
 }
 
-int HU_dequeueChatChar(void)
+byte HU_dequeueChatChar(void)
 {
-    int c;
+    byte c;
 
     if (head != tail)
     {

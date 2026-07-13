@@ -227,18 +227,10 @@ void I_GetEvent(void) {
     for (;;) {
         int codepoint = GetCharPressed();
         if (!codepoint) break;
-
-        int size;
-        const char *src = CodepointToUTF8(codepoint, &size);
-
         ev.type = ev_character;
         ev.data1 = codepoint;
-        ev.data2 = size;
-        memcpy(ev.data4, src, size);
-
         D_PostEvent(&ev);
     }
-
 
     Vector2 mouse = {GetMouseX(), GetMouseY()};
     Vector2 delta = GetMouseDelta();
@@ -503,7 +495,7 @@ void I_InitGraphics(char *title) {
 
 }
 
-void X_OnEvent(int type, int data1, int data2, int data3, unsigned char data4[4]) {
+void X_OnEvent(int type, int data1, int data2, int data3) {
     //printf("processing event = %d %d %d %d\n", type, data1, data2, data3);
 }
 
