@@ -716,6 +716,7 @@ void HU_Ticker(void)
         else if (c == KEY_ENTER) { // 13 means "deliver" the inputbuffer as a message
             if (w_inputbuffer[i].l.len && (chat_dest[i] == consoleplayer+1 || chat_dest[i] == HU_BROADCAST)) {
                 HUlib_addMessageToSText(&w_message, player_names[i], w_inputbuffer[i].l.l);
+                printf("%s%s\n", player_names[i], w_inputbuffer[i].l.l);
                 message_nottobefuckedwith = true;
                 message_on = true;
                 message_counter = HU_MSGTIMEOUT;
@@ -860,7 +861,11 @@ boolean HU_Responder(event_t *ev)
         // leave chat mode and notify that it was sent
         chat_on = false;
         strcpy(lastmessage, chat_macros[c]);
+        int l = strlen(lastmessage);
+        for (int i = 0; i < l; i++)
+            if ('a' <= lastmessage[i] && lastmessage[i] <= 'z') lastmessage[i] = toupper(lastmessage[i]);
         plr->message = lastmessage;
+        printf("%s: %s\n", "You", plr->message);
         return true;
     }
 
@@ -878,6 +883,7 @@ boolean HU_Responder(event_t *ev)
         if (w_chat.l.len) {
             strcpy(lastmessage, w_chat.l.l);
             plr->message = lastmessage;
+            printf("%s: %s\n", "You", plr->message);
         }
         return true;
     }
