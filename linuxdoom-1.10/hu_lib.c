@@ -33,6 +33,8 @@
 // boolean : whether the screen is always erased
 #define noterased viewwindowx
 
+int measure_last_utf8_sequence(const unsigned char *buf, size_t len);
+
 extern boolean	automapactive;	// in AM_map.c
 
 void HUlib_init(void)
@@ -82,10 +84,12 @@ HUlib_addCharToTextLine
 boolean HUlib_delCharFromTextLine(hu_textline_t* t)
 {
 
+    int n = measure_last_utf8_sequence((unsigned char *)t->l, t->len);
+
     if (!t->len) return false;
     else
     {
-	t->l[--t->len] = 0;
+	for (int i = 0; i < n; i++) t->l[--t->len] = 0;
 	t->needsupdate = 4;
 	return true;
     }
@@ -304,27 +308,6 @@ HUlib_addPrefixToIText
     while (*str)
 	HUlib_addCharToTextLine(&it->l, *(str++));
     it->lm = it->l.len;
-}
-
-// wrapper function for handling general keyed input.
-// returns true if it ate the key
-boolean
-HUlib_keyInIText
-( hu_itext_t*	it,
-  unsigned char ch )
-{
-
-    if (ch >= ' ' && ch <= '_') 
-  	HUlib_addCharToTextLine(&it->l, (char) ch);
-    else 
-	if (ch == KEY_BACKSPACE) 
-	    HUlib_delCharFromIText(it);
-	else 
-	    if (ch != KEY_ENTER) 
-		return false; // did not eat key
-
-    return true; // ate the key
-
 }
 
 void HUlib_drawIText(hu_itext_t* it)

@@ -673,9 +673,6 @@ void HU_Erase(void)
 void HU_Ticker(void)
 {
 
-    int i, rc;
-    char c;
-
     // tick down message counter if message is up
     if (message_counter && !--message_counter)
     {
@@ -700,47 +697,42 @@ void HU_Ticker(void)
 
     } // else message_on = false;
 
+    if (!netgame) return;
+
     // check for incoming chat characters
-    if (netgame)
-    {
-	for (i=0 ; i<MAXPLAYERS; i++)
-	{
-	    if (!playeringame[i])
-		continue;
-	    if (i != consoleplayer
-		&& (c = players[i].cmd.chatchar))
-	    {
-		if (c <= HU_BROADCAST)
-		    chat_dest[i] = c;
-		else
-		{
-		    if (c >= 'a' && c <= 'z')
-			c = (char) shiftxform[(unsigned char) c];
-		    rc = HUlib_keyInIText(&w_inputbuffer[i], c);
-		    if (rc && c == KEY_ENTER)
-		    {
-			if (w_inputbuffer[i].l.len
-			    && (chat_dest[i] == consoleplayer+1
-				|| chat_dest[i] == HU_BROADCAST))
-			{
-			    HUlib_addMessageToSText(&w_message,
-						    player_names[i],
-						    w_inputbuffer[i].l.l);
-			    
-			    message_nottobefuckedwith = true;
-			    message_on = true;
-			    message_counter = HU_MSGTIMEOUT;
-			    if ( gamemode == commercial )
-			      S_StartSound(0, sfx_radio);
-			    else
-			      S_StartSound(0, sfx_tink);
-			}
-			HUlib_resetIText(&w_inputbuffer[i]);
-		    }
-		}
-		players[i].cmd.chatchar = 0;
-	    }
-	}
+    for (int i=0 ; i<MAXPLAYERS; i++) {
+        byte c = players[i].cmd.chatchar;
+
+        if (!playeringame[i]) continue;
+        if (i == consoleplayer) continue;
+        if (c == 0) continue;
+
+        if (c <= HU_BROADCAST) { // c less than HU_BROADCAST (5) means goes to specific player
+            chat_dest[i] = c;
+        }
+        if (c == KEY_BACKSPACE) { // 127 is command code to erase previous character
+            HUlib_delCharFromIText(&w_inputbuffer[i]);
+        }
+        else if (c == KEY_ENTER) { // 13 means "deliver" the inputbuffer as a message
+            if (w_inputbuffer[i].l.len && (chat_dest[i] == consoleplayer+1 || chat_dest[i] == HU_BROADCAST)) {
+                HUlib_addMessageToSText(&w_message, player_names[i], w_inputbuffer[i].l.l);
+                message_nottobefuckedwith = true;
+                message_on = true;
+                message_counter = HU_MSGTIMEOUT;
+                int sfx = gamemode == commercial ? sfx_radio : sfx_tink;
+                S_StartSound(0, sfx);
+            }
+            HUlib_resetIText(&w_inputbuffer[i]);
+        }
+        else if (' ' <= c && c < 127) { // basic printable character, ignore case
+            HUlib_addCharToTextLine(&w_inputbuffer[i].l, toupper(c));
+        }
+        else if (c > 127) { // part of a non-trivial utf8 sequence, treated mostly as before
+            HUlib_addCharToTextLine(&w_inputbuffer[i].l, c);
+        }
+
+        // incoming chat char if any was consumed
+        players[i].cmd.chatchar = 0;
     }
 
 }
@@ -782,15 +774,14 @@ byte HU_dequeueChatChar(void)
     return c;
 }
 
+int encode_single_utf8(int codepoint, unsigned char *buf);
 boolean HU_Responder(event_t *ev)
 {
 
     static char		lastmessage[HU_MAXLINELENGTH+1];
     char*		macromessage;
-    boolean		eatkey = false;
-    static boolean	shiftdown = false;
+    //static boolean	shiftdown = false;
     static boolean	altdown = false;
-    unsigned char 	c;
     int			i;
     int			numplayers;
     
@@ -808,120 +799,114 @@ boolean HU_Responder(event_t *ev)
     for (i=0 ; i<MAXPLAYERS ; i++)
 	numplayers += playeringame[i];
 
-    if (ev->data1 == KEY_RSHIFT)
-    {
-	shiftdown = ev->type == ev_keydown;
-	return false;
-    }
-    else if (ev->data1 == KEY_RALT || ev->data1 == KEY_LALT)
-    {
-	altdown = ev->type == ev_keydown;
-	return false;
+    // observe and remember if shift, alt are down
+    //if (ev->data1 == KEY_RSHIFT && ev->type == ev_keydown) { shiftdown = true; return false; }
+    //if (ev->data1 == KEY_RSHIFT && ev->type == ev_keyup) { shiftdown = false; return false; }
+    if (ev->data1 == KEY_RALT && ev->type == ev_keydown) { altdown = true; return false; }
+    if (ev->data1 == KEY_RALT && ev->type == ev_keyup) { altdown = false; return false; }
+
+
+    // show last message
+    if (!chat_on && ev->type == ev_keydown && ev->data1 == KEY_ENTER) {
+        message_on = true;
+        message_counter = HU_MSGTIMEOUT;
+        return true;
     }
 
-    if (ev->type != ev_keydown)
-	return false;
-
-    if (!chat_on)
-    {
-	if (ev->data1 == HU_MSGREFRESH)
-	{
-	    message_on = true;
-	    message_counter = HU_MSGTIMEOUT;
-	    eatkey = true;
-	}
-	else if (netgame && ev->data1 == HU_INPUTTOGGLE)
-	{
-	    eatkey = chat_on = true;
-	    HUlib_resetIText(&w_chat);
-	    HU_queueChatChar(HU_BROADCAST);
-	}
-	else if (netgame && numplayers > 2)
-	{
-	    for (i=0; i<MAXPLAYERS ; i++)
-	    {
-		if (ev->data1 == destination_keys[i])
-		{
-		    if (playeringame[i] && i!=consoleplayer)
-		    {
-			eatkey = chat_on = true;
-			HUlib_resetIText(&w_chat);
-			HU_queueChatChar(i+1);
-			break;
-		    }
-		    else if (i == consoleplayer)
-		    {
-			num_nobrainers++;
-			if (num_nobrainers < 3)
-			    plr->message = HUSTR_TALKTOSELF1;
-			else if (num_nobrainers < 6)
-			    plr->message = HUSTR_TALKTOSELF2;
-			else if (num_nobrainers < 9)
-			    plr->message = HUSTR_TALKTOSELF3;
-			else if (num_nobrainers < 32)
-			    plr->message = HUSTR_TALKTOSELF4;
-			else
-			    plr->message = HUSTR_TALKTOSELF5;
-		    }
-		}
-	    }
-	}
-    }
-    else
-    {
-	c = ev->data1;
-	// send a macro
-	if (altdown)
-	{
-	    c = c - '0';
-	    if (c > 9)
-		return false;
-	    // fprintf(stderr, "got here\n");
-	    macromessage = chat_macros[c];
-	    
-	    // kill last message with a '\n'
-	    HU_queueChatChar(KEY_ENTER); // DEBUG!!!
-	    
-	    // send the macro message
-	    while (*macromessage)
-		HU_queueChatChar(*macromessage++);
-	    HU_queueChatChar(KEY_ENTER);
-	    
-	    // leave chat mode and notify that it was sent
-	    chat_on = false;
-	    strcpy(lastmessage, chat_macros[c]);
-	    plr->message = lastmessage;
-	    eatkey = true;
-	}
-	else
-	{
-	    if (language == french)
-		c = ForeignTranslation(c);
-	    if (shiftdown || (c >= 'a' && c <= 'z'))
-		c = shiftxform[c];
-	    eatkey = HUlib_keyInIText(&w_chat, c);
-	    if (eatkey)
-	    {
-		// static unsigned char buf[20]; // DEBUG
-		HU_queueChatChar(c);
-		
-		// sprintf(buf, "KEY: %d => %d", ev->data1, c);
-		//      plr->message = buf;
-	    }
-	    if (c == KEY_ENTER)
-	    {
-		chat_on = false;
-		if (w_chat.l.len)
-		{
-		    strcpy(lastmessage, w_chat.l.l);
-		    plr->message = lastmessage;
-		}
-	    }
-	    else if (c == KEY_ESCAPE)
-		chat_on = false;
-	}
+    // press T to begin broadcast chat mode
+    if (!chat_on && ev->type == ev_character && ev->data1 == HU_INPUTTOGGLE) {
+        chat_on = true;
+        HUlib_resetIText(&w_chat);
+        HU_queueChatChar(HU_BROADCAST); // 5 codes for broadcast
+        return true;
     }
 
-    return eatkey;
+    // press I G B or R to begin private chat to respective player
+    if (!chat_on && ev->type == ev_character && netgame && numplayers > 2) {
+        int p = -1;
+        for (int i=0; i<MAXPLAYERS ; i++) if(ev->data1 == destination_keys[i]) { p = i; break; }
+        if (p < 0 || !playeringame[p]) return false;
+
+        // you're talking to yourself!
+        if (p == consoleplayer) {
+            num_nobrainers++;
+            if (num_nobrainers < 3) plr->message = HUSTR_TALKTOSELF1;
+            else if (num_nobrainers < 6) plr->message = HUSTR_TALKTOSELF2;
+            else if (num_nobrainers < 9) plr->message = HUSTR_TALKTOSELF3;
+            else if (num_nobrainers < 32) plr->message = HUSTR_TALKTOSELF4;
+            else plr->message = HUSTR_TALKTOSELF5;
+            return false;
+        }
+
+        chat_on = true;
+        HUlib_resetIText(&w_chat);
+        HU_queueChatChar(p+1); // 1 through 4 code for private message
+        return true;
+    }
+
+    // alt + number sends chat macro
+    if (chat_on && altdown && ev->type == ev_keydown && '0' <= ev->data1 && ev->data1 <= '9') {
+        int c = ev->data1 - '0';
+
+        macromessage = chat_macros[c];
+
+        // kill last message with a '\n'
+        HU_queueChatChar(KEY_ENTER);
+
+        // send the macro message
+        while (*macromessage) HU_queueChatChar(*macromessage++);
+        HU_queueChatChar(KEY_ENTER);
+
+        // leave chat mode and notify that it was sent
+        chat_on = false;
+        strcpy(lastmessage, chat_macros[c]);
+        plr->message = lastmessage;
+        return true;
+    }
+
+    // handle backspace key by queueing 127 and erasing last character
+    if (chat_on && ev->type == ev_keydown && ev->data1 == KEY_BACKSPACE) {
+        HU_queueChatChar(127); // code for rub out
+        HUlib_delCharFromIText(&w_chat);
+        return true;
+    }
+
+    // handle enter key by enqueuing 13, close chat, copy message to HUD
+    if (chat_on && ev->type == ev_keydown && ev->data1 == KEY_ENTER) {
+        HU_queueChatChar(13); // code for ENTER
+        chat_on = false;
+        if (w_chat.l.len) {
+            strcpy(lastmessage, w_chat.l.l);
+            plr->message = lastmessage;
+        }
+        return true;
+    }
+
+    // escape simply exits chat mode without altering the buffers
+    if (chat_on && ev->type == ev_keydown && ev->data1 == KEY_ESCAPE) {
+        chat_on = false;
+        return true;
+    }
+
+    // proper chat, user typed a character
+    if (chat_on && ev->type == ev_character) {
+        int c = toupper(ev->data1);
+        if (' ' <= c && c <= '_') { // uppercase range of ascii printchars
+            HU_queueChatChar(c);
+            HUlib_addCharToTextLine(&w_chat.l, c);
+            return true;
+        }
+        else { // non ascii character
+            unsigned char buf[4];
+            int size = encode_single_utf8(c, buf); if (size < 0) return false;
+            for (int i = 0; i < size; i++) {
+                HU_queueChatChar(buf[i]);
+                HUlib_addCharToTextLine(&w_chat.l, buf[i]);
+            }
+            return true;
+        }
+    }
+
+    return false;
 
 }
