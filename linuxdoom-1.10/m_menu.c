@@ -1354,6 +1354,10 @@ M_WriteText
 }
 
 
+int encode_single_utf8(long codepoint, unsigned char *buf);
+int measure_last_utf8_sequence(const unsigned char*, size_t);
+long latin_toupper(long);
+long latin_fallback(long);
 
 //
 // CONTROL PANEL
@@ -1461,20 +1465,20 @@ boolean M_Responder (event_t* ev)
 	    }
     }
     
-    if (ch == -1)
-	return false;
-
-    
     // Save Game string input
-    if (saveStringEnter)
+    if (saveStringEnter && ev->type == ev_keydown)
     {
 	switch(ch)
 	{
 	  case KEY_BACKSPACE:
 	    if (saveCharIndex > 0)
 	    {
-		saveCharIndex--;
-		savegamestrings[saveSlot][saveCharIndex] = 0;
+                char *savestring = savegamestrings[saveSlot];
+                int n = measure_last_utf8_sequence((unsigned char *)savestring, strlen(savestring));
+                for (int i = 0; i < n; i++) {
+                    saveCharIndex--;
+                    savegamestrings[saveSlot][saveCharIndex] = 0;
+                }
 	    }
 	    break;
 				
@@ -1488,23 +1492,29 @@ boolean M_Responder (event_t* ev)
 	    if (savegamestrings[saveSlot][0])
 		M_DoSave(saveSlot);
 	    break;
-				
-	  default:
-	    ch = toupper(ch);
-	    if (ch != 32)
-		if (ch-HU_FONTSTART < 0 || ch-HU_FONTSTART >= HU_FONTSIZE)
-		    break;
-	    if (ch >= 32 && ch <= 127 &&
-		saveCharIndex < SAVESTRINGSIZE-1 &&
-		M_StringWidth(savegamestrings[saveSlot]) <
-		(SAVESTRINGSIZE-2)*8)
-	    {
-		savegamestrings[saveSlot][saveCharIndex++] = ch;
-		savegamestrings[saveSlot][saveCharIndex] = 0;
-	    }
-	    break;
 	}
 	return true;
+    }
+
+    if (saveStringEnter && ev->type == ev_character) {
+        int u = ev->data1; // what they really typed
+        int c = toupper(latin_fallback(u)); // admittedly we can't currently render languages we hope to support
+        if (c < 32) return false;
+        int idx = c - HU_FONTSTART; // index into the system font
+        // if c is not in the font then we choose not to enter it to the save name textbox
+        if (c != ' ' && (idx < 0 || idx > HU_FONTSIZE - 1)) return false;
+        // write the character as utf8
+        unsigned char buf[4];
+        int n = encode_single_utf8(c, buf); if (n < 0) return false;
+        // to textbox
+        char *savename = savegamestrings[saveSlot];
+        // if there is room
+        if (strlen(savename) + n >= SAVESTRINGSIZE) return false;
+        for (int i = 0; i < n; i++) {
+            savename[saveCharIndex++] = buf[i];
+            savename[saveCharIndex] = 0;
+        }
+        return true;
     }
     
     // Take care of any messages that need input

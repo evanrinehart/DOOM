@@ -34,6 +34,10 @@
 #define noterased viewwindowx
 
 int measure_last_utf8_sequence(const unsigned char *buf, size_t len);
+int get_utf8_size(unsigned char);
+long decode_single_utf8(const unsigned char *, size_t);
+int encode_single_utf8(long, unsigned char*);
+
 
 extern boolean	automapactive;	// in AM_map.c
 
@@ -102,10 +106,6 @@ int splat_glyph(hu_textline_t *l, int x, unsigned char c) {
     V_DrawPatchDirect(x, l->y, FG, patch);
     return x + w;
 }
-
-int get_utf8_size(unsigned char);
-int decode_single_utf8(const unsigned char *, size_t);
-int encode_single_utf8(int, unsigned char*);
 
 // placeholder in lieu of actual font graphics
 unsigned char spanish(const char *src, size_t len) {
