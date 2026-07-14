@@ -31,6 +31,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <sys/stat.h>
+
 #include "doomdef.h"
 #include "m_misc.h"
 #include "i_video.h"
@@ -228,11 +230,48 @@ char *GetDoomWadDir() {
 }
 
 char *GetHomeDir() {
-#ifdef NORMALUNIX
     char *home = getenv("HOME");
     if (!home) I_Error("Please set $HOME to your home directory");
     return home;
-#else
-    return "";
-#endif
+}
+
+#define APP_NAME "linuxdoom"
+
+char *GetDataHome() {
+    char *base = getenv("XDG_DATA_HOME");
+    if (base && base[0] == '/') {
+        char *path = malloc(strlen(base) + 1 + strlen(APP_NAME) + 1);
+        sprintf(path, "%s/%s", base, APP_NAME);
+        return path;
+    }
+    else {
+        char *home = GetHomeDir();
+        char *localshare = ".local/share";
+        char *path = malloc(strlen(home) + 1 + strlen(localshare) + 1 + strlen(APP_NAME) + 1);
+        sprintf(path, "%s/%s/%s", home, localshare, APP_NAME);
+        return path;
+    }
+}
+
+char *GetSavePath(const char *filename) {
+    char *datahome = GetDataHome(); // e.g. HOME/.local/share/linuxdoom
+    char *path = malloc(strlen(datahome) + 1 + strlen("saves") + 1 + strlen(filename) + 1);
+    sprintf(path, "%s/saves/%s", datahome, filename); // DATAHOME/saves/<filename>
+    free(datahome);
+    return path;
+}
+
+void EstablishDataHomeDir(void) {
+    char *datahome = GetDataHome();
+    int e = mkdir(datahome, 0700);
+    if (e < 0 && errno != EEXIST) I_Error("mkdir %s: %s\n", datahome, strerror(errno));
+    free(datahome);
+}
+
+void EstablishSavesDir(void) {
+    EstablishDataHomeDir();
+    char *saves = GetSavePath("");
+    int e = mkdir(saves, 0700);
+    if (e < 0 && errno != EEXIST) I_Error("mkdir %s: %s\n", saves, strerror(errno));
+    free(saves);
 }

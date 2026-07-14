@@ -1210,8 +1210,10 @@ void G_DoLoadGame (void)
     gameaction = ga_nothing; 
 
     byte *savebuffer;
-	 
-    M_ReadFile (savename, &savebuffer);
+
+    char *savepath = GetSavePath(savename);
+    M_ReadFile (savepath, &savebuffer);
+    free(savepath);
     save_p = savebuffer + SAVESTRINGSIZE;
     
     // skip the description field 
@@ -1313,11 +1315,21 @@ void G_DoSaveGame (void)
     if (verbose) printf("G_DoSaveGame: save size = %d\n", length);
     if (length > SAVEGAMESIZE) 
 	I_Error ("Savegame buffer overrun"); 
-    M_WriteFile (name, savebuffer, length); 
+
+    EstablishSavesDir();
+    char *savepath = GetSavePath(name);
+    int success = M_WriteFile (savepath, savebuffer, length);
+    if (!success) {
+        fprintf(stderr, "DoSaveGame: saving to %s failed\n", savepath);
+        players[consoleplayer].message = GGNOTSAVED;
+    }
+    else {
+        printf("DoSaveGame: saved to %s\n", savepath);
+        players[consoleplayer].message = GGSAVED;
+    }
+    free(savepath);
     gameaction = ga_nothing; 
     savedescription[0] = 0;		 
-	 
-    players[consoleplayer].message = GGSAVED; 
 
     // draw the pattern into the back screen
     R_FillBackScreen ();	

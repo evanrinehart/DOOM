@@ -132,6 +132,7 @@
 //	G_game.C
 //
 #define GGSAVED	"game saved."
+#define GGNOTSAVED	"game save failed."
 
 //
 //	HU_stuff.C

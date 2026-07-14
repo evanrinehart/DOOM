@@ -517,7 +517,9 @@ void M_ReadSaveStrings(void)
     {
 	sprintf(name,SAVEGAMENAME"%d.dsg",i);
 
-	handle = open (name, O_RDONLY | 0, 0666);
+	char *savepath = GetSavePath(name);
+	handle = open (savepath, O_RDONLY | 0, 0666);
+	free(savepath);
 	if (handle == -1)
 	{
 	    strcpy(&savegamestrings[i][0],EMPTYSTRING);
