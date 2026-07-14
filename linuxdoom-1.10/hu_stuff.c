@@ -705,7 +705,7 @@ boolean HU_Responder(event_t *ev)
     }
 
     // press T to begin broadcast chat mode
-    if (!chat_on && ev->type == ev_character && ev->data1 == HU_INPUTTOGGLE) {
+    if (!chat_on && ev->type == ev_character && netgame && ev->data1 == HU_INPUTTOGGLE) {
         chat_on = true;
         HUlib_resetIText(&w_chat);
         HU_queueChatChar(HU_BROADCAST); // 5 codes for broadcast
