@@ -220,7 +220,7 @@ int GetLocalAddress (void)
 
 struct in_addr resolve(char *name, int noisy) {
     struct in_addr addr;
-    if (noisy) printf("resolving \"%s\" -> ", name);
+    if (noisy) printf("Doomcom: resolving \"%s\" -> ", name);
     if (name[0] == '.') {
         addr.s_addr = inet_addr(name + 1);
         if (noisy) printf("verbatim %s\n", inet_ntoa(addr));
@@ -283,7 +283,7 @@ void I_InitNetwork (void)
     if (p && p<myargc-1)
     {
 	listenport = atoi (myargv[p+1]);
-	printf ("using alternate port %i\n", listenport);
+	printf ("Doomcom: using alternate port %i\n", listenport);
     }
     else {
         listenport = DOOMPORT;
@@ -339,8 +339,8 @@ void I_InitNetwork (void)
     }
 
     for (int i = 0; i < doomcom->numnodes; i++) {
-        if (i==0) printf("node %d: YOU (port=%d)\n", i, listenport);
-        else printf("node %d: %s:%d\n", i, inet_ntoa(sendaddress[i].sin_addr), ntohs(sendaddress[i].sin_port));
+        if (i==0) printf("Doomcom: node %d - YOU (port=%d)\n", i, listenport);
+        else printf("Doomcom: node %d - %s:%d\n", i, inet_ntoa(sendaddress[i].sin_addr), ntohs(sendaddress[i].sin_port));
     }
 	
     doomcom->id = DOOMCOM_ID;
@@ -365,7 +365,7 @@ void I_NetCmd (void)
 	netget ();
     }
     else
-	I_Error ("Bad net cmd: %i\n",doomcom->command);
+	I_Error ("I_NetCmd: Bad net cmd: %i\n",doomcom->command);
 }
 
 
