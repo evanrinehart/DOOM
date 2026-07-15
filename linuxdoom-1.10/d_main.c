@@ -929,7 +929,7 @@ void D_PrintHelp(void) {
     void (*pr)(char *, char *) = PrintHelpLine;
 
     printf("WAD loading control:\n");
-    pr("-iwad <filename>", "select main IWAD to load in case multiple are in the directory");
+    pr("-iwad <filename>", "specify which IWAD file to load");
     pr("-file <file1> <file2> ...", "select PWADs to load as mods. Order matters");
     printf("\n");
 
