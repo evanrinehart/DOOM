@@ -1435,15 +1435,13 @@ boolean M_Responder (event_t* ev)
     
     // Take care of any messages that need a yes no answer
     if (messageToPrint && messageNeedsInput) {
-        int ch = doomchar;
         int answer = 0;
-        if (ch == ' ') answer = 'n';
-        if (ch == 'N') answer = 'n';
-        if (ch == 'Y') answer = 'y';
+        if (doomchar == ' ') answer = 'n';
+        if (doomchar == 'N') answer = 'n';
+        if (doomchar == 'Y') answer = 'y';
         if (gohome) answer = 'n';
         if (goback) answer = 'n';
         if (activate) answer = 'y';
-
 
         if (answer) {
             menuactive = messageLastMenuActive;
