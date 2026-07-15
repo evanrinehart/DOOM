@@ -41,6 +41,18 @@ typedef struct
 } wadinfo_t;
 
 
+struct iwad {
+    char *filename;
+    int availability; // 0 free, 1 commercial
+    int mode;
+    int mission;
+    int language;
+    char *informal;
+    char *title;
+    char *window_title;
+};
+
+
 typedef struct
 {
     int			filepos;

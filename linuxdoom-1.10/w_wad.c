@@ -24,6 +24,7 @@
 #include <ctype.h>
 #include <sys/types.h>
 #include <string.h>
+#include <stdlib.h>
 #include <strings.h>
 #include <unistd.h>
 #include <malloc.h>
@@ -270,7 +271,7 @@ void W_Reload (void)
     close (handle);
 }
 
-
+extern struct iwad known_iwads[];
 
 //
 // W_InitMultipleFiles

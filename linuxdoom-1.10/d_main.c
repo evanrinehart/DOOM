@@ -543,27 +543,18 @@ void D_AddFile (char *file)
     wadfiles[numwadfiles] = newfile;
 }
 
-struct iwad {
-    char *filename;
-    int mode;
-    int mission;
-    int language;
-    char *title;
-    char *window_title;
-};
-
 struct iwad known_iwads[] = {
-    {"doom2f.wad",    commercial, doom2,     french,  "DOOM 2: Hell on Earth", "DOOM II"},
-    {"doom2.wad",     commercial, doom2,     english, "DOOM 2: Hell on Earth", "DOOM II"},
-    {"plutonia.wad",  commercial, pack_plut, english, "DOOM 2: The Plutonia Experiment", "Final DOOM - The Plutonia Experiment"},
-    {"tnt.wad",       commercial, pack_tnt,  english, "DOOM 2: TNT - Evilution", "Final DOOM - TNT: Evilution"},
-    {"doomu.wad",     retail,     doom,      english, "Ultimate DOOM"},
-    {"doom.wad",      registered, doom,      english, "DOOM"},
-    {"doom1.wad",     shareware,  doom,      english, "DOOM", "DOOM - Shareware"},
-    {"freedoom1.wad", retail,     doom,      english, "FreeDOOM: Phase 1", "FreeDOOM"},
-    {"freedoom2.wad", commercial, doom2,     english, "FreeDOOM: Phase 2", "FreeDOOM"},
-    {"CHEX.WAD",      retail,     doom,      english, "CHEX QUEST"},
-    {NULL, 0, 0, 0, NULL}
+    {"doom2f.wad",    9, commercial, doom2,     french,  "French DOOM II", "DOOM 2: Hell on Earth", "DOOM II"},
+    {"doom2.wad",     1, commercial, doom2,     english, "Doom II", "DOOM 2: Hell on Earth", "DOOM II"},
+    {"plutonia.wad",  1, commercial, pack_plut, english, "Final DOOM Plutonia", "DOOM 2: The Plutonia Experiment", "Final DOOM - The Plutonia Experiment"},
+    {"tnt.wad",       1, commercial, pack_tnt,  english, "Final DOOM TNT", "DOOM 2: TNT - Evilution", "Final DOOM - TNT: Evilution"},
+    {"doomu.wad",     1, retail,     doom,      english, "Ultimate DOOM", "Ultimate DOOM"},
+    {"doom.wad",      9, registered, doom,      english, "Registered DOOM 1", "DOOM"},
+    {"doom1.wad",     0, shareware,  doom,      english, "Shareware DOOM", "DOOM", "DOOM - Shareware"},
+    {"freedoom1.wad", 0, retail,     doom,      english, "FreeDOOM Phase 1", "FreeDOOM: Phase 1", "FreeDOOM"},
+    {"freedoom2.wad", 0, commercial, doom2,     english, "FreeDOOM Phase 2", "FreeDOOM: Phase 2", "FreeDOOM"},
+    {"CHEX.WAD",      9, retail,     doom,      english, "Chex Quest", "CHEX QUEST"},
+    {NULL, 0, 0, 0, 0, NULL}
 };
 
 bool TryIWAD(struct iwad *info) {
