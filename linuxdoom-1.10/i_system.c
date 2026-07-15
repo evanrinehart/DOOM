@@ -253,10 +253,17 @@ char *GetDataHome() {
     }
 }
 
-char *GetSavePath(const char *filename) {
+char *GetDataPath(const char *dirname, const char *filename) {
     char *datahome = GetDataHome(); // e.g. HOME/.local/share/linuxdoom
-    char *path = malloc(strlen(datahome) + 1 + strlen("saves") + 1 + strlen(filename) + 1);
-    sprintf(path, "%s/saves/%s", datahome, filename); // DATAHOME/saves/<filename>
+    char *path;
+    if (filename) {
+        path = malloc(strlen(datahome) + 1 + strlen(dirname) + 1 + strlen(filename) + 1);
+        sprintf(path, "%s/%s/%s", datahome, dirname, filename); // DATAHOME/<dirname>/filename
+    }
+    else {
+        path = malloc(strlen(datahome) + 1 + strlen(dirname) + 1);
+        sprintf(path, "%s/%s", datahome, dirname); // DATAHOME/<dirname>
+    }
     free(datahome);
     return path;
 }
@@ -270,7 +277,15 @@ void EstablishDataHomeDir(void) {
 
 void EstablishSavesDir(void) {
     EstablishDataHomeDir();
-    char *saves = GetSavePath("");
+    char *saves = GetDataPath("saves", NULL);
+    int e = mkdir(saves, 0700);
+    if (e < 0 && errno != EEXIST) I_Error("mkdir %s: %s\n", saves, strerror(errno));
+    free(saves);
+}
+
+void EstablishWadsDir(void) {
+    EstablishDataHomeDir();
+    char *saves = GetDataPath("wads", NULL);
     int e = mkdir(saves, 0700);
     if (e < 0 && errno != EEXIST) I_Error("mkdir %s: %s\n", saves, strerror(errno));
     free(saves);

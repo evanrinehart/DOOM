@@ -92,8 +92,9 @@ long I_GetMonotimeLong(float *);
 
 char *GetDoomWadDir();
 char *GetHomeDir();
-char *GetSavePath(const char *filename);
+char *GetDataPath(const char *dirname, const char *filename);
 void EstablishSavesDir(void);
+void EstablishWadsDir(void);
 void EstablishDataHomeDir(void);
 
 #endif

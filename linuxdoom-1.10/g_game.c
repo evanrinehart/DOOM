@@ -1211,7 +1211,7 @@ void G_DoLoadGame (void)
 
     byte *savebuffer;
 
-    char *savepath = GetSavePath(savename);
+    char *savepath = GetDataPath("saves", savename);
     M_ReadFile (savepath, &savebuffer);
     free(savepath);
     save_p = savebuffer + SAVESTRINGSIZE;
@@ -1317,7 +1317,7 @@ void G_DoSaveGame (void)
 	I_Error ("Savegame buffer overrun"); 
 
     EstablishSavesDir();
-    char *savepath = GetSavePath(name);
+    char *savepath = GetDataPath("saves", name);
     int success = M_WriteFile (savepath, savebuffer, length);
     if (!success) {
         fprintf(stderr, "DoSaveGame: saving to %s failed\n", savepath);
