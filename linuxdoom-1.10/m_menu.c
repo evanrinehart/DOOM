@@ -1370,137 +1370,233 @@ long latin_fallback(long);
 //
 boolean M_Responder (event_t* ev)
 {
-    int             ch;
-    int             i;
+
+    // joystick mouse "cooldown" states
     static  int     joywait = 0;
     static  int     mousewait = 0;
     static  int     mousey = 0;
     static  int     lasty = 0;
     static  int     mousex = 0;
     static  int     lastx = 0;
-	
-    ch = -1;
-	
+
+    // first compute abstract actions from event
+    int updown = 0;
+    int leftright = 0;
+    bool activate = false; // enter-like
+    bool goback = false; // navigate back
+    bool gohome = false; // escape-like
+    int key = 0; // doomkeys.h
+    long character = 0; // what was actually typed
+    long doomchar = 0;  // dumbed down for doom e.g. é becomes E
+
+    if (ev->type == ev_keydown) {
+        key = ev->data1;
+        if (key == KEY_UPARROW) updown = +1;
+        if (key == KEY_DOWNARROW) updown = -1;
+        if (key == KEY_LEFTARROW) leftright = -1;
+        if (key == KEY_RIGHTARROW) leftright = +1;
+        if (key == KEY_ENTER) activate = true;
+        if (key == KEY_BACKSPACE) goback = true;
+        if (key == KEY_ESCAPE) gohome = true;
+    }
+
+    if (ev->type == ev_character) {
+        character = ev->data1;
+        doomchar = toupper(latin_fallback(character));
+    }
+
     if (ev->type == ev_joystick && joywait < I_GetTime())
     {
-	if (ev->data3 == -1)
-	{
-	    ch = KEY_UPARROW;
-	    joywait = I_GetTime() + 5;
-	}
-	else if (ev->data3 == 1)
-	{
-	    ch = KEY_DOWNARROW;
-	    joywait = I_GetTime() + 5;
-	}
-		
-	if (ev->data2 == -1)
-	{
-	    ch = KEY_LEFTARROW;
-	    joywait = I_GetTime() + 2;
-	}
-	else if (ev->data2 == 1)
-	{
-	    ch = KEY_RIGHTARROW;
-	    joywait = I_GetTime() + 2;
-	}
-		
-	if (ev->data1&1)
-	{
-	    ch = KEY_ENTER;
-	    joywait = I_GetTime() + 5;
-	}
-	if (ev->data1&2)
-	{
-	    ch = KEY_BACKSPACE;
-	    joywait = I_GetTime() + 5;
-	}
+	if (ev->data3 == -1) { updown = +1; joywait = I_GetTime() + 5; }
+	if (ev->data3 == 1) { updown = -1; joywait = I_GetTime() + 5; }
+	if (ev->data2 == -1) { leftright = -1; joywait = I_GetTime() + 2; }
+	if (ev->data2 == 1) { leftright = +1; joywait = I_GetTime() + 2; }
+	if (ev->data1 & 1) { activate = true; joywait = I_GetTime() + 5; }
+	if (ev->data1 & 2) { goback = true; joywait = I_GetTime() + 5; }
     }
-    else
+
+    if (ev->type == ev_mouse && mousewait < I_GetTime())
     {
-	if (ev->type == ev_mouse && mousewait < I_GetTime())
-	{
 	    mousey += ev->data3;
-	    if (mousey < lasty-30)
-	    {
-		ch = KEY_DOWNARROW;
-		mousewait = I_GetTime() + 5;
-		mousey = lasty -= 30;
-	    }
-	    else if (mousey > lasty+30)
-	    {
-		ch = KEY_UPARROW;
-		mousewait = I_GetTime() + 5;
-		mousey = lasty += 30;
-	    }
+	    if (mousey < lasty-30) { updown = -1; mousewait = I_GetTime() + 5; mousey = lasty -= 30; }
+	    if (mousey > lasty+30) { updown = +1; mousewait = I_GetTime() + 5; mousey = lasty += 30; }
 		
 	    mousex += ev->data2;
-	    if (mousex < lastx-30)
-	    {
-		ch = KEY_LEFTARROW;
-		mousewait = I_GetTime() + 5;
-		mousex = lastx -= 30;
-	    }
-	    else if (mousex > lastx+30)
-	    {
-		ch = KEY_RIGHTARROW;
-		mousewait = I_GetTime() + 5;
-		mousex = lastx += 30;
-	    }
+	    if (mousex < lastx-30) { leftright = -1; mousewait = I_GetTime() + 5; mousex = lastx -= 30; }
+	    if (mousex > lastx+30) { leftright = +1; mousewait = I_GetTime() + 5; mousex = lastx += 30; }
 		
-	    if (ev->data1&1)
-	    {
-		ch = KEY_ENTER;
-		mousewait = I_GetTime() + 15;
-	    }
-			
-	    if (ev->data1&2)
-	    {
-		ch = KEY_BACKSPACE;
-		mousewait = I_GetTime() + 15;
-	    }
-	}
-	else
-	    if (ev->type == ev_keydown)
-	    {
-		ch = ev->data1;
-	    }
+	    if (ev->data1 & 1) { activate = true; mousewait = I_GetTime() + 15; }
+	    if (ev->data1 & 2) { goback = true; mousewait = I_GetTime() + 15; }
     }
+
+    // react to various actions
+
+
     
-    // Save Game string input
-    if (saveStringEnter && ev->type == ev_keydown)
+    // Take care of any messages that need a yes no answer
+    if (messageToPrint && messageNeedsInput) {
+        int ch = doomchar;
+        int answer = 0;
+        if (ch == ' ') answer = 'n';
+        if (ch == 'N') answer = 'n';
+        if (ch == 'Y') answer = 'y';
+        if (gohome) answer = 'n';
+        if (goback) answer = 'n';
+        if (activate) answer = 'y';
+
+
+        if (answer) {
+            menuactive = messageLastMenuActive;
+            messageToPrint = 0;
+            if (messageRoutine) messageRoutine(answer);
+            menuactive = false;
+            S_StartSound(NULL,sfx_swtchx);
+            return true;
+        }
+    }
+
+    // and messages which don't need an answer
+    if (messageToPrint && !messageNeedsInput) {
+        if (key || character || activate || goback) {
+            menuactive = messageLastMenuActive;
+            messageToPrint = 0;
+            if (messageRoutine) messageRoutine('n');
+            menuactive = false;
+            S_StartSound(NULL,sfx_swtchx);
+            return true;
+        }
+    }
+
+    // feature currently disabled
+    if (false && key == KEY_F1)
     {
-	switch(ch)
-	{
-	  case KEY_BACKSPACE:
-	    if (saveCharIndex > 0)
-	    {
-                char *savestring = savegamestrings[saveSlot];
-                int n = measure_last_utf8_sequence((unsigned char *)savestring, strlen(savestring));
-                for (int i = 0; i < n; i++) {
-                    saveCharIndex--;
-                    savegamestrings[saveSlot][saveCharIndex] = 0;
-                }
-	    }
-	    break;
-				
-	  case KEY_ESCAPE:
-	    saveStringEnter = 0;
-	    strcpy(&savegamestrings[saveSlot][0],saveOldString);
-	    break;
-				
-	  case KEY_ENTER:
-	    saveStringEnter = 0;
-	    if (savegamestrings[saveSlot][0])
-		M_DoSave(saveSlot);
-	    break;
-	}
+	G_ScreenShot ();
 	return true;
     }
 
-    if (saveStringEnter && ev->type == ev_character) {
-        int u = ev->data1; // what they really typed
-        int c = toupper(latin_fallback(u)); // admittedly we can't currently render languages we hope to support
+    // F-Keys
+    if (!menuactive && key == KEY_MINUS) {
+        if (automapactive || chat_on) return false;
+        M_SizeDisplay(0);
+        S_StartSound(NULL,sfx_stnmov);
+        return true;
+    }
+
+    if (!menuactive && key == KEY_EQUALS) {
+        if (automapactive || chat_on) return false;
+        M_SizeDisplay(1);
+        S_StartSound(NULL,sfx_stnmov);
+        return true;
+    }
+
+    if (!menuactive && key == KEY_F1) {
+        M_StartControlPanel ();
+        currentMenu = gamemode==retail ?  &ReadDef2 : &ReadDef1;
+        itemOn = 0;
+        S_StartSound(NULL,sfx_swtchn);
+        return true;
+    }
+
+    if (!menuactive && key == KEY_F2) {
+        M_StartControlPanel();
+        S_StartSound(NULL,sfx_swtchn);
+        M_SaveGame(0);
+        return true;
+    }
+				
+    if (!menuactive && key == KEY_F3) {
+        M_StartControlPanel();
+        S_StartSound(NULL,sfx_swtchn);
+        M_LoadGame(0);
+        return true;
+    }
+				
+    if (!menuactive && key == KEY_F4) {
+        M_StartControlPanel ();
+        currentMenu = &SoundDef;
+        itemOn = sfx_vol;
+        S_StartSound(NULL,sfx_swtchn);
+        return true;
+    }
+
+    if (!menuactive && key == KEY_F5) {
+        M_ChangeDetail(0);
+        S_StartSound(NULL,sfx_swtchn);
+        return true;
+    }
+
+    if (!menuactive && key == KEY_F6) {
+        S_StartSound(NULL,sfx_swtchn);
+        M_QuickSave();
+        return true;
+    }
+
+    if (!menuactive && key == KEY_F7) {
+        S_StartSound(NULL,sfx_swtchn);
+        M_EndGame(0);
+        return true;
+    }
+
+    if (!menuactive && key == KEY_F8) {
+        M_ChangeMessages(0);
+        S_StartSound(NULL,sfx_swtchn);
+        return true;
+    }
+
+    if (!menuactive && key == KEY_F9) {
+        S_StartSound(NULL,sfx_swtchn);
+        M_QuickLoad();
+        return true;
+    }
+
+    if (!menuactive && key == KEY_F10) {
+        S_StartSound(NULL,sfx_swtchn);
+        M_QuitDOOM(0);
+        return true;
+    }
+
+    if (!menuactive && key == KEY_F11) {
+        usegamma++;
+        if (usegamma > 4) usegamma = 0;
+        players[consoleplayer].message = gammamsg[usegamma];
+        I_SetPalette (W_CacheLumpName ("PLAYPAL",PU_CACHE));
+        return true;
+    }
+
+    // Pop-up menu?
+    if (!menuactive && key == KEY_ESCAPE) {
+        M_StartControlPanel ();
+        S_StartSound(NULL,sfx_swtchn);
+        X_AfterSummonMenu();
+        return true;
+    }
+
+    // savegame textbox interaction takes priority over menu navigation
+    if (saveStringEnter && key == KEY_BACKSPACE && saveCharIndex > 0) {
+        char *savestring = savegamestrings[saveSlot];
+        int n = measure_last_utf8_sequence((unsigned char *)savestring, strlen(savestring));
+        for (int i = 0; i < n; i++) {
+            saveCharIndex--;
+            savegamestrings[saveSlot][saveCharIndex] = 0;
+        }
+        return true;
+    }
+
+    if (saveStringEnter && (gohome || goback)) {
+        saveStringEnter = 0;
+        strcpy(&savegamestrings[saveSlot][0],saveOldString);
+        return true;
+    }
+
+    if (saveStringEnter && activate) {
+        saveStringEnter = 0;
+        if (savegamestrings[saveSlot][0]) M_DoSave(saveSlot);
+	return true;
+    }
+
+    if (saveStringEnter && character) {
+        // seems unusually complicated needs review
+        int c = (int)doomchar;
         if (c < 32) return false;
         int idx = c - HU_FONTSTART; // index into the system font
         // if c is not in the font then we choose not to enter it to the save name textbox
@@ -1518,177 +1614,29 @@ boolean M_Responder (event_t* ev)
         }
         return true;
     }
-    
-    // Take care of any messages that need input
-    if (messageToPrint)
-    {
-	if (messageNeedsInput == true &&
-	    !(ch == ' ' || ch == 'n' || ch == 'y' || ch == KEY_ESCAPE))
-	    return false;
-		
-	menuactive = messageLastMenuActive;
-	messageToPrint = 0;
-	if (messageRoutine)
-	    messageRoutine(ch);
-			
-	menuactive = false;
-	S_StartSound(NULL,sfx_swtchx);
-	return true;
-    }
-	
-    if (false && ch == KEY_F1)
-    {
-	G_ScreenShot ();
-	return true;
-    }
-		
-    
-    // F-Keys
-    if (!menuactive)
-	switch(ch)
-	{
-	  case KEY_MINUS:         // Screen size down
-	    if (automapactive || chat_on)
-		return false;
-	    M_SizeDisplay(0);
-	    S_StartSound(NULL,sfx_stnmov);
-	    return true;
-				
-	  case KEY_EQUALS:        // Screen size up
-	    if (automapactive || chat_on)
-		return false;
-	    M_SizeDisplay(1);
-	    S_StartSound(NULL,sfx_stnmov);
-	    return true;
-				
-	  case KEY_F1:            // Help key
-	    M_StartControlPanel ();
 
-	    if ( gamemode == retail )
-	      currentMenu = &ReadDef2;
-	    else
-	      currentMenu = &ReadDef1;
-	    
-	    itemOn = 0;
-	    S_StartSound(NULL,sfx_swtchn);
-	    return true;
-				
-	  case KEY_F2:            // Save
-	    M_StartControlPanel();
-	    S_StartSound(NULL,sfx_swtchn);
-	    M_SaveGame(0);
-	    return true;
-				
-	  case KEY_F3:            // Load
-	    M_StartControlPanel();
-	    S_StartSound(NULL,sfx_swtchn);
-	    M_LoadGame(0);
-	    return true;
-				
-	  case KEY_F4:            // Sound Volume
-	    M_StartControlPanel ();
-	    currentMenu = &SoundDef;
-	    itemOn = sfx_vol;
-	    S_StartSound(NULL,sfx_swtchn);
-	    return true;
-				
-	  case KEY_F5:            // Detail toggle
-	    M_ChangeDetail(0);
-	    S_StartSound(NULL,sfx_swtchn);
-	    return true;
-				
-	  case KEY_F6:            // Quicksave
-	    S_StartSound(NULL,sfx_swtchn);
-	    M_QuickSave();
-	    return true;
-				
-	  case KEY_F7:            // End game
-	    S_StartSound(NULL,sfx_swtchn);
-	    M_EndGame(0);
-	    return true;
-				
-	  case KEY_F8:            // Toggle messages
-	    M_ChangeMessages(0);
-	    S_StartSound(NULL,sfx_swtchn);
-	    return true;
-				
-	  case KEY_F9:            // Quickload
-	    S_StartSound(NULL,sfx_swtchn);
-	    M_QuickLoad();
-	    return true;
-				
-	  case KEY_F10:           // Quit DOOM
-	    S_StartSound(NULL,sfx_swtchn);
-	    M_QuitDOOM(0);
-	    return true;
-				
-	  case KEY_F11:           // gamma toggle
-	    usegamma++;
-	    if (usegamma > 4)
-		usegamma = 0;
-	    players[consoleplayer].message = gammamsg[usegamma];
-	    I_SetPalette (W_CacheLumpName ("PLAYPAL",PU_CACHE));
-	    return true;
-				
-	}
-
-    
-    // Pop-up menu?
-    if (!menuactive)
-    {
-	if (ch == KEY_ESCAPE)
-	{
-	    M_StartControlPanel ();
-	    S_StartSound(NULL,sfx_swtchn);
-	    X_AfterSummonMenu();
-	    return true;
-	}
-	return false;
-    }
-
-    
-    // Keys usable within menu
-    switch (ch)
-    {
-      case KEY_DOWNARROW:
-	do
-	{
-	    if (itemOn+1 > currentMenu->numitems-1)
-		itemOn = 0;
-	    else itemOn++;
+    // menu navigation
+    if (menuactive && updown) {
+	do {
+            itemOn += -updown; // menu items increase going down
+            if (itemOn < 0) itemOn = currentMenu->numitems - 1;
+            if (itemOn > currentMenu->numitems - 1) itemOn = 0;
 	    S_StartSound(NULL,sfx_pstop);
 	} while(currentMenu->menuitems[itemOn].status==-1);
 	return true;
-		
-      case KEY_UPARROW:
-	do
-	{
-	    if (!itemOn)
-		itemOn = currentMenu->numitems-1;
-	    else itemOn--;
-	    S_StartSound(NULL,sfx_pstop);
-	} while(currentMenu->menuitems[itemOn].status==-1);
-	return true;
+    }
 
-      case KEY_LEFTARROW:
+    if (menuactive && leftright) {
 	if (currentMenu->menuitems[itemOn].routine &&
 	    currentMenu->menuitems[itemOn].status == 2)
 	{
 	    S_StartSound(NULL,sfx_stnmov);
-	    currentMenu->menuitems[itemOn].routine(0);
+	    currentMenu->menuitems[itemOn].routine(leftright < 0 ? 0 : 1);
 	}
 	return true;
-		
-      case KEY_RIGHTARROW:
-	if (currentMenu->menuitems[itemOn].routine &&
-	    currentMenu->menuitems[itemOn].status == 2)
-	{
-	    S_StartSound(NULL,sfx_stnmov);
-	    currentMenu->menuitems[itemOn].routine(1);
-	}
-	return true;
+    }
 
-      case KEY_ENTER:
+    if (menuactive && activate) {
 	if (currentMenu->menuitems[itemOn].routine &&
 	    currentMenu->menuitems[itemOn].status)
 	{
@@ -1705,15 +1653,17 @@ boolean M_Responder (event_t* ev)
 	    }
 	}
 	return true;
-		
-      case KEY_ESCAPE:
+    }
+
+    if (menuactive && gohome) {
 	currentMenu->lastOn = itemOn;
 	M_ClearMenus ();
 	S_StartSound(NULL,sfx_swtchx);
 	X_AfterUnsummonMenu();
 	return true;
-		
-      case KEY_BACKSPACE:
+    }
+
+    if (menuactive && goback) {
 	currentMenu->lastOn = itemOn;
 	if (currentMenu->prevMenu)
 	{
@@ -1722,24 +1672,26 @@ boolean M_Responder (event_t* ev)
 	    S_StartSound(NULL,sfx_swtchn);
 	}
 	return true;
-	
-      default:
-	for (i = itemOn+1;i < currentMenu->numitems;i++)
+    }
+
+    // menu navigation shortcuts
+    if (menuactive && character) {
+        int ch = tolower(doomchar);
+
+	for (int i = itemOn+1;i < currentMenu->numitems;i++)
 	    if (currentMenu->menuitems[i].alphaKey == ch)
 	    {
 		itemOn = i;
 		S_StartSound(NULL,sfx_pstop);
 		return true;
 	    }
-	for (i = 0;i <= itemOn;i++)
+	for (int i = 0;i <= itemOn;i++)
 	    if (currentMenu->menuitems[i].alphaKey == ch)
 	    {
 		itemOn = i;
 		S_StartSound(NULL,sfx_pstop);
 		return true;
 	    }
-	break;
-	
     }
 
     return false;
