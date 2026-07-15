@@ -1407,32 +1407,32 @@ boolean M_Responder (event_t* ev)
 
     if (ev->type == ev_joystick && joywait < I_GetTime())
     {
-	if (ev->data3 == -1) { updown = +1; joywait = I_GetTime() + 5; }
-	if (ev->data3 == 1) { updown = -1; joywait = I_GetTime() + 5; }
-	if (ev->data2 == -1) { leftright = -1; joywait = I_GetTime() + 2; }
-	if (ev->data2 == 1) { leftright = +1; joywait = I_GetTime() + 2; }
-	if (ev->data1 & 1) { activate = true; joywait = I_GetTime() + 5; }
-	if (ev->data1 & 2) { goback = true; joywait = I_GetTime() + 5; }
+        if (ev->data3 == -1) { updown = +1; joywait = I_GetTime() + 5; }
+        if (ev->data3 == 1) { updown = -1; joywait = I_GetTime() + 5; }
+        if (ev->data2 == -1) { leftright = -1; joywait = I_GetTime() + 2; }
+        if (ev->data2 == 1) { leftright = +1; joywait = I_GetTime() + 2; }
+        if (ev->data1 & 1) { activate = true; joywait = I_GetTime() + 5; }
+        if (ev->data1 & 2) { goback = true; joywait = I_GetTime() + 5; }
     }
 
     if (ev->type == ev_mouse && mousewait < I_GetTime())
     {
-	    mousey += ev->data3;
-	    if (mousey < lasty-30) { updown = -1; mousewait = I_GetTime() + 5; mousey = lasty -= 30; }
-	    if (mousey > lasty+30) { updown = +1; mousewait = I_GetTime() + 5; mousey = lasty += 30; }
-		
-	    mousex += ev->data2;
-	    if (mousex < lastx-30) { leftright = -1; mousewait = I_GetTime() + 5; mousex = lastx -= 30; }
-	    if (mousex > lastx+30) { leftright = +1; mousewait = I_GetTime() + 5; mousex = lastx += 30; }
-		
-	    if (ev->data1 & 1) { activate = true; mousewait = I_GetTime() + 15; }
-	    if (ev->data1 & 2) { goback = true; mousewait = I_GetTime() + 15; }
+        mousey += ev->data3;
+        if (mousey < lasty-30) { updown = -1; mousewait = I_GetTime() + 5; mousey = lasty -= 30; }
+        if (mousey > lasty+30) { updown = +1; mousewait = I_GetTime() + 5; mousey = lasty += 30; }
+
+        mousex += ev->data2;
+        if (mousex < lastx-30) { leftright = -1; mousewait = I_GetTime() + 5; mousex = lastx -= 30; }
+        if (mousex > lastx+30) { leftright = +1; mousewait = I_GetTime() + 5; mousex = lastx += 30; }
+
+        if (ev->data1 & 1) { activate = true; mousewait = I_GetTime() + 15; }
+        if (ev->data1 & 2) { goback = true; mousewait = I_GetTime() + 15; }
     }
 
     // react to various actions
 
 
-    
+
     // Take care of any messages that need a yes no answer
     if (messageToPrint && messageNeedsInput) {
         int answer = 0;
@@ -1468,8 +1468,8 @@ boolean M_Responder (event_t* ev)
     // feature currently disabled
     if (false && key == KEY_F1)
     {
-	G_ScreenShot ();
-	return true;
+        G_ScreenShot ();
+        return true;
     }
 
     // F-Keys
@@ -1501,14 +1501,14 @@ boolean M_Responder (event_t* ev)
         M_SaveGame(0);
         return true;
     }
-				
+
     if (!menuactive && key == KEY_F3) {
         M_StartControlPanel();
         S_StartSound(NULL,sfx_swtchn);
         M_LoadGame(0);
         return true;
     }
-				
+
     if (!menuactive && key == KEY_F4) {
         M_StartControlPanel ();
         currentMenu = &SoundDef;
@@ -1589,7 +1589,7 @@ boolean M_Responder (event_t* ev)
     if (saveStringEnter && activate) {
         saveStringEnter = 0;
         if (savegamestrings[saveSlot][0]) M_DoSave(saveSlot);
-	return true;
+        return true;
     }
 
     if (saveStringEnter && character) {
@@ -1615,81 +1615,79 @@ boolean M_Responder (event_t* ev)
 
     // menu navigation
     if (menuactive && updown) {
-	do {
+        do {
             itemOn += -updown; // menu items increase going down
             if (itemOn < 0) itemOn = currentMenu->numitems - 1;
             if (itemOn > currentMenu->numitems - 1) itemOn = 0;
-	    S_StartSound(NULL,sfx_pstop);
-	} while(currentMenu->menuitems[itemOn].status==-1);
-	return true;
+            S_StartSound(NULL,sfx_pstop);
+        } while(currentMenu->menuitems[itemOn].status==-1);
+        return true;
     }
 
     if (menuactive && leftright) {
-	if (currentMenu->menuitems[itemOn].routine &&
-	    currentMenu->menuitems[itemOn].status == 2)
-	{
-	    S_StartSound(NULL,sfx_stnmov);
-	    currentMenu->menuitems[itemOn].routine(leftright < 0 ? 0 : 1);
-	}
-	return true;
+        if (currentMenu->menuitems[itemOn].routine && currentMenu->menuitems[itemOn].status == 2)
+        {
+            S_StartSound(NULL,sfx_stnmov);
+            currentMenu->menuitems[itemOn].routine(leftright < 0 ? 0 : 1);
+        }
+        return true;
     }
 
     if (menuactive && activate) {
-	if (currentMenu->menuitems[itemOn].routine &&
-	    currentMenu->menuitems[itemOn].status)
-	{
-	    currentMenu->lastOn = itemOn;
-	    if (currentMenu->menuitems[itemOn].status == 2)
-	    {
-		currentMenu->menuitems[itemOn].routine(1);      // right arrow
-		S_StartSound(NULL,sfx_stnmov);
-	    }
-	    else
-	    {
-		currentMenu->menuitems[itemOn].routine(itemOn);
-		S_StartSound(NULL,sfx_pistol);
-	    }
-	}
-	return true;
+        if (currentMenu->menuitems[itemOn].routine && currentMenu->menuitems[itemOn].status)
+        {
+            currentMenu->lastOn = itemOn;
+            if (currentMenu->menuitems[itemOn].status == 2)
+            {
+                currentMenu->menuitems[itemOn].routine(1);      // right arrow
+                S_StartSound(NULL,sfx_stnmov);
+            }
+            else
+            {
+                currentMenu->menuitems[itemOn].routine(itemOn);
+                S_StartSound(NULL,sfx_pistol);
+            }
+        }
+        return true;
     }
 
     if (menuactive && gohome) {
-	currentMenu->lastOn = itemOn;
-	M_ClearMenus ();
-	S_StartSound(NULL,sfx_swtchx);
-	X_AfterUnsummonMenu();
-	return true;
+        currentMenu->lastOn = itemOn;
+        M_ClearMenus ();
+        S_StartSound(NULL,sfx_swtchx);
+        X_AfterUnsummonMenu();
+        return true;
     }
 
     if (menuactive && goback) {
-	currentMenu->lastOn = itemOn;
-	if (currentMenu->prevMenu)
-	{
-	    currentMenu = currentMenu->prevMenu;
-	    itemOn = currentMenu->lastOn;
-	    S_StartSound(NULL,sfx_swtchn);
-	}
-	return true;
+        currentMenu->lastOn = itemOn;
+        if (currentMenu->prevMenu)
+        {
+            currentMenu = currentMenu->prevMenu;
+            itemOn = currentMenu->lastOn;
+            S_StartSound(NULL,sfx_swtchn);
+        }
+        return true;
     }
 
     // menu navigation shortcuts
     if (menuactive && character) {
         int ch = tolower(doomchar);
 
-	for (int i = itemOn+1;i < currentMenu->numitems;i++)
-	    if (currentMenu->menuitems[i].alphaKey == ch)
-	    {
-		itemOn = i;
-		S_StartSound(NULL,sfx_pstop);
-		return true;
-	    }
-	for (int i = 0;i <= itemOn;i++)
-	    if (currentMenu->menuitems[i].alphaKey == ch)
-	    {
-		itemOn = i;
-		S_StartSound(NULL,sfx_pstop);
-		return true;
-	    }
+        for (int i = itemOn+1;i < currentMenu->numitems;i++)
+            if (currentMenu->menuitems[i].alphaKey == ch)
+            {
+                itemOn = i;
+                S_StartSound(NULL,sfx_pstop);
+                return true;
+            }
+        for (int i = 0;i <= itemOn;i++)
+            if (currentMenu->menuitems[i].alphaKey == ch)
+            {
+                itemOn = i;
+                S_StartSound(NULL,sfx_pstop);
+                return true;
+            }
     }
 
     return false;
