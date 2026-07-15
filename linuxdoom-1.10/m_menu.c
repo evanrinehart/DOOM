@@ -1672,12 +1672,10 @@ boolean M_Responder (event_t* ev)
 
     // menu navigation shortcuts
     if (menuactive && character) {
-        int ch = tolower(doomchar);
         int i = itemOn;
         do {
-            i++;
-            if (i > currentMenu->numitems - 1) i = 0;
-            if (currentMenu->menuitems[i].alphaKey == ch) {
+            i = (i + 1) % currentMenu->numitems;
+            if (currentMenu->menuitems[i].alphaKey == tolower(doomchar)) {
                 itemOn = i;
                 S_StartSound(NULL,sfx_pstop);
                 return true;
