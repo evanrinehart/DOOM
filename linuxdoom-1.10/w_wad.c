@@ -299,8 +299,27 @@ void W_InitMultipleFiles (char** filenames)
     for ( ; *filenames ; filenames++)
 	W_AddFile (*filenames);
 
-    if (!numlumps)
-	I_Error ("W_InitFiles: no files found");
+    if (!numlumps) {
+        printf("W_InitFiles: could not load any WAD or lump files.\n");
+        printf("searched in directory: %s\n", GetDoomWadDir());
+        if (strcmp(GetDoomWadDir(), ".")==0) {
+            printf("set DOOMWADDIR to the location of your WADs!\n");
+        }
+
+        printf("\nAt least one of these IWADs is required:\n");
+        printf("%-16s %-24s %s\n", "FILE", "GAME", "");
+        for (struct iwad *w = known_iwads; w->filename; w++) {
+            char *note = "";
+            if (w->availability == 0) note = "(freely available)";
+            if (w->availability == 1) note = "(commercially available)";
+            printf("%-16s %-24s %s\n", w->filename, w->informal, note);
+        }
+        printf("\n");
+        printf("see https://doomwiki.org/wiki/IWAD for the MD5 sum of each file\n");
+        printf("\n");
+        printf("CHEX.WAD is not fully supported and requires the -chex flag to load.\n");
+        exit(1);
+    }
     
     // set up caching
     size = numlumps * sizeof(*lumpcache);
