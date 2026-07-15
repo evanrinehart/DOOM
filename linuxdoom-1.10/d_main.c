@@ -546,8 +546,8 @@ void D_AddFile (char *file)
 struct iwad known_iwads[] = {
     {"doom2f.wad",    9, commercial, doom2,     french,  "French DOOM II", "DOOM 2: Hell on Earth", "DOOM II"},
     {"doom2.wad",     1, commercial, doom2,     english, "Doom II", "DOOM 2: Hell on Earth", "DOOM II"},
-    {"plutonia.wad",  1, commercial, pack_plut, english, "Final DOOM Plutonia", "DOOM 2: The Plutonia Experiment", "Final DOOM - The Plutonia Experiment"},
-    {"tnt.wad",       1, commercial, pack_tnt,  english, "Final DOOM TNT", "DOOM 2: TNT - Evilution", "Final DOOM - TNT: Evilution"},
+    {"plutonia.wad",  1, commercial, pack_plut, english, "Final DOOM", "DOOM 2: The Plutonia Experiment", "Final DOOM - The Plutonia Experiment"},
+    {"tnt.wad",       1, commercial, pack_tnt,  english, "Final DOOM", "DOOM 2: TNT - Evilution", "Final DOOM - TNT: Evilution"},
     {"doomu.wad",     1, retail,     doom,      english, "Ultimate DOOM", "Ultimate DOOM"},
     {"doom.wad",      9, registered, doom,      english, "Registered DOOM 1", "DOOM"},
     {"doom1.wad",     0, shareware,  doom,      english, "Shareware DOOM", "DOOM", "DOOM - Shareware"},
@@ -557,11 +557,16 @@ struct iwad known_iwads[] = {
     {NULL, 0, 0, 0, 0, NULL}
 };
 
-bool TryIWAD(struct iwad *info) {
+struct iwad *shareware_info = &known_iwads[6];
+
+
+bool TryIWAD(struct iwad *info, char *dirpath) {
+
+    if (strcmp(info->filename,"CHEX.WAD")==0 && !M_CheckParm("-chex")) return false;
+
     bool got_it = false;
-    char *doomwaddir = GetDoomWadDir();
-    char *path = malloc(strlen(doomwaddir)+1+strlen(info->filename)+1);
-    sprintf(path, "%s/%s", doomwaddir, info->filename);
+    char *path = malloc(strlen(dirpath)+1+strlen(info->filename)+1);
+    sprintf(path, "%s/%s", dirpath, info->filename);
     if ( !access (path,R_OK) ) {
         got_it = true;
         gamemode = info->mode;
@@ -576,6 +581,16 @@ bool TryIWAD(struct iwad *info) {
     return got_it;
 }
 
+bool TryIWADs(char *dirpath) {
+    if (dirpath == NULL) return false;
+    int p = M_CheckParm("-iwad"); // only try named iwad
+    char *chosen_iwad = p && p < myargc-1 ? myargv[p+1] : NULL;
+    for (struct iwad *info = known_iwads; info->filename; info++) {
+        if (chosen_iwad && strcmp(info->filename, chosen_iwad) != 0) continue;
+        if (TryIWAD(info, dirpath)) return true;
+    }
+    return false;
+}
 
 
 //
@@ -586,25 +601,39 @@ bool TryIWAD(struct iwad *info) {
 //
 void IdentifyVersion (void)
 {
-
-    int p = M_CheckParm("-iwad"); // only try named iwad
-    char *chosen_iwad = p && p < myargc-1 ? myargv[p+1] : NULL;
-
-    for (struct iwad *info = known_iwads; info->filename; info++) {
-        if (chosen_iwad && strcmp(info->filename, chosen_iwad) != 0) continue;
-        if (strcmp(info->filename, "CHEX.WAD") == 0 && !M_CheckParm("-chex")) continue;
-        if (TryIWAD(info)) return;
-    }
-
-    if (verbose) printf("Game mode indeterminate.\n");
+    // defaults in case no IWAD but highly custom set of lumps ends up working
     gamemode = indetermined;
     gamemission = none;
     game_title = "Public DOOM";
     window_title = "DOOM";
 
-    // We don't abort. Let's see what the PWAD contains.
-    //exit(1);
-    //I_Error ("Game mode indeterminate\n");
+    EstablishDataSubdir("wads");
+    char *stash = GetDataPath("wads", NULL);
+    char *doomwaddir = getenv("DOOMWADDIR");
+
+    bool gotit = TryIWADs(".") || TryIWADs(stash) || TryIWADs(doomwaddir);
+
+    char *question = "No IWAD file found. Download DOOM Shareware?";
+
+    if (!gotit && doomwaddir == NULL && !M_CheckParm("-iwad") && AskYesNo(question)) {
+        char cmd[] = "curl -L -o";
+        char doom1[] = "doom1.wad";
+        char url[] = "https://distro.ibiblio.org/slitaz/sources/packages/d/doom1.wad";
+
+        char *command = malloc(strlen(cmd) + 1 + strlen(stash) + 1 + strlen(doom1) + 1 + strlen(url) + 1);
+        sprintf(command, "%s %s/%s %s", cmd, stash, doom1, url);
+        int e = system(command);
+        free(command);
+
+        if (e) I_Error("requested download failed: %s", url);
+
+        TryIWAD(shareware_info, stash);
+        free(stash);
+        return;
+    }
+
+    free(stash);
+    if (verbose) printf("Game mode indeterminate.\n");
 }
 
 

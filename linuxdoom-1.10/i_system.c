@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <ctype.h>
 
 #include <stdarg.h>
 #include <unistd.h>
@@ -220,13 +221,7 @@ _Noreturn void I_Error (char *error, ...)
 
 
 char *GetDoomWadDir() {
-#ifdef NORMALUNIX
-    char *dir = getenv("DOOMWADDIR");
-    if (!dir) return ".";
-    return dir;
-#else
-    return ".";
-#endif
+    return getenv("DOOMWADDIR");
 }
 
 char *GetHomeDir() {
@@ -281,4 +276,15 @@ void EstablishDataSubdir(const char *dirname) {
     int e = mkdir(path, 0700);
     if (e < 0 && errno != EEXIST) I_Error("mkdir %s: %s\n", path, strerror(errno));
     free(path);
+}
+
+int AskYesNo(const char *question)
+{
+    printf("%s [y/N] ", question);
+    fflush(stdout);
+    int c = getchar();
+    if (c == EOF) return false;
+    if (c == '\n') return false;
+    {int d; do { d = getchar(); } while (d!='\n' && d!=EOF);} // discard rest of line
+    return tolower((unsigned char) c) == 'y';
 }

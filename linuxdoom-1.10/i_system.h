@@ -95,5 +95,6 @@ char *GetHomeDir();
 char *GetDataPath(const char *dirname, const char *filename);
 void EstablishDataHomeDir(void);
 void EstablishDataSubdir(const char *dirname);
+int AskYesNo(const char *question);
 
 #endif
