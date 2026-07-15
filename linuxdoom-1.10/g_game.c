@@ -1316,7 +1316,7 @@ void G_DoSaveGame (void)
     if (length > SAVEGAMESIZE) 
 	I_Error ("Savegame buffer overrun"); 
 
-    EstablishSavesDir();
+    EstablishDataSubdir("saves");
     char *savepath = GetDataPath("saves", name);
     int success = M_WriteFile (savepath, savebuffer, length);
     if (!success) {

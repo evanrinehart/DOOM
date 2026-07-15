@@ -275,18 +275,10 @@ void EstablishDataHomeDir(void) {
     free(datahome);
 }
 
-void EstablishSavesDir(void) {
+void EstablishDataSubdir(const char *dirname) {
     EstablishDataHomeDir();
-    char *saves = GetDataPath("saves", NULL);
-    int e = mkdir(saves, 0700);
-    if (e < 0 && errno != EEXIST) I_Error("mkdir %s: %s\n", saves, strerror(errno));
-    free(saves);
-}
-
-void EstablishWadsDir(void) {
-    EstablishDataHomeDir();
-    char *saves = GetDataPath("wads", NULL);
-    int e = mkdir(saves, 0700);
-    if (e < 0 && errno != EEXIST) I_Error("mkdir %s: %s\n", saves, strerror(errno));
-    free(saves);
+    char *path = GetDataPath(dirname, NULL);
+    int e = mkdir(path, 0700);
+    if (e < 0 && errno != EEXIST) I_Error("mkdir %s: %s\n", path, strerror(errno));
+    free(path);
 }
