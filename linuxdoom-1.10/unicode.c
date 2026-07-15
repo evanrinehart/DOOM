@@ -216,6 +216,17 @@ long latin_fallback(long codepoint)
         case 0x0178: case 0x00FF:
             return 'Y';
 
+        case 0x00BF:                  /* ¿ */
+            return '?';
+
+        case 0x00A1:                  /* ¡ */
+            return '!';
+
+        /* Guillemets */
+        case 0x00AB:                  /* « */
+        case 0x00BB:                  /* » */
+            return '"';
+
         default:
             return '?';
     }

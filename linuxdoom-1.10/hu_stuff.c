@@ -666,6 +666,7 @@ byte HU_dequeueChatChar(void)
 }
 
 int encode_single_utf8(long codepoint, unsigned char *buf);
+long latin_toupper(long);
 
 boolean HU_Responder(event_t *ev)
 {
@@ -787,7 +788,7 @@ boolean HU_Responder(event_t *ev)
 
     // proper chat, user typed a character
     if (chat_on && ev->type == ev_character) {
-        long c = toupper(ev->data1);
+        long c = latin_toupper(ev->data1);
         if (' ' <= c && c <= '_') { // uppercase range of ascii printchars
             HU_queueChatChar(c);
             HUlib_addCharToTextLine(&w_chat.l, c);

@@ -107,32 +107,7 @@ int splat_glyph(hu_textline_t *l, int x, unsigned char c) {
     return x + w;
 }
 
-// placeholder in lieu of actual font graphics
-unsigned char spanish(const char *src, size_t len) {
-    int u = decode_single_utf8((const unsigned char *)src, len);
-    if (u < 0) return '@';
-    char buf[6];
-    buf[encode_single_utf8(u, (unsigned char *)buf)] = 0;
-    if (strcmp(buf, "¿")==0) return '?';
-    if (strcmp(buf, "¡")==0) return '!';
-    if (strcmp(buf, "«")==0) return '"';
-    if (strcmp(buf, "»")==0) return '"';
-    if (strcmp(buf, "Ñ")==0) return 'N';
-    if (strcmp(buf, "ñ")==0) return 'N';
-    if (strcmp(buf, "á")==0) return 'A';
-    if (strcmp(buf, "é")==0) return 'E';
-    if (strcmp(buf, "í")==0) return 'I';
-    if (strcmp(buf, "ó")==0) return 'O';
-    if (strcmp(buf, "ú")==0) return 'U';
-    if (strcmp(buf, "Á")==0) return 'A';
-    if (strcmp(buf, "É")==0) return 'E';
-    if (strcmp(buf, "Í")==0) return 'I';
-    if (strcmp(buf, "Ó")==0) return 'O';
-    if (strcmp(buf, "Ú")==0) return 'U';
-    if (strcmp(buf, "ü")==0) return 'U';
-    if (strcmp(buf, "Ü")==0) return 'U';
-    return '?';
-}
+long latin_fallback(long);
 
 void
 HUlib_drawTextLine
@@ -147,13 +122,10 @@ HUlib_drawTextLine
     while (left > 0) {
 
         int n = get_utf8_size(l->l[i]);
-        unsigned char c = ' ';
+        long u = decode_single_utf8((const unsigned char*)&l->l[i], left);
+        unsigned char c = u<0 ? '@' : toupper(latin_fallback(u));
 
-        if (n == 1) c = toupper(l->l[i]);
-        else if (n > 1) c = spanish(&l->l[i], left);
-        else c = '_';
-
-        if (n==1 && (c==' ' || c < l->sc || c > '_'))
+        if (c==' ' || c < l->sc || c > '_')
             x += 4;
         else
             x = splat_glyph(l, x, c);
