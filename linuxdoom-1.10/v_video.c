@@ -41,6 +41,7 @@ byte*				screens[5];
  
 int				dirtybox[4]; 
 
+struct framebuffer fb_foundation;
 struct framebuffer fb_hud;
 struct framebuffer fb_wipe;
 
@@ -165,15 +166,20 @@ V_CopyRect
 { 
     byte*	src;
     byte*	dest; 
+
+    if (srcscrn != 4) {
+        //printf("V_CopyRect from %d to %d ignored\n", srcscrn, destscrn);
+        //return;
+    }
 	 
 #ifdef RANGECHECK 
     if (srcx<0
-	||srcx+width >SCREENWIDTH
+	||srcx+width >HSCREENWIDTH
 	|| srcy<0
-	|| srcy+height>SCREENHEIGHT 
-	||destx<0||destx+width >SCREENWIDTH
+	|| srcy+height>HSCREENHEIGHT
+	||destx<0||destx+width >HSCREENWIDTH
 	|| desty<0
-	|| desty+height>SCREENHEIGHT 
+	|| desty+height>HSCREENHEIGHT
 	|| (unsigned)srcscrn>4
 	|| (unsigned)destscrn>4)
     {
@@ -182,14 +188,17 @@ V_CopyRect
 #endif 
     V_MarkRect (destx, desty, width, height); 
 	 
-    src = screens[srcscrn]+SCREENWIDTH*srcy+srcx; 
-    dest = screens[destscrn]+SCREENWIDTH*desty+destx; 
+    src = screens[srcscrn]+HSCREENWIDTH*srcy+srcx;
+    //dest = screens[destscrn]+HSCREENWIDTH*desty+destx;
+    dest = fb_hud.color + HSCREENWIDTH*desty + destx;
+
 
     for ( ; height>0 ; height--) 
     { 
+        // HUD WRITE
 	memcpy (dest, src, width); 
-	src += SCREENWIDTH; 
-	dest += SCREENWIDTH; 
+	src += HSCREENWIDTH;
+	dest += HSCREENWIDTH;
     } 
 } 
  
@@ -213,6 +222,12 @@ V_DrawPatch
     byte*	dest;
     byte*	source; 
     int		w; 
+
+    if (scrn > 1) {
+        //printf("V_DrawPatch to screen %d ignored\n", scrn);
+        //return;
+    }
+    if (scrn == 1) return; // problematic bezel
 	 
     y -= SHORT(patch->topoffset); 
     x -= SHORT(patch->leftoffset); 
@@ -234,11 +249,14 @@ V_DrawPatch
 	V_MarkRect (x, y, SHORT(patch->width), SHORT(patch->height)); 
 
     col = 0; 
-    desttop = screens[scrn]+y*HSCREENWIDTH+x;
+    desttop = fb_hud.color + y*HSCREENWIDTH + x;
+    byte *masktop = fb_hud.mask + y*HSCREENWIDTH + x;
+
+    if (scrn==4) desttop = screens[scrn]+y*HSCREENWIDTH+x;
 	 
     w = SHORT(patch->width); 
 
-    for ( ; col<w ; x++, col++, desttop++)
+    for ( ; col<w ; x++, col++, desttop++, masktop++)
     { 
 	column = (column_t *)((byte *)patch + LONG(patch->columnofs[col])); 
  
@@ -247,13 +265,16 @@ V_DrawPatch
 	{ 
 	    source = (byte *)column + 3; 
 	    dest = desttop + column->topdelta*HSCREENWIDTH;
+            byte* dmask = masktop + column->topdelta*HSCREENWIDTH;
 	    count = column->length; 
 			 
 	    while (count--) 
 	    { 
                 // HUD WRITE
 		*dest = *source++; 
+                if (scrn!=4) *dmask = 255;
 		dest += HSCREENWIDTH;
+                dmask += HSCREENWIDTH;
 	    } 
 	    column = (column_t *)(  (byte *)column + column->length 
 				    + 4 ); 
@@ -281,6 +302,11 @@ V_DrawPatchFlipped
     byte*	dest;
     byte*	source; 
     int		w; 
+
+    if (scrn != 0) {
+        printf("V_DrawPatchFlipped to screen %d ignored\n", scrn);
+        return;
+    }
 	 
     y -= SHORT(patch->topoffset); 
     x -= SHORT(patch->leftoffset); 
@@ -300,7 +326,9 @@ V_DrawPatchFlipped
 	V_MarkRect (x, y, SHORT(patch->width), SHORT(patch->height)); 
 
     col = 0; 
-    desttop = screens[scrn]+y*HSCREENWIDTH+x;
+    //desttop = screens[scrn]+y*HSCREENWIDTH+x;
+    desttop = fb_hud.color + y*HSCREENWIDTH + x;
+    // we still need to output to fb_hud.mask
 	 
     w = SHORT(patch->width); 
 
@@ -507,4 +535,8 @@ void V_Init (void)
     // the HUD and status bar and intermission and finale
     // assume precisely 320x200
     AllocFramebuffer(&fb_hud, 320, 200, true);
+    AllocFramebuffer(&fb_foundation, 320, 200, false);
+
+    // clear to transparent
+    ClearFramebuffer(&fb_hud, 0, 0);
 }

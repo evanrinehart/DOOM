@@ -44,7 +44,7 @@ planefunction_t		ceilingfunc;
 //
 
 // Here comes the obnoxious "visplane".
-#define MAXVISPLANES	160
+#define MAXVISPLANES	250
 visplane_t		visplanes[MAXVISPLANES];
 visplane_t*		lastvisplane;
 visplane_t*		floorplane;
@@ -242,7 +242,7 @@ R_FindPlane
 	return check;
 		
     if (lastvisplane - visplanes == MAXVISPLANES)
-	I_Error ("R_FindPlane: no more visplanes");
+	I_Error ("R_FindPlane: no more visplanes (%d/%d)", lastvisplane-visplanes, MAXVISPLANES);
 		
     lastvisplane++;
 

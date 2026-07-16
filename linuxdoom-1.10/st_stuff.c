@@ -1095,6 +1095,9 @@ void ST_drawWidgets(boolean refresh)
 void ST_doRefresh(void)
 {
 
+    // this is not the right place for this action
+    ClearFramebuffer(&fb_hud, 0, 0);
+
     st_firsttime = false;
 
     // draw status bar background to off-screen buff

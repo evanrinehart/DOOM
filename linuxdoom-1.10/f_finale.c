@@ -648,7 +648,7 @@ F_DrawPatchCol
     int		count;
 	
     column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
-    desttop = screens[0]+x;
+    desttop = fb_hud.color + x;
 
     // step through the posts in a column
     while (column->topdelta != 0xff )

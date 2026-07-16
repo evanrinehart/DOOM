@@ -28,6 +28,8 @@
 #include "hooks.h"
 #include "netscope.h"
 
+#include "v_framebuffer.h"
+
 #define MIN(A,B) ((A) < (B) ? (A) : (B))
 #define MAX(A,B) ((A) > (B) ? (A) : (B))
 
@@ -45,8 +47,13 @@ extern byte gammatable[5][256];
 extern int usegamma;
 
 static Color current_palette[256];
+
 static Texture screen_tex;
 static Image screen_img;
+static Texture foundation_tex;
+static Image foundation_img;
+static Texture hud_tex;
+static Image hud_img;
 
 static int window_w;
 static int window_h;
@@ -326,15 +333,29 @@ void I_FinishUpdate (void) {
         *writing++ = current_palette[screens[0][i]];
     }
 
+    byte *reading = fb_hud.color;
+    byte *mask = fb_hud.mask;
+    writing = hud_img.data;
+    int count = hud_img.width * hud_img.height;
+    for (int i = 0; i < count; i++) {
+        Color c = current_palette[*reading++];
+        if (*mask++ == 0) c.a = 0;
+        *writing++ = c;
+    }
+
     BeginDrawing();
 
     ClearBackground(BLACK);
     UpdateTexture(screen_tex, screen_img.data);
+    UpdateTexture(hud_tex, hud_img.data);
 
     Rectangle src = {0, 0, screen_tex.width, screen_tex.height};
     Rectangle dst = {offset_x, 0, window_w, window_h};
     Vector2 zero = {0,0};
     DrawTexturePro(screen_tex, src, dst, zero, 0.0f, WHITE);
+
+    src = (Rectangle){0, 0, hud_tex.width, hud_tex.height};
+    DrawTexturePro(hud_tex, src, dst, zero, 0.0f, WHITE);
 
     if (show_debug) {
         render_netstatus(netstatus);
@@ -448,6 +469,12 @@ void I_InitGraphics(char *title) {
 
     screen_img = GenImageColor(SCREENWIDTH, SCREENHEIGHT, GREEN);
     screen_tex = LoadTextureFromImage(screen_img);
+
+    // create full color images for each 8bit framebuffer
+    hud_img = GenImageColor(fb_hud.width, fb_hud.height, GREEN);
+    hud_tex = LoadTextureFromImage(hud_img);
+    foundation_img = GenImageColor(fb_foundation.width, fb_foundation.height, GREEN);
+    foundation_tex = LoadTextureFromImage(foundation_img);
 
     SetExitKey(0);
 

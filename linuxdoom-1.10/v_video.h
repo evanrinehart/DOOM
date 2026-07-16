@@ -31,6 +31,8 @@
 // Needed because we are refering to patches.
 #include "r_data.h"
 
+#include "v_framebuffer.h"
+
 //
 // VIDEO
 //
@@ -44,18 +46,6 @@
 
 
 extern	byte*		screens[5];
-
-struct framebuffer {
-    byte *color;
-    byte *mask;
-    int width;
-    int height;
-    int count; // width x height
-    int dirty; // contains new stuff
-};
-
-extern struct framebuffer fb_hud;
-extern struct framebuffer fb_wipe;
 
 extern  int	dirtybox[4];
 
@@ -122,4 +112,5 @@ V_MarkRect
   int		width,
   int		height );
 
+void ClearFramebuffer(struct framebuffer *fb, byte color, byte mask);
 #endif

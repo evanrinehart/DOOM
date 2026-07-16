@@ -802,20 +802,22 @@ void R_FillBackScreen (void)
 	name = name1;
     
     src = W_CacheLumpName (name, PU_CACHE); 
-    dest = screens[1]; 
+    dest = fb_foundation.color;
 	 
-    for (y=0 ; y<SCREENHEIGHT-SBARHEIGHT ; y++) 
+    // HUD WRITE
+    // actually, this is the background layer.
+    for (y=0 ; y<HSCREENHEIGHT-SBARHEIGHT ; y++)
     { 
-	for (x=0 ; x<SCREENWIDTH/64 ; x++) 
+	for (x=0 ; x<HSCREENWIDTH/64 ; x++)
 	{ 
-	    memcpy (dest, src+((y&63)<<6), 64); 
+	    memcpy (dest, src+((y&63)<<6), 64);
 	    dest += 64; 
 	} 
 
-	if (SCREENWIDTH&63) 
+	if (HSCREENWIDTH&63)
 	{ 
-	    memcpy (dest, src+((y&63)<<6), SCREENWIDTH&63); 
-	    dest += (SCREENWIDTH&63); 
+	    memcpy (dest, src+((y&63)<<6), HSCREENWIDTH&63);
+	    dest += (HSCREENWIDTH&63);
 	} 
     } 
 	
@@ -899,6 +901,7 @@ void R_DrawViewBorder (void)
     if (scaledviewwidth == SCREENWIDTH) 
 	return; 
   
+    // note SBARHEIGHT is still 32 right now
     top = ((SCREENHEIGHT-SBARHEIGHT)-viewheight)/2; 
     side = (SCREENWIDTH-scaledviewwidth)/2; 
  
