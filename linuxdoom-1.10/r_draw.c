@@ -44,7 +44,7 @@
 #define MAXHEIGHT			832
 
 // status bar height at bottom of screen
-#define SBARHEIGHT		32
+#define SBARHEIGHT		64
 
 //
 // All drawing to the view buffer is accomplished in this file.
@@ -793,7 +793,7 @@ void R_FillBackScreen (void)
 
     char*	name;
 	
-    if (scaledviewwidth == 320)
+    if (scaledviewwidth == 2*320)
 	return;
 	
     if ( gamemode == commercial)

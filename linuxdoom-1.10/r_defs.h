@@ -469,10 +469,10 @@ typedef struct
   // Here lies the rub for all
   //  dynamic resize/change of resolution.
 
-  byte top_store[SCREENWIDTH + 2];
-  byte bottom_store[SCREENWIDTH + 2];
-  byte *top; // points one past the start
-  byte *bottom; // points one past the start
+  unsigned short top_store[SCREENWIDTH + 2];
+  unsigned short bottom_store[SCREENWIDTH + 2];
+  unsigned short *top; // points one past the start
+  unsigned short *bottom; // points one past the start
 
 } visplane_t;
 

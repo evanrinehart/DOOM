@@ -394,7 +394,7 @@ void R_DrawPlanes (void)
 	// sky flat
 	if (pl->picnum == skyflatnum)
 	{
-	    dc_iscale = pspriteiscale;
+	    dc_iscale = pspriteiscale / 2;
 	    
 	    // Sky is allways drawn full bright,
 	    //  i.e. colormaps[0] is used.
@@ -434,8 +434,8 @@ void R_DrawPlanes (void)
 
 	planezlight = zlight[light];
 
-	pl->top[pl->maxx+1] = 0xff;
-	pl->top[pl->minx-1] = 0xff;
+	pl->top[pl->maxx+1] = 0xffff;
+	pl->top[pl->minx-1] = 0xffff;
 		
 	stop = pl->maxx + 1;
 
