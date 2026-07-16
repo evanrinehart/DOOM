@@ -45,6 +45,18 @@
 
 extern	byte*		screens[5];
 
+struct framebuffer {
+    byte *color;
+    byte *mask;
+    int width;
+    int height;
+    int count; // width x height
+    int dirty; // contains new stuff
+};
+
+extern struct framebuffer fb_hud;
+extern struct framebuffer fb_wipe;
+
 extern  int	dirtybox[4];
 
 extern	byte	gammatable[5][256];

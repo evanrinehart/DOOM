@@ -2,9 +2,10 @@
 // C++ might sucks for OOP, but it sure is a better C.
 // So there.
 #define SCREENWIDTH  640
-//SCREEN_MUL*BASE_WIDTH //320
 #define SCREENHEIGHT 400
-//(int)(SCREEN_MUL*BASE_WIDTH*INV_ASPECT_RATIO) //200
+
+#define HSCREENWIDTH  320
+#define HSCREENHEIGHT 200
 
 // These are in values.h but we want these exact values
 #define MAXCHAR		((char)0x7f)

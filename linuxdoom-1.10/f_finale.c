@@ -646,6 +646,8 @@ F_DrawPatchCol
     byte*	dest;
     byte*	desttop;
     int		count;
+
+    if (col >= 320) return; // bunny scroll at high rez would go off the patch
 	
     column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
     desttop = screens[0]+x;

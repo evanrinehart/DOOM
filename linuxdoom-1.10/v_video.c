@@ -22,6 +22,8 @@
 //
 //-----------------------------------------------------------------------------
 
+#include <stdlib.h>
+
 #include "i_system.h"
 #include "r_local.h"
 
@@ -39,6 +41,8 @@ byte*				screens[5];
  
 int				dirtybox[4]; 
 
+struct framebuffer fb_hud;
+struct framebuffer fb_wipe;
 
 
 // Now where did these came from?
@@ -468,6 +472,19 @@ V_GetBlock
 } 
 
 
+void AllocFramebuffer(struct framebuffer *fb, int w, int h, bool mask) {
+    fb->color = malloc(w*h);
+    fb->mask = mask ? malloc(w*h) : NULL;
+    fb->width = w;
+    fb->height = h;
+    fb->count = w*h;
+    fb->dirty = 0;
+}
+
+void ClearFramebuffer(struct framebuffer *fb, byte color, byte mask) {
+    memset(fb->color, color, fb->count);
+    if (fb->mask) memset(fb->mask, mask, fb->count);
+}
 
 
 //
@@ -484,4 +501,7 @@ void V_Init (void)
 
     for (i=0 ; i<4 ; i++)
 	screens[i] = base + i*SCREENWIDTH*SCREENHEIGHT;
+
+    // the HUD and status bar assume precisely 320x200
+    AllocFramebuffer(&fb_hud, 320, 200, true);
 }
