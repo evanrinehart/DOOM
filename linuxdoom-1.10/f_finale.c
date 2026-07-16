@@ -272,21 +272,21 @@ void F_TextWrite (void)
     src = W_CacheLumpName ( finaleflat , PU_CACHE);
     dest = screens[0];
 	
-    for (y=0 ; y<SCREENHEIGHT ; y++)
+    for (y=0 ; y<HSCREENHEIGHT ; y++)
     {
-	for (x=0 ; x<SCREENWIDTH/64 ; x++)
+	for (x=0 ; x<HSCREENWIDTH/64 ; x++)
 	{
 	    memcpy (dest, src+((y&63)<<6), 64);
 	    dest += 64;
 	}
-	if (SCREENWIDTH&63)
+	if (HSCREENWIDTH&63)
 	{
-	    memcpy (dest, src+((y&63)<<6), SCREENWIDTH&63);
-	    dest += (SCREENWIDTH&63);
+	    memcpy (dest, src+((y&63)<<6), HSCREENWIDTH&63);
+	    dest += (HSCREENWIDTH&63);
 	}
     }
 
-    V_MarkRect (0, 0, SCREENWIDTH, SCREENHEIGHT);
+    V_MarkRect (0, 0, HSCREENWIDTH, HSCREENHEIGHT);
     
     // draw some of the text onto the screen
     cx = 10;
@@ -316,7 +316,7 @@ void F_TextWrite (void)
 	}
 		
 	w = SHORT (hu_font[c]->width);
-	if (cx+w > SCREENWIDTH)
+	if (cx+w > HSCREENWIDTH)
 	    break;
 	V_DrawPatch(cx, cy, 0, hu_font[c]);
 	cx+=w;
@@ -646,8 +646,6 @@ F_DrawPatchCol
     byte*	dest;
     byte*	desttop;
     int		count;
-
-    if (col >= 320) return; // bunny scroll at high rez would go off the patch
 	
     column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
     desttop = screens[0]+x;
@@ -656,13 +654,14 @@ F_DrawPatchCol
     while (column->topdelta != 0xff )
     {
 	source = (byte *)column + 3;
-	dest = desttop + column->topdelta*SCREENWIDTH;
+	dest = desttop + column->topdelta*HSCREENWIDTH;
 	count = column->length;
 		
 	while (count--)
 	{
+            // HUD WRITE
 	    *dest = *source++;
-	    dest += SCREENWIDTH;
+	    dest += HSCREENWIDTH;
 	}
 	column = (column_t *)(  (byte *)column + column->length + 4 );
     }
@@ -685,7 +684,7 @@ void F_BunnyScroll (void)
     p1 = W_CacheLumpName ("PFUB2", PU_LEVEL);
     p2 = W_CacheLumpName ("PFUB1", PU_LEVEL);
 
-    V_MarkRect (0, 0, SCREENWIDTH, SCREENHEIGHT);
+    V_MarkRect (0, 0, HSCREENWIDTH, HSCREENHEIGHT);
 	
     scrolled = 320 - (finalecount-230)/2;
     if (scrolled > 320)
@@ -693,7 +692,7 @@ void F_BunnyScroll (void)
     if (scrolled < 0)
 	scrolled = 0;
 		
-    for ( x=0 ; x<SCREENWIDTH ; x++)
+    for ( x=0 ; x<HSCREENWIDTH ; x++)
     {
 	if (x+scrolled < 320)
 	    F_DrawPatchCol (x, p1, x+scrolled);
@@ -705,8 +704,8 @@ void F_BunnyScroll (void)
 	return;
     if (finalecount < 1180)
     {
-	V_DrawPatch ((SCREENWIDTH-13*8)/2,
-		     (SCREENHEIGHT-8*8)/2,0, W_CacheLumpName ("END0",PU_CACHE));
+	V_DrawPatch ((HSCREENWIDTH-13*8)/2,
+		     (HSCREENHEIGHT-8*8)/2,0, W_CacheLumpName ("END0",PU_CACHE));
 	laststage = 0;
 	return;
     }
@@ -721,7 +720,7 @@ void F_BunnyScroll (void)
     }
 	
     sprintf (name,"END%i",stage);
-    V_DrawPatch ((SCREENWIDTH-13*8)/2, (SCREENHEIGHT-8*8)/2,0, W_CacheLumpName (name,PU_CACHE));
+    V_DrawPatch ((HSCREENWIDTH-13*8)/2, (HSCREENHEIGHT-8*8)/2,0, W_CacheLumpName (name,PU_CACHE));
 }
 
 
