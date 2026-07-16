@@ -91,6 +91,7 @@ clean:
 test: $(BINNAME)
 	@tmpdir=$$(mktemp -d); \
 	trap 'rm -rf "$$tmpdir"' EXIT; \
+	mkdir -p $$tmpdir/.local/share; \
 	HOME="$$tmpdir" xvfb-run -s "-screen 0 1024x768x24" ./$(BINNAME) -1 -timedemo demo1 -nosound -nostartup
 
 $(O):
