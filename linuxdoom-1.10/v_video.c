@@ -218,9 +218,9 @@ V_DrawPatch
     x -= SHORT(patch->leftoffset); 
 #ifdef RANGECHECK 
     if (x<0
-	||x+SHORT(patch->width) >SCREENWIDTH
+	||x+SHORT(patch->width) >HSCREENWIDTH
 	|| y<0
-	|| y+SHORT(patch->height)>SCREENHEIGHT 
+	|| y+SHORT(patch->height)>HSCREENHEIGHT
 	|| (unsigned)scrn>4)
     {
       fprintf( stderr, "Patch at %d,%d exceeds LFB\n", x,y );
@@ -234,7 +234,7 @@ V_DrawPatch
 	V_MarkRect (x, y, SHORT(patch->width), SHORT(patch->height)); 
 
     col = 0; 
-    desttop = screens[scrn]+y*SCREENWIDTH+x; 
+    desttop = screens[scrn]+y*HSCREENWIDTH+x;
 	 
     w = SHORT(patch->width); 
 
@@ -246,13 +246,13 @@ V_DrawPatch
 	while (column->topdelta != 0xff ) 
 	{ 
 	    source = (byte *)column + 3; 
-	    dest = desttop + column->topdelta*SCREENWIDTH; 
+	    dest = desttop + column->topdelta*HSCREENWIDTH;
 	    count = column->length; 
 			 
 	    while (count--) 
 	    { 
 		*dest = *source++; 
-		dest += SCREENWIDTH; 
+		dest += HSCREENWIDTH;
 	    } 
 	    column = (column_t *)(  (byte *)column + column->length 
 				    + 4 ); 
