@@ -41,6 +41,8 @@ static byte*	wipe_scr_end;
 static byte*	wipe_scr;
 static byte*	wipe_scr_mask;
 
+boolean wipe_ongoing = false;
+
 
 void
 wipe_shittyColMajorXform

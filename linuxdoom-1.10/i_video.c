@@ -387,6 +387,7 @@ void I_FinishUpdate (void) {
     unpack_frame(&fb_status, status_img);
     unpack_frame(&fb_hud, hud_img);
     unpack_frame(&fb_wipe, wipe_img);
+    unpack_frame(&fb_menu, menu_img);
 
     BeginDrawing();
 
@@ -396,6 +397,7 @@ void I_FinishUpdate (void) {
     UpdateTexture(status_tex, status_img.data);
     UpdateTexture(hud_tex, hud_img.data);
     UpdateTexture(wipe_tex, wipe_img.data);
+    UpdateTexture(menu_tex, menu_img.data);
 
     // splat the various textures on quads
     if (show_layer[1]) show_fbtex(&fb_backwall, backwall_tex);
@@ -403,6 +405,7 @@ void I_FinishUpdate (void) {
     if (show_layer[3]) show_fbtex(&fb_status, status_tex);
     if (show_layer[4]) show_fbtex(&fb_hud, hud_tex);
     if (show_layer[5]) show_fbtex(&fb_wipe, wipe_tex);
+    if (show_layer[6]) show_fbtex(&fb_menu, menu_tex);
 
     if (show_debug) {
         render_netstatus(netstatus);

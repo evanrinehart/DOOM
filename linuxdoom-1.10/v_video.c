@@ -34,6 +34,7 @@
 #include "m_swap.h"
 
 #include "v_video.h"
+#include "f_wipe.h"
 
 
 // Each screen is [SCREENWIDTH*SCREENHEIGHT]; 
@@ -392,7 +393,7 @@ V_DrawPatchDirect
   int		y,
   patch_t*	patch ) 
 {
-    V_DrawPatch(x, y, &fb_hud, patch);
+    V_DrawPatch(x, y, wipe_ongoing ? &fb_menu : &fb_hud, patch);
 } 
  
 
@@ -531,6 +532,8 @@ void V_Init (void)
     AllocFramebuffer(&fb_wipeaux, 320, 200, false);
 
     // "the menu shows even during wipe effect"
+    // the truth is the menu is usually drawn to the HUD layer
+    // this layer is temporarily used during a screen wipe
     AllocFramebuffer(&fb_menu, 320, 200, true);
 
 

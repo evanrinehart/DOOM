@@ -358,6 +358,8 @@ void D_Display (void)
 
     wipestart = I_GetTime () - 1;
 
+    wipe_ongoing = true; // see V_DrawPatchDirect
+
     do
     {
 	do
@@ -372,6 +374,9 @@ void D_Display (void)
 	M_Drawer ();                            // menu is drawn even on top of wipes
 	I_FinishUpdate ();                      // page flip or blit buffer
     } while (!done);
+
+    wipe_ongoing = false;
+    ClearFramebuffer(&fb_menu, 0, 0);
 
     // fix netgame's clock state so we don't do 40 gametics suddenly
     netgame_prevtime = I_GetTime() / ticdup;
