@@ -429,6 +429,28 @@ void maskedcpy(byte *out, byte *color, byte *mask, int n) {
     }
 }
 
+void downscalecpy(byte *out, struct framebuffer *src) {
+    int W = src->width;
+    int H = src->height;
+    int left = src->left;
+    int top = src->top;
+    int right = src->right;
+    int bottom = src->bottom;
+    int mult = src->width / 320;
+    for (int j = 0; j < H; j += mult) {
+        if (j < top) continue;
+        if (j >= bottom) continue;
+        byte *reading = src->color + j * W;
+        byte *writing = out + (j/mult) * 320;
+        for (int i = 0; i < W; i += mult) {
+            if (left < i && i < right) *writing = *reading;
+            reading += mult;
+            writing++;
+        }
+    }
+}
+
+
 void I_ReadScreen (struct framebuffer *out) {
     // called from f_wipe to read the screen
     // since we have separate layers we composite them on demand
@@ -440,6 +462,7 @@ void I_ReadScreen (struct framebuffer *out) {
     memset(out->color, 0, N);
     if (out->mask) memset(out->mask, 255, N);
     memcpy(out->color, fb_backwall.color, N);
+    downscalecpy(out->color, &fb_screen); // dubious
     maskedcpy(out->color, fb_status.color, fb_status.mask, N);
     maskedcpy(out->color, fb_hud.color, fb_hud.mask, N);
 }
