@@ -478,6 +478,7 @@ V_GetBlock
 void ClearFramebuffer(struct framebuffer *fb, byte color, byte mask) {
     memset(fb->color, color, fb->count);
     if (fb->mask) memset(fb->mask, mask, fb->count);
+    fb->dirty = true;
 }
 
 void AllocFramebuffer(struct framebuffer *fb, int w, int h, bool mask) {
@@ -486,7 +487,7 @@ void AllocFramebuffer(struct framebuffer *fb, int w, int h, bool mask) {
     fb->width = w;
     fb->height = h;
     fb->count = w*h;
-    fb->dirty = 0;
+    fb->dirty = true;
 
     fb->left = 0;
     fb->top = 0;

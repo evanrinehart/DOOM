@@ -368,6 +368,24 @@ void show_fbtex(struct framebuffer *fb, Texture tex) {
     DrawTexturePro(tex, src, dst, zero, 0.0f, WHITE);
 }
 
+void upload_layer(struct framebuffer *fb, Image img, Texture tex) {
+    // ideally we can skip this if dirty is false
+    // which would mean nothing has changed in the buffer.
+
+    // however status bar is using dirty for something else and
+    // unsetting dirty here breaks it
+
+    // the main issue is not every place framebuffers are written
+    // set the dirty flag. E.g. fb_screen is written by the
+    // renderer via screen[0]. Wipe effect doMelt, etc.
+
+    // for now it's an unnecessary optimization
+
+    //if (!fb->dirty) return;
+    unpack_frame(fb, img);
+    UpdateTexture(tex, img.data);
+    //fb->dirty = false;
+}
 
 
 extern boolean noblit;
@@ -382,22 +400,16 @@ void I_FinishUpdate (void) {
 
     if (noblit) return;
 
-    unpack_frame(&fb_backwall, backwall_img);
-    unpack_frame(&fb_screen, screen_img);
-    unpack_frame(&fb_status, status_img);
-    unpack_frame(&fb_hud, hud_img);
-    unpack_frame(&fb_wipe, wipe_img);
-    unpack_frame(&fb_menu, menu_img);
+    upload_layer(&fb_backwall, backwall_img, backwall_tex);
+    upload_layer(&fb_screen, screen_img, screen_tex);
+    upload_layer(&fb_status, status_img, status_tex);
+    upload_layer(&fb_hud, hud_img, hud_tex);
+    upload_layer(&fb_wipe, wipe_img, wipe_tex);
+    upload_layer(&fb_menu, menu_img, menu_tex);
 
     BeginDrawing();
 
     ClearBackground(BLACK);
-    UpdateTexture(backwall_tex, backwall_img.data);
-    UpdateTexture(screen_tex, screen_img.data);
-    UpdateTexture(status_tex, status_img.data);
-    UpdateTexture(hud_tex, hud_img.data);
-    UpdateTexture(wipe_tex, wipe_img.data);
-    UpdateTexture(menu_tex, menu_img.data);
 
     // splat the various textures on quads
     if (show_layer[1]) show_fbtex(&fb_backwall, backwall_tex);
