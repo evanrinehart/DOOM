@@ -578,6 +578,12 @@ void I_InitGraphics(char *title) {
 
     video_initialized = true;
 
+    // preliminary present frame to clear out the dust
+    BeginDrawing();
+    ClearBackground(BLACK);
+    EndDrawing();
+    SwapScreenBuffer();
+
     // create full color images for each 8bit framebuffer
     screen_img = GenImageColor(fb_screen.width, fb_screen.height, GREEN);
     screen_tex = LoadTextureFromImage(screen_img);
