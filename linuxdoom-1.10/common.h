@@ -4,8 +4,8 @@
 #define SCREENWIDTH  640
 #define SCREENHEIGHT 400
 
-#define HSCREENWIDTH  320
-#define HSCREENHEIGHT 200
+#define BASEWIDTH  320
+#define BASEHEIGHT 200
 
 // These are in values.h but we want these exact values
 #define MAXCHAR		((char)0x7f)

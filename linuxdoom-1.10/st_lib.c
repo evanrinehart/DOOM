@@ -281,7 +281,7 @@ STlib_updateBinIcon
 	if (*bi->val)
 	    V_DrawPatch(bi->x, bi->y, &fb_status, bi->p);
 	else
-	    V_CopyRect(x, y-ST_Y, BG, w, h, x, y, FG);
+	    V_CopyRectFb(x, y-ST_Y, &fb_aux, w, h, x, y, &fb_status);
 
 	bi->oldval = *bi->val;
     }

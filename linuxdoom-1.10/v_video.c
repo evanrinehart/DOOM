@@ -182,58 +182,6 @@ void V_CopyRectFb(
         msk += fbdst->width;
     }
 }
-
-//
-// V_CopyRect 
-// 
-void
-V_CopyRect
-( int		srcx,
-  int		srcy,
-  int		srcscrn,
-  int		width,
-  int		height,
-  int		destx,
-  int		desty,
-  int		destscrn ) 
-{ 
-    byte*	src;
-    byte*	dest; 
-
-    if (srcscrn != 4) {
-        //printf("V_CopyRect from %d to %d ignored\n", srcscrn, destscrn);
-        //return;
-    }
-	 
-#ifdef RANGECHECK 
-    if (srcx<0
-	||srcx+width >HSCREENWIDTH
-	|| srcy<0
-	|| srcy+height>HSCREENHEIGHT
-	||destx<0||destx+width >HSCREENWIDTH
-	|| desty<0
-	|| desty+height>HSCREENHEIGHT
-	|| (unsigned)srcscrn>4
-	|| (unsigned)destscrn>4)
-    {
-	I_Error ("Bad V_CopyRect");
-    }
-#endif 
-    V_MarkRect (destx, desty, width, height); 
-	 
-    src = screens[srcscrn]+HSCREENWIDTH*srcy+srcx;
-    //dest = screens[destscrn]+HSCREENWIDTH*desty+destx;
-    dest = fb_hud.color + HSCREENWIDTH*desty + destx;
-
-
-    for ( ; height>0 ; height--) 
-    { 
-        // HUD WRITE
-	memcpy (dest, src, width); 
-	src += HSCREENWIDTH;
-	dest += HSCREENWIDTH;
-    } 
-} 
  
 
 //

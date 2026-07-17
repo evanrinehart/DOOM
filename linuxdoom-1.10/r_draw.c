@@ -810,18 +810,18 @@ void R_FillBackScreen (void)
     src = W_CacheLumpName (name, PU_CACHE); 
     dest = fb_backwall.color;
 
-    for (y=0 ; y<HSCREENHEIGHT-32 ; y++)
+    for (y=0 ; y<BASEHEIGHT-32 ; y++)
     { 
-	for (x=0 ; x<HSCREENWIDTH/64 ; x++)
+	for (x=0 ; x<BASEWIDTH/64 ; x++)
 	{ 
 	    memcpy (dest, src+((y&63)<<6), 64);
 	    dest += 64; 
 	} 
 
-	if (HSCREENWIDTH&63)
+	if (BASEWIDTH&63)
 	{ 
-	    memcpy (dest, src+((y&63)<<6), HSCREENWIDTH&63);
-	    dest += (HSCREENWIDTH&63);
+	    memcpy (dest, src+((y&63)<<6), BASEWIDTH&63);
+	    dest += (BASEWIDTH&63);
 	} 
     } 
 	
@@ -879,53 +879,3 @@ R_VideoErase
   //  at one point.
     memcpy (screens[0]+ofs, screens[1]+ofs, count); 
 } 
-
-
-//
-// R_DrawViewBorder
-// Draws the border around the view
-//  for different size windows?
-//
-void
-V_MarkRect
-( int		x,
-  int		y,
-  int		width,
-  int		height ); 
- 
-void R_DrawViewBorder (void) 
-{ 
-    int		top;
-    int		side;
-    int		ofs;
-    int		i; 
- 
-    if (scaledviewwidth == SCREENWIDTH) 
-	return; 
-  
-    // note SBARHEIGHT is still 32 right now
-    top = ((SCREENHEIGHT-SBARHEIGHT)-viewheight)/2; 
-    side = (SCREENWIDTH-scaledviewwidth)/2; 
- 
-    // copy top and one line of left side 
-    R_VideoErase (0, top*SCREENWIDTH+side); 
- 
-    // copy one line of right side and bottom 
-    ofs = (viewheight+top)*SCREENWIDTH-side; 
-    R_VideoErase (ofs, top*SCREENWIDTH+side); 
- 
-    // copy sides using wraparound 
-    ofs = top*SCREENWIDTH + SCREENWIDTH-side; 
-    side <<= 1;
-    
-    for (i=1 ; i<viewheight ; i++) 
-    { 
-	R_VideoErase (ofs, side); 
-	ofs += SCREENWIDTH; 
-    } 
-
-    // ? 
-    V_MarkRect (0,0,SCREENWIDTH, SCREENHEIGHT-SBARHEIGHT); 
-} 
- 
- 

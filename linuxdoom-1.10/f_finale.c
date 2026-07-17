@@ -273,25 +273,25 @@ void F_TextWrite (void)
     dest = fb_hud.color;
     byte *mdest = fb_hud.mask;
 	
-    for (y=0 ; y<HSCREENHEIGHT ; y++)
+    for (y=0 ; y<BASEHEIGHT ; y++)
     {
-	for (x=0 ; x<HSCREENWIDTH/64 ; x++)
+	for (x=0 ; x<BASEWIDTH/64 ; x++)
 	{
 	    memcpy (dest, src+((y&63)<<6), 64);
 	    memset (mdest, 255, 64);
 	    dest += 64;
 	    mdest += 64;
 	}
-	if (HSCREENWIDTH&63)
+	if (BASEWIDTH&63)
 	{
-	    memcpy (dest, src+((y&63)<<6), HSCREENWIDTH&63);
-	    memset (mdest, 255, HSCREENWIDTH&64);
-	    dest += (HSCREENWIDTH&63);
-	    mdest += (HSCREENWIDTH&63);
+	    memcpy (dest, src+((y&63)<<6), BASEWIDTH&63);
+	    memset (mdest, 255, BASEWIDTH&64);
+	    dest += (BASEWIDTH&63);
+	    mdest += (BASEWIDTH&63);
 	}
     }
 
-    V_MarkRect (0, 0, HSCREENWIDTH, HSCREENHEIGHT);
+    V_MarkRect (0, 0, BASEWIDTH, BASEHEIGHT);
     
     // draw some of the text onto the screen
     cx = 10;
@@ -321,7 +321,7 @@ void F_TextWrite (void)
 	}
 		
 	w = SHORT (hu_font[c]->width);
-	if (cx+w > HSCREENWIDTH)
+	if (cx+w > BASEWIDTH)
 	    break;
 	V_DrawPatch(cx, cy, &fb_hud, hu_font[c]);
 	cx+=w;
@@ -695,7 +695,7 @@ void F_BunnyScroll (void)
     p1 = W_CacheLumpName ("PFUB2", PU_LEVEL);
     p2 = W_CacheLumpName ("PFUB1", PU_LEVEL);
 
-    V_MarkRect (0, 0, HSCREENWIDTH, HSCREENHEIGHT);
+    V_MarkRect (0, 0, BASEWIDTH, BASEHEIGHT);
 	
     scrolled = 320 - (finalecount-230)/2;
     if (scrolled > 320)
@@ -703,7 +703,7 @@ void F_BunnyScroll (void)
     if (scrolled < 0)
 	scrolled = 0;
 		
-    for ( x=0 ; x<HSCREENWIDTH ; x++)
+    for ( x=0 ; x<BASEWIDTH ; x++)
     {
 	if (x+scrolled < 320)
 	    F_DrawPatchCol (x, p1, x+scrolled);
@@ -715,8 +715,8 @@ void F_BunnyScroll (void)
 	return;
     if (finalecount < 1180)
     {
-	V_DrawPatch ((HSCREENWIDTH-13*8)/2,
-		     (HSCREENHEIGHT-8*8)/2, &fb_hud, W_CacheLumpName ("END0",PU_CACHE));
+	V_DrawPatch ((BASEWIDTH-13*8)/2,
+		     (BASEHEIGHT-8*8)/2, &fb_hud, W_CacheLumpName ("END0",PU_CACHE));
 	laststage = 0;
 	return;
     }
@@ -731,7 +731,7 @@ void F_BunnyScroll (void)
     }
 	
     sprintf (name,"END%i",stage);
-    V_DrawPatch ((HSCREENWIDTH-13*8)/2, (HSCREENHEIGHT-8*8)/2, &fb_hud, W_CacheLumpName (name,PU_CACHE));
+    V_DrawPatch ((BASEWIDTH-13*8)/2, (BASEHEIGHT-8*8)/2, &fb_hud, W_CacheLumpName (name,PU_CACHE));
 }
 
 

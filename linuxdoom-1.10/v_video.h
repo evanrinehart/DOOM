@@ -58,17 +58,6 @@ extern	int	usegamma;
 void V_Init (void);
 
 
-void
-V_CopyRect
-( int		srcx,
-  int		srcy,
-  int		srcscrn,
-  int		width,
-  int		height,
-  int		destx,
-  int		desty,
-  int		destscrn );
-
 void V_CopyRectFb(
     int srcx, int srcy, struct framebuffer *fbsrc, int width, int height,
     int dstx, int dsty, struct framebuffer *fbdst

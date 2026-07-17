@@ -205,12 +205,9 @@ extern int netgame_prevtime;
 
 void D_Display (void)
 {
-    static  boolean		viewactivestate = false;
-    static  boolean		menuactivestate = false;
     static  boolean		inhelpscreensstate = false;
     static  boolean		fullscreen = false;
     static  gamestate_t		oldgamestate = -1;
-    static  int			borderdrawcount;
     int				nowtime;
     int				tics;
     int				wipestart;
@@ -229,14 +226,13 @@ void D_Display (void)
     {
 	R_ExecuteSetViewSize ();
 	oldgamestate = -1;                      // force background redraw
-	borderdrawcount = 3;
     }
 
     // save the current screen if about to wipe
     if (gamestate != wipegamestate)
     {
 	wipe = true;
-	wipe_StartScreen(0, 0, HSCREENWIDTH, HSCREENHEIGHT);
+	wipe_StartScreen(0, 0, BASEWIDTH, BASEHEIGHT);
     }
     else
     {
@@ -303,25 +299,9 @@ void D_Display (void)
     // see if the border needs to be initially drawn
     if (gamestate == GS_LEVEL && oldgamestate != GS_LEVEL)
     {
-	viewactivestate = false;        // view was not active
 	R_FillBackScreen ();    // draw the pattern into the back screen
     }
 
-    // see if the border needs to be updated to the screen
-    if (gamestate == GS_LEVEL && !automapactive && scaledviewwidth != 320*2)
-    {
-	if (menuactive || menuactivestate || !viewactivestate)
-	    borderdrawcount = 3;
-	if (borderdrawcount)
-	{
-	    R_DrawViewBorder ();    // erase old menu stuff
-	    borderdrawcount--;
-	}
-
-    }
-
-    menuactivestate = menuactive;
-    viewactivestate = viewactive;
     inhelpscreensstate = inhelpscreens;
     oldgamestate = wipegamestate = gamestate;
     
@@ -354,7 +334,7 @@ void D_Display (void)
     }
     
     // wipe update
-    wipe_EndScreen(0, 0, HSCREENWIDTH, HSCREENHEIGHT);
+    wipe_EndScreen(0, 0, BASEWIDTH, BASEHEIGHT);
 
     wipestart = I_GetTime () - 1;
 
@@ -369,7 +349,7 @@ void D_Display (void)
 	} while (!tics);
 	wipestart = nowtime;
 	done = wipe_ScreenWipe(wipe_Melt
-			       , 0, 0, HSCREENWIDTH, HSCREENHEIGHT, tics);
+			       , 0, 0, BASEWIDTH, BASEHEIGHT, tics);
 	I_UpdateNoBlit ();
 	M_Drawer ();                            // menu is drawn even on top of wipes
 	I_FinishUpdate ();                      // page flip or blit buffer
