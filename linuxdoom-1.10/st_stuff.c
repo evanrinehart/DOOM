@@ -502,7 +502,12 @@ void ST_refreshBackground(void)
     if (st_statusbaron)
     {
         // draw concrete bg to aux
-        V_DrawPatch(ST_X, 0, &fb_aux, netgame ? faceback : sbar);
+        V_DrawPatch(ST_X, 0, &fb_aux, sbar);
+
+        // draw colored background for netgame face to aux
+        if (netgame)
+            V_DrawPatch(ST_FX, 0, &fb_aux, faceback);
+
         // copy concrete bg back to status fb
         V_CopyRectFb(ST_X, 0, &fb_aux, ST_WIDTH, ST_HEIGHT, ST_X, ST_Y, &fb_status);
     }
