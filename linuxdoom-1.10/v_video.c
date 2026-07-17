@@ -46,6 +46,7 @@ struct framebuffer fb_status;
 struct framebuffer fb_screen;
 
 struct framebuffer fb_aux;
+struct framebuffer fb_backwall;
 
 
 // Now where did these came from?
@@ -479,6 +480,12 @@ void AllocFramebuffer(struct framebuffer *fb, int w, int h, bool mask) {
     fb->height = h;
     fb->count = w*h;
     fb->dirty = 0;
+
+    fb->left = 0;
+    fb->top = 0;
+    fb->right = w;
+    fb->bottom = h;
+
     ClearFramebuffer(fb, 0, 0);
 }
 
@@ -504,6 +511,7 @@ void V_Init (void)
     AllocFramebuffer(&fb_hud, 320, 200, true);
     AllocFramebuffer(&fb_status, 320, 200, true);
     AllocFramebuffer(&fb_aux, 320, 200, false);
+    AllocFramebuffer(&fb_backwall, 320, 200, false);
     // main screen may be high rez (e.g. 640 x 400)
     AllocFramebuffer(&fb_screen, SCREENWIDTH, SCREENHEIGHT, false);
 

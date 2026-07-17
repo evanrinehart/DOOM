@@ -766,6 +766,11 @@ R_InitBuffer
     // Preclaculate all row offsets.
     for (i=0 ; i<height ; i++) 
 	ylookup[i] = screens[0] + (i+viewwindowy)*SCREENWIDTH; 
+
+    fb_screen.left = viewwindowx;
+    fb_screen.top = viewwindowy;
+    fb_screen.right = viewwindowx + viewwidth;
+    fb_screen.bottom = viewwindowy + viewheight;
 } 
  
  
@@ -801,11 +806,11 @@ void R_FillBackScreen (void)
     else
 	name = name1;
     
+    // Draw the background wall
     src = W_CacheLumpName (name, PU_CACHE); 
-// FIXME
-    dest = fb_screen.color;
-	 
-    for (y=0 ; y<HSCREENHEIGHT-SBARHEIGHT ; y++)
+    dest = fb_backwall.color;
+
+    for (y=0 ; y<HSCREENHEIGHT-32 ; y++)
     { 
 	for (x=0 ; x<HSCREENWIDTH/64 ; x++)
 	{ 
@@ -820,10 +825,11 @@ void R_FillBackScreen (void)
 	} 
     } 
 	
+// FIXME
+/*
     patch = W_CacheLumpName ("brdr_t",PU_CACHE);
 
-    struct framebuffer *fb = &fb_screen;
-    // FIXME
+    struct framebuffer *fb = &fb_backwall;
 
     for (x=0 ; x<scaledviewwidth ; x+=8)
 	V_DrawPatch (viewwindowx+x,viewwindowy-8,fb,patch);
@@ -861,6 +867,7 @@ void R_FillBackScreen (void)
 		 viewwindowy+viewheight,
 		 fb,
 		 W_CacheLumpName ("brdr_br",PU_CACHE));
+*/
 } 
  
 

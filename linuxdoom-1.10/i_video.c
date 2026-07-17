@@ -54,6 +54,8 @@ static Texture status_tex;
 static Image status_img;
 static Texture hud_tex;
 static Image hud_img;
+static Texture backwall_tex;
+static Image backwall_img;
 
 static int window_w;
 static int window_h;
@@ -348,8 +350,14 @@ void unpack_frame(struct framebuffer *fb, Image out) {
 }
 
 void show_fbtex(struct framebuffer *fb, Texture tex) {
-    Rectangle src = {0, 0, tex.width, tex.height};
-    Rectangle dst = {offset_x, 0, window_w, window_h};
+    int fw = fb->right - fb->left;
+    int fh = fb->bottom - fb->top;
+    int mw = (double)window_w * fw / fb->width;
+    int mh = (double)window_h * fh / fb->height;
+    int mx = (double)window_w * fb->left / fb->width;
+    int my = (double)window_h * fb->top / fb->height;
+    Rectangle src = {fb->left, fb->top, fw, fh};
+    Rectangle dst = {offset_x + mx, my, mw, mh};
     Vector2 zero = {0,0};
     DrawTexturePro(tex, src, dst, zero, 0.0f, WHITE);
 }
@@ -368,6 +376,7 @@ void I_FinishUpdate (void) {
 
     if (noblit) return;
 
+    unpack_frame(&fb_backwall, backwall_img);
     unpack_frame(&fb_screen, screen_img);
     unpack_frame(&fb_status, status_img);
     unpack_frame(&fb_hud, hud_img);
@@ -375,14 +384,16 @@ void I_FinishUpdate (void) {
     BeginDrawing();
 
     ClearBackground(BLACK);
+    UpdateTexture(backwall_tex, backwall_img.data);
     UpdateTexture(screen_tex, screen_img.data);
-    UpdateTexture(hud_tex, hud_img.data);
     UpdateTexture(status_tex, status_img.data);
+    UpdateTexture(hud_tex, hud_img.data);
 
     // splat the various textures on quads
-    if (show_layer[1]) show_fbtex(&fb_screen, screen_tex);
-    if (show_layer[2]) show_fbtex(&fb_status, status_tex);
-    if (show_layer[3]) show_fbtex(&fb_hud, hud_tex);
+    if (show_layer[1]) show_fbtex(&fb_backwall, backwall_tex);
+    if (show_layer[2]) show_fbtex(&fb_screen, screen_tex);
+    if (show_layer[3]) show_fbtex(&fb_status, status_tex);
+    if (show_layer[4]) show_fbtex(&fb_hud, hud_tex);
 
     if (show_debug) {
         render_netstatus(netstatus);
@@ -495,12 +506,14 @@ void I_InitGraphics(char *title) {
     video_initialized = true;
 
     // create full color images for each 8bit framebuffer
+    screen_img = GenImageColor(fb_screen.width, fb_screen.height, GREEN);
+    screen_tex = LoadTextureFromImage(screen_img);
     hud_img = GenImageColor(fb_hud.width, fb_hud.height, GREEN);
     hud_tex = LoadTextureFromImage(hud_img);
     status_img = GenImageColor(fb_status.width, fb_status.height, GREEN);
     status_tex = LoadTextureFromImage(status_img);
-    screen_img = GenImageColor(fb_screen.width, fb_screen.height, GREEN);
-    screen_tex = LoadTextureFromImage(screen_img);
+    backwall_img = GenImageColor(fb_backwall.width, fb_backwall.height, GREEN);
+    backwall_tex = LoadTextureFromImage(backwall_img);
     //foundation_img = GenImageColor(fb_foundation.width, fb_foundation.height, GREEN);
     //foundation_tex = LoadTextureFromImage(foundation_img);
 

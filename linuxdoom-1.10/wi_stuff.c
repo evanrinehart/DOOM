@@ -393,11 +393,11 @@ static patch_t**	lnames;
 // slam background
 // UNUSED static unsigned char *background=0;
 
-
 void WI_slamBackground(void)
 {
-    memcpy(screens[0], screens[1], HSCREENWIDTH * HSCREENHEIGHT);
-    V_MarkRect (0, 0, HSCREENWIDTH, HSCREENHEIGHT);
+    if (fb_hud.count != fb_aux.count) I_Error("WI_slamBackground: source and target don't match. No slam");
+    memcpy(fb_hud.color, fb_aux.color, fb_aux.count);
+    memset(fb_hud.mask, 255, fb_hud.count);
 }
 
 // The ticker is used to detect keys
@@ -1540,10 +1540,9 @@ void WI_loadData(void)
 	strcpy(name,"INTERPIC");
     }
 
-    // FIXME
     // background
     bg = W_CacheLumpName(name, PU_CACHE);    
-    V_DrawPatch(0, 0, &fb_screen, bg);
+    V_DrawPatch(0, 0, &fb_aux, bg);
 
 
     // UNUSED unsigned char *pic = screens[1];

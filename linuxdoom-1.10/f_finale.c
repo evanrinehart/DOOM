@@ -270,19 +270,24 @@ void F_TextWrite (void)
     
     // erase the entire screen to a tiled background
     src = W_CacheLumpName ( finaleflat , PU_CACHE);
-    dest = screens[0];
+    dest = fb_hud.color;
+    byte *mdest = fb_hud.mask;
 	
     for (y=0 ; y<HSCREENHEIGHT ; y++)
     {
 	for (x=0 ; x<HSCREENWIDTH/64 ; x++)
 	{
 	    memcpy (dest, src+((y&63)<<6), 64);
+	    memset (mdest, 255, 64);
 	    dest += 64;
+	    mdest += 64;
 	}
 	if (HSCREENWIDTH&63)
 	{
 	    memcpy (dest, src+((y&63)<<6), HSCREENWIDTH&63);
+	    memset (mdest, 255, HSCREENWIDTH&64);
 	    dest += (HSCREENWIDTH&63);
+	    mdest += (HSCREENWIDTH&63);
 	}
     }
 
