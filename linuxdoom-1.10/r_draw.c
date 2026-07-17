@@ -825,49 +825,42 @@ void R_FillBackScreen (void)
 	} 
     } 
 	
-// FIXME
-/*
-    patch = W_CacheLumpName ("brdr_t",PU_CACHE);
-
     struct framebuffer *fb = &fb_backwall;
 
-    for (x=0 ; x<scaledviewwidth ; x+=8)
-	V_DrawPatch (viewwindowx+x,viewwindowy-8,fb,patch);
+    int scale = SCREENWIDTH / 320;
+    int width = viewwidth / scale;
+    int height = viewheight / scale;
+    int left = viewwindowx / scale;
+    int top = viewwindowy / scale;
+
+    // Draw beveled edge.
+    patch = W_CacheLumpName ("brdr_t",PU_CACHE);
+    for (x=0 ; x<width ; x+=8)
+	V_DrawPatch (left+x,top-8,fb,patch);
+
     patch = W_CacheLumpName ("brdr_b",PU_CACHE);
+    for (x=0 ; x<width ; x+=8)
+	V_DrawPatch (left+x,top+height,fb,patch);
 
-    for (x=0 ; x<scaledviewwidth ; x+=8)
-	V_DrawPatch (viewwindowx+x,viewwindowy+viewheight,fb,patch);
     patch = W_CacheLumpName ("brdr_l",PU_CACHE);
+    for (y=0 ; y<height ; y+=8)
+	V_DrawPatch (left-8,top+y,fb,patch);
 
-    for (y=0 ; y<viewheight ; y+=8)
-	V_DrawPatch (viewwindowx-8,viewwindowy+y,fb,patch);
     patch = W_CacheLumpName ("brdr_r",PU_CACHE);
+    for (y=0 ; y<height ; y+=8)
+	V_DrawPatch (left+width,top+y,fb,patch);
 
-    for (y=0 ; y<viewheight ; y+=8)
-	V_DrawPatch (viewwindowx+scaledviewwidth,viewwindowy+y,fb,patch);
+    patch = W_CacheLumpName ("brdr_tl",PU_CACHE);
+    V_DrawPatch (left-8, top-8, fb, patch);
 
+    patch = W_CacheLumpName ("brdr_tr",PU_CACHE);
+    V_DrawPatch (left+width, top-8, fb, patch);
 
-    // Draw beveled edge. 
-    V_DrawPatch (viewwindowx-8,
-		 viewwindowy-8,
-		 fb,
-		 W_CacheLumpName ("brdr_tl",PU_CACHE));
-    
-    V_DrawPatch (viewwindowx+scaledviewwidth,
-		 viewwindowy-8,
-		 fb,
-		 W_CacheLumpName ("brdr_tr",PU_CACHE));
-    
-    V_DrawPatch (viewwindowx-8,
-		 viewwindowy+viewheight,
-		 fb,
-		 W_CacheLumpName ("brdr_bl",PU_CACHE));
-    
-    V_DrawPatch (viewwindowx+scaledviewwidth,
-		 viewwindowy+viewheight,
-		 fb,
-		 W_CacheLumpName ("brdr_br",PU_CACHE));
-*/
+    patch = W_CacheLumpName ("brdr_bl",PU_CACHE);
+    V_DrawPatch (left-8, top+height, fb, patch);
+
+    patch = W_CacheLumpName ("brdr_br",PU_CACHE);
+    V_DrawPatch (left+width, top+height, fb, patch);
 } 
  
 

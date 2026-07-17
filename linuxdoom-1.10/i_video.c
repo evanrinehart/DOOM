@@ -358,12 +358,19 @@ void unpack_frame(struct framebuffer *fb, Image out) {
 void show_fbtex(struct framebuffer *fb, Texture tex) {
     int fw = fb->right - fb->left;
     int fh = fb->bottom - fb->top;
-    int mw = (double)window_w * fw / fb->width;
-    int mh = (double)window_h * fh / fb->height;
-    int mx = (double)window_w * fb->left / fb->width;
-    int my = (double)window_h * fb->top / fb->height;
+
+    int fscale = fb->width / 320;
+    int wscale = window_w / 320;
+    int left = fb->left / fscale;
+    int top = fb->top / fscale;
+    int right = fb->right / fscale;
+    int bottom = fb->bottom / fscale;
+    int width = right - left;
+    int height = bottom - top;
+
     Rectangle src = {fb->left, fb->top, fw, fh};
-    Rectangle dst = {offset_x + mx, my, mw, mh};
+    Rectangle dst = {offset_x + wscale*left, 1.2*wscale*top, wscale*width, 1.2*wscale*height};
+
     Vector2 zero = {0,0};
     DrawTexturePro(tex, src, dst, zero, 0.0f, WHITE);
 }
