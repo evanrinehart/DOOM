@@ -221,6 +221,8 @@ void D_Display (void)
 
     if (nodrawers)
 	return;                    // for comparative timing / profiling
+
+    ClearFramebuffer(&fb_hud, 0, 0);
 		
     redrawsbar = false;
     
@@ -328,8 +330,13 @@ void D_Display (void)
 	    y = 4;
 	else
 	    y = viewwindowy+4;
-	V_DrawPatchDirect(viewwindowx+(scaledviewwidth-68)/2,
-			  y,W_CacheLumpName ("M_PAUSE", PU_CACHE));
+        // the PAUSE indicator drawn to screen here will be small
+        // technically wrong
+        V_DrawPatch(
+            viewwindowx+(scaledviewwidth-68)/2,
+            y,
+            &fb_screen,
+            W_CacheLumpName ("M_PAUSE", PU_CACHE));
     }
 
 
