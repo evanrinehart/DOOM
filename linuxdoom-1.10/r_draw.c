@@ -810,6 +810,7 @@ void R_FillBackScreen (void)
     src = W_CacheLumpName (name, PU_CACHE); 
     dest = fb_backwall.color;
 
+    // warning this 32 is base statusbar height, not to be scaled
     for (y=0 ; y<BASEHEIGHT-32 ; y++)
     { 
 	for (x=0 ; x<BASEWIDTH/64 ; x++)

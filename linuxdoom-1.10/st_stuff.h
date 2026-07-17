@@ -27,8 +27,7 @@
 #include "d_event.h"
 
 // Size of statusbar.
-// Now sensitive for scaling.
-#define ST_HEIGHT	32*SCREEN_MUL
+#define ST_HEIGHT	32
 #define ST_WIDTH	BASEWIDTH
 #define ST_Y		(BASEHEIGHT - ST_HEIGHT)
 

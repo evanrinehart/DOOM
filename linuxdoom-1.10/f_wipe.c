@@ -285,8 +285,8 @@ wipe_ScreenWipe
     if (!go)
     {
 	go = 1;
-        wipe_scr = fb_wipe.color;
-        wipe_scr_mask = fb_wipe.mask;
+	wipe_scr = fb_wipe.color;
+	wipe_scr_mask = fb_wipe.mask;
 	(*wipes[wipeno*3])(width, height, ticks);
     }
 
