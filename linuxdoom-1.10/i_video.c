@@ -359,8 +359,8 @@ void show_fbtex(struct framebuffer *fb, Texture tex) {
     int fw = fb->right - fb->left;
     int fh = fb->bottom - fb->top;
 
-    int fscale = fb->width / 320;
-    int wscale = window_w / 320;
+    int fscale = fb->width / BASEWIDTH;
+    int wscale = window_w / BASEWIDTH;
     int left = fb->left / fscale;
     int top = fb->top / fscale;
     int right = fb->right / fscale;

@@ -44,7 +44,7 @@
 #define MAXHEIGHT			832
 
 // status bar height at bottom of screen
-#define SBARHEIGHT		64
+#define SBARHEIGHT		(REZ_FACTOR * 32)
 
 //
 // All drawing to the view buffer is accomplished in this file.
@@ -798,7 +798,7 @@ void R_FillBackScreen (void)
 
     char*	name;
 	
-    if (scaledviewwidth == 2*320)
+    if (scaledviewwidth == SCREENWIDTH)
 	return;
 	
     if ( gamemode == commercial)
@@ -827,7 +827,7 @@ void R_FillBackScreen (void)
 	
     struct framebuffer *fb = &fb_backwall;
 
-    int scale = SCREENWIDTH / 320;
+    int scale = REZ_FACTOR;
     int width = viewwidth / scale;
     int height = viewheight / scale;
     int left = viewwindowx / scale;

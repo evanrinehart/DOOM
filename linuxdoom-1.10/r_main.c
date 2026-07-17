@@ -680,8 +680,10 @@ void R_ExecuteSetViewSize (void)
     }
     else
     {
-	scaledviewwidth = 2 * setblocks*32;
-	viewheight = (2 * setblocks*168/10) & ~15;
+	int scale = REZ_FACTOR;
+	int quant = 8 * scale - 1;
+	scaledviewwidth = scale * setblocks*32;
+	viewheight = (scale * setblocks*168/10) & ~quant;
     }
     
     viewwidth = scaledviewwidth;
