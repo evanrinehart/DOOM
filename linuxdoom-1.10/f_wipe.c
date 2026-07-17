@@ -21,8 +21,8 @@
 //-----------------------------------------------------------------------------
 
 #include "z_zone.h"
-#include "i_video.h"
 #include "v_video.h"
+#include "i_video.h"
 #include "m_random.h"
 
 #include "doomdef.h"
@@ -39,6 +39,7 @@ static boolean	go = 0;
 static byte*	wipe_scr_start;
 static byte*	wipe_scr_end;
 static byte*	wipe_scr;
+static byte*	wipe_scr_mask;
 
 
 void
@@ -138,14 +139,10 @@ wipe_initMelt
   int	ticks )
 {
     int i, r;
-    
-    // copy start screen to main screen
-    memcpy(wipe_scr, wipe_scr_start, width*height);
-    
+
     // makes this wipe faster (in theory)
     // to have stuff in column-major format
     wipe_shittyColMajorXform((short*)wipe_scr_start, width/2, height);
-    wipe_shittyColMajorXform((short*)wipe_scr_end, width/2, height);
     
     // setup initial column positions
     // (y<0 => not ready to scroll yet)
@@ -175,6 +172,7 @@ wipe_doMelt
     
     short*	s;
     short*	d;
+    short*	dmask;
     boolean	done = true;
 
     width/=2;
@@ -191,12 +189,12 @@ wipe_doMelt
 	    {
 		dy = (y[i] < 16) ? y[i]+1 : 8;
 		if (y[i]+dy >= height) dy = height - y[i];
-		s = &((short *)wipe_scr_end)[i*height+y[i]];
 		d = &((short *)wipe_scr)[y[i]*width+i];
+		dmask = &((short *)wipe_scr_mask)[y[i]*width+i];
 		idx = 0;
 		for (j=dy;j;j--)
 		{
-		    d[idx] = *(s++);
+		    dmask[idx] = 0;
 		    idx += width;
 		}
 		y[i] += dy;
@@ -234,8 +232,13 @@ wipe_StartScreen
   int	width,
   int	height )
 {
-    wipe_scr_start = screens[2];
-    I_ReadScreen(wipe_scr_start);
+
+    // read screen and make a color copy on the side
+    I_ReadScreen(&fb_wipe);
+    memcpy(fb_wipesrc.color, fb_wipe.color, fb_wipe.count);
+
+    wipe_scr_start = fb_wipesrc.color;
+
     return 0;
 }
 
@@ -246,9 +249,15 @@ wipe_EndScreen
   int	width,
   int	height )
 {
-    wipe_scr_end = screens[3];
-    I_ReadScreen(wipe_scr_end);
-    V_DrawBlock(x, y, 0, width, height, wipe_scr_start); // restore start scr.
+
+    // obtain another screenshot of "after wipe"
+    // which we don't want for the usual wipe effect since it's low rez
+    // but the color transform effect ...
+
+    I_ReadScreen(&fb_wipeaux);
+
+    wipe_scr_end = fb_wipeaux.color;
+
     return 0;
 }
 
@@ -274,15 +283,14 @@ wipe_ScreenWipe
     if (!go)
     {
 	go = 1;
-	// wipe_scr = (byte *) Z_Malloc(width*height, PU_STATIC, 0); // DEBUG
-	wipe_scr = screens[0];
+        wipe_scr = fb_wipe.color;
+        wipe_scr_mask = fb_wipe.mask;
 	(*wipes[wipeno*3])(width, height, ticks);
     }
 
     // do a piece of wipe-in
     V_MarkRect(0, 0, width, height);
     rc = (*wipes[wipeno*3+1])(width, height, ticks);
-    //  V_DrawBlock(x, y, 0, width, height, wipe_scr); // DEBUG
 
     // final stuff
     if (rc)

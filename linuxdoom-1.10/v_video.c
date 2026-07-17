@@ -48,6 +48,12 @@ struct framebuffer fb_screen;
 struct framebuffer fb_aux;
 struct framebuffer fb_backwall;
 
+struct framebuffer fb_wipe;
+struct framebuffer fb_wipesrc;
+struct framebuffer fb_wipeaux;
+
+struct framebuffer fb_menu;
+
 
 // Now where did these came from?
 byte gammatable[5][256] =
@@ -506,14 +512,28 @@ void V_Init (void)
     for (i=0 ; i<4 ; i++)
 	screens[i] = base + i*SCREENWIDTH*SCREENHEIGHT;
 
-    // the HUD and status bar and intermission and finale
-    // assume precisely 320x200
-    AllocFramebuffer(&fb_hud, 320, 200, true);
+    // what shows if you shrink the screen with -
+    AllocFramebuffer(&fb_backwall, 320, 200, false);
+
+    // main view screen may be high rez (e.g. 640 x 400)
+    AllocFramebuffer(&fb_screen, SCREENWIDTH, SCREENHEIGHT, false);
+
+    // status bar uses an offscreen buffer to stash concrete bg
     AllocFramebuffer(&fb_status, 320, 200, true);
     AllocFramebuffer(&fb_aux, 320, 200, false);
-    AllocFramebuffer(&fb_backwall, 320, 200, false);
-    // main screen may be high rez (e.g. 640 x 400)
-    AllocFramebuffer(&fb_screen, SCREENWIDTH, SCREENHEIGHT, false);
+
+    // the HUD shows messages and is also used for intermission and finales
+    AllocFramebuffer(&fb_hud, 320, 200, true);
+
+    // wipe effect needs at least one buffer for itself
+    AllocFramebuffer(&fb_wipe, 320, 200, true);
+    AllocFramebuffer(&fb_wipesrc, 320, 200, false);
+    AllocFramebuffer(&fb_wipeaux, 320, 200, false);
+
+    // "the menu shows even during wipe effect"
+    AllocFramebuffer(&fb_menu, 320, 200, true);
+
+
 
     // hax
     free(fb_screen.color);

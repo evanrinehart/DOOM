@@ -36,6 +36,7 @@
 
 #include "doomdef.h"
 #include "m_misc.h"
+#include "v_framebuffer.h"
 #include "i_video.h"
 #include "i_sound.h"
 

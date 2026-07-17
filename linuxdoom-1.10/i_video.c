@@ -56,6 +56,10 @@ static Texture hud_tex;
 static Image hud_img;
 static Texture backwall_tex;
 static Image backwall_img;
+static Texture wipe_tex;
+static Image wipe_img;
+static Texture menu_tex;
+static Image menu_img;
 
 static int window_w;
 static int window_h;
@@ -69,7 +73,7 @@ static bool mouse_affinity = 0; // capture the mouse if you have the chance
 static bool mouse_residual = 0; // mouse was captured at some point
 static bool mouse_captured = 0;
 
-bool show_layer[10] = {0,1,1,1,1}; // zero unused
+bool show_layer[10] = {0,1,1,1,1,1,1};
 
 // updated at a distance by m_misc.c "defaults"
 bool mouse_walk = true;
@@ -217,10 +221,12 @@ void I_GetEvent(void) {
 
     PollInputEvents();
 
-    if (IsKeyPressed(KEY_ONE) && IsKeyDown(KEY_LEFT_CONTROL)) show_layer[1] = !show_layer[1];
-    if (IsKeyPressed(KEY_TWO) && IsKeyDown(KEY_LEFT_CONTROL)) show_layer[2] = !show_layer[2];
-    if (IsKeyPressed(KEY_THREE) && IsKeyDown(KEY_LEFT_CONTROL)) show_layer[3] = !show_layer[3];
-    if (IsKeyPressed(KEY_FOUR) && IsKeyDown(KEY_LEFT_CONTROL)) show_layer[4] = !show_layer[4];
+    if (IsKeyPressed(KEY_ONE) && IsKeyDown(KEY_RIGHT_ALT)) show_layer[1] = !show_layer[1];
+    if (IsKeyPressed(KEY_TWO) && IsKeyDown(KEY_RIGHT_ALT)) show_layer[2] = !show_layer[2];
+    if (IsKeyPressed(KEY_THREE) && IsKeyDown(KEY_RIGHT_ALT)) show_layer[3] = !show_layer[3];
+    if (IsKeyPressed(KEY_FOUR) && IsKeyDown(KEY_RIGHT_ALT)) show_layer[4] = !show_layer[4];
+    if (IsKeyPressed(KEY_FIVE) && IsKeyDown(KEY_RIGHT_ALT)) show_layer[5] = !show_layer[5];
+    if (IsKeyPressed(KEY_SIX) && IsKeyDown(KEY_RIGHT_ALT)) show_layer[6] = !show_layer[6];
 
     for (int i = 0; i < 8; i++) {
         if (IsGamepadAvailable(i) && gamepads[i]==NULL) {
@@ -380,6 +386,7 @@ void I_FinishUpdate (void) {
     unpack_frame(&fb_screen, screen_img);
     unpack_frame(&fb_status, status_img);
     unpack_frame(&fb_hud, hud_img);
+    unpack_frame(&fb_wipe, wipe_img);
 
     BeginDrawing();
 
@@ -388,12 +395,14 @@ void I_FinishUpdate (void) {
     UpdateTexture(screen_tex, screen_img.data);
     UpdateTexture(status_tex, status_img.data);
     UpdateTexture(hud_tex, hud_img.data);
+    UpdateTexture(wipe_tex, wipe_img.data);
 
     // splat the various textures on quads
     if (show_layer[1]) show_fbtex(&fb_backwall, backwall_tex);
     if (show_layer[2]) show_fbtex(&fb_screen, screen_tex);
     if (show_layer[3]) show_fbtex(&fb_status, status_tex);
     if (show_layer[4]) show_fbtex(&fb_hud, hud_tex);
+    if (show_layer[5]) show_fbtex(&fb_wipe, wipe_tex);
 
     if (show_debug) {
         render_netstatus(netstatus);
@@ -411,9 +420,28 @@ void I_FinishUpdate (void) {
     fps = 7.0 / (max_time - min_time);
 }
 
-void I_ReadScreen (byte* scr) {
+
+
+void maskedcpy(byte *out, byte *color, byte *mask, int n) {
+    while (n--) {
+        if (*mask++) { *out++ = *color++; }
+        else { out++; color++; }
+    }
+}
+
+void I_ReadScreen (struct framebuffer *out) {
     // called from f_wipe to read the screen
-    memcpy (scr, screens[0], SCREENWIDTH*SCREENHEIGHT);
+    // since we have separate layers we composite them on demand
+    // assuming that target buffer is 320x200 bytes.
+    int N = 320 * 200;
+
+    if (out->count != N) I_Error("I_ReadScreen: unacceptable target size");
+
+    memset(out->color, 0, N);
+    if (out->mask) memset(out->mask, 255, N);
+    memcpy(out->color, fb_backwall.color, N);
+    maskedcpy(out->color, fb_status.color, fb_status.mask, N);
+    maskedcpy(out->color, fb_hud.color, fb_hud.mask, N);
 }
 
 void I_SetPalette (byte* palette) {
@@ -514,8 +542,10 @@ void I_InitGraphics(char *title) {
     status_tex = LoadTextureFromImage(status_img);
     backwall_img = GenImageColor(fb_backwall.width, fb_backwall.height, GREEN);
     backwall_tex = LoadTextureFromImage(backwall_img);
-    //foundation_img = GenImageColor(fb_foundation.width, fb_foundation.height, GREEN);
-    //foundation_tex = LoadTextureFromImage(foundation_img);
+    wipe_img = GenImageColor(fb_wipe.width, fb_wipe.height, GREEN);
+    wipe_tex = LoadTextureFromImage(wipe_img);
+    menu_img = GenImageColor(fb_menu.width, fb_menu.height, GREEN);
+    menu_tex = LoadTextureFromImage(menu_img);
 
     SetExitKey(0);
 

@@ -46,9 +46,9 @@
 
 #include "w_wad.h"
 
-#include "i_system.h"
-#include "i_video.h"
 #include "v_video.h"
+#include "i_video.h"
+#include "i_system.h"
 
 #include "hu_stuff.h"
 
@@ -565,7 +565,7 @@ void M_ScreenShot (void)
     
     // munge planar buffer to linear
     linear = screens[2];
-    I_ReadScreen (linear);
+    //I_ReadScreen (linear);
     
     // find a file name to save it to
     strcpy(lbmname,"DOOM00.pcx");

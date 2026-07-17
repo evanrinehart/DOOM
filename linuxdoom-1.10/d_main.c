@@ -221,8 +221,6 @@ void D_Display (void)
 
     if (nodrawers)
 	return;                    // for comparative timing / profiling
-
-    ClearFramebuffer(&fb_hud, 0, 0);
 		
     redrawsbar = false;
     
@@ -238,13 +236,17 @@ void D_Display (void)
     if (gamestate != wipegamestate)
     {
 	wipe = true;
-	wipe_StartScreen(0, 0, SCREENWIDTH, SCREENHEIGHT);
+	wipe_StartScreen(0, 0, HSCREENWIDTH, HSCREENHEIGHT);
     }
     else
+    {
 	wipe = false;
+    }
 
-    if (gamestate == GS_LEVEL && gametic)
+    if (gamestate == GS_LEVEL && gametic) {
+	ClearFramebuffer(&fb_hud, 0, 0);
 	HU_Erase();
+    }
     
     // do buffered drawing
     switch (gamestate)
@@ -352,7 +354,7 @@ void D_Display (void)
     }
     
     // wipe update
-    wipe_EndScreen(0, 0, SCREENWIDTH, SCREENHEIGHT);
+    wipe_EndScreen(0, 0, HSCREENWIDTH, HSCREENHEIGHT);
 
     wipestart = I_GetTime () - 1;
 
@@ -365,7 +367,7 @@ void D_Display (void)
 	} while (!tics);
 	wipestart = nowtime;
 	done = wipe_ScreenWipe(wipe_Melt
-			       , 0, 0, SCREENWIDTH, SCREENHEIGHT, tics);
+			       , 0, 0, HSCREENWIDTH, HSCREENHEIGHT, tics);
 	I_UpdateNoBlit ();
 	M_Drawer ();                            // menu is drawn even on top of wipes
 	I_FinishUpdate ();                      // page flip or blit buffer
