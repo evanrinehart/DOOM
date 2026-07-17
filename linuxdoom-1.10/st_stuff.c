@@ -260,7 +260,7 @@
     (strlen(mapnames[(gameepisode-1)*9+(gamemap-1)]))
 
 #define ST_MAPTITLEX \
-    (HSCREENWIDTH - ST_MAPWIDTH * ST_CHATFONTWIDTH)
+    (BASEWIDTH - ST_MAPWIDTH * ST_CHATFONTWIDTH)
 
 #define ST_MAPTITLEY		0
 #define ST_MAPHEIGHT		1
