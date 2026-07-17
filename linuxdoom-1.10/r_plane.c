@@ -252,7 +252,7 @@ R_FindPlane
     check->minx = SCREENWIDTH;
     check->maxx = -1;
     
-    memset (check->top_store + 1, 0xff, sizeof check->top_store - 2);
+    memset (check->top_store + 1, 0xffff, sizeof check->top_store - 2);
 		
     return check;
 }
@@ -296,7 +296,7 @@ R_CheckPlane
     }
 
     for (x=intrl ; x<= intrh ; x++)
-	if (pl->top[x] != 0xff)
+	if (pl->top[x] != 0xffff)
 	    break;
 
     if (x > intrh)
@@ -317,7 +317,7 @@ R_CheckPlane
     pl->minx = start;
     pl->maxx = stop;
 
-    memset (pl->top_store + 1, 0xff, sizeof pl->top_store - 2);
+    memset (pl->top_store + 1, 0xffff, sizeof pl->top_store - 2);
 		
     return pl;
 }
