@@ -252,12 +252,12 @@ void D_Display (void)
 	    break;
 	if (automapactive)
 	    AM_Drawer ();
-	if (wipe || (viewheight != 200 && fullscreen) )
+	if (wipe || (viewheight != SCREENHEIGHT && fullscreen) )
 	    redrawsbar = true;
 	if (inhelpscreensstate && !inhelpscreens)
 	    redrawsbar = true;              // just put away the help screen
-	ST_Drawer (viewheight == 200, redrawsbar );
-	fullscreen = viewheight == 200;
+	ST_Drawer (viewheight == SCREENHEIGHT, redrawsbar );
+	fullscreen = viewheight == SCREENHEIGHT;
 	break;
 
       case GS_INTERMISSION:
@@ -329,7 +329,7 @@ void D_Display (void)
 	else
 	    y = viewwindowy+4;
 	V_DrawPatchDirect(viewwindowx+(scaledviewwidth-68)/2,
-			  y,0,W_CacheLumpName ("M_PAUSE", PU_CACHE));
+			  y,W_CacheLumpName ("M_PAUSE", PU_CACHE));
     }
 
 
@@ -422,7 +422,7 @@ void D_PageTicker (void)
 //
 void D_PageDrawer (void)
 {
-    V_DrawPatch (0,0, 0, W_CacheLumpName(pagename, PU_CACHE));
+    V_DrawPatch (0,0, &fb_hud, W_CacheLumpName(pagename, PU_CACHE));
 }
 
 

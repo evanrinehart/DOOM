@@ -802,10 +802,9 @@ void R_FillBackScreen (void)
 	name = name1;
     
     src = W_CacheLumpName (name, PU_CACHE); 
-    dest = fb_foundation.color;
+// FIXME
+    dest = fb_screen.color;
 	 
-    // HUD WRITE
-    // actually, this is the background layer.
     for (y=0 ; y<HSCREENHEIGHT-SBARHEIGHT ; y++)
     { 
 	for (x=0 ; x<HSCREENWIDTH/64 ; x++)
@@ -823,41 +822,44 @@ void R_FillBackScreen (void)
 	
     patch = W_CacheLumpName ("brdr_t",PU_CACHE);
 
+    struct framebuffer *fb = &fb_screen;
+    // FIXME
+
     for (x=0 ; x<scaledviewwidth ; x+=8)
-	V_DrawPatch (viewwindowx+x,viewwindowy-8,1,patch);
+	V_DrawPatch (viewwindowx+x,viewwindowy-8,fb,patch);
     patch = W_CacheLumpName ("brdr_b",PU_CACHE);
 
     for (x=0 ; x<scaledviewwidth ; x+=8)
-	V_DrawPatch (viewwindowx+x,viewwindowy+viewheight,1,patch);
+	V_DrawPatch (viewwindowx+x,viewwindowy+viewheight,fb,patch);
     patch = W_CacheLumpName ("brdr_l",PU_CACHE);
 
     for (y=0 ; y<viewheight ; y+=8)
-	V_DrawPatch (viewwindowx-8,viewwindowy+y,1,patch);
+	V_DrawPatch (viewwindowx-8,viewwindowy+y,fb,patch);
     patch = W_CacheLumpName ("brdr_r",PU_CACHE);
 
     for (y=0 ; y<viewheight ; y+=8)
-	V_DrawPatch (viewwindowx+scaledviewwidth,viewwindowy+y,1,patch);
+	V_DrawPatch (viewwindowx+scaledviewwidth,viewwindowy+y,fb,patch);
 
 
     // Draw beveled edge. 
     V_DrawPatch (viewwindowx-8,
 		 viewwindowy-8,
-		 1,
+		 fb,
 		 W_CacheLumpName ("brdr_tl",PU_CACHE));
     
     V_DrawPatch (viewwindowx+scaledviewwidth,
 		 viewwindowy-8,
-		 1,
+		 fb,
 		 W_CacheLumpName ("brdr_tr",PU_CACHE));
     
     V_DrawPatch (viewwindowx-8,
 		 viewwindowy+viewheight,
-		 1,
+		 fb,
 		 W_CacheLumpName ("brdr_bl",PU_CACHE));
     
     V_DrawPatch (viewwindowx+scaledviewwidth,
 		 viewwindowy+viewheight,
-		 1,
+		 fb,
 		 W_CacheLumpName ("brdr_br",PU_CACHE));
 } 
  

@@ -103,7 +103,7 @@ boolean HUlib_delCharFromTextLine(hu_textline_t* t)
 int splat_glyph(hu_textline_t *l, int x, unsigned char c) {
     patch_t *patch = l->f[c - l->sc];
     int w = SHORT(patch->width);
-    V_DrawPatchDirect(x, l->y, FG, patch);
+    V_DrawPatchDirect(x, l->y, patch);
     return x + w;
 }
 
@@ -140,7 +140,7 @@ HUlib_drawTextLine
     if (drawcursor
 	&& x + SHORT(l->f['_' - l->sc]->width) <= HSCREENWIDTH)
     {
-	V_DrawPatchDirect(x, l->y, FG, l->f['_' - l->sc]);
+	V_DrawPatchDirect(x, l->y, l->f['_' - l->sc]);
     }
 }
 

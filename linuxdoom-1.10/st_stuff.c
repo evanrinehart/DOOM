@@ -499,12 +499,10 @@ void ST_refreshBackground(void)
 
     if (st_statusbaron)
     {
-	V_DrawPatch(ST_X, 0, BG, sbar);
-
-	if (netgame)
-	    V_DrawPatch(ST_FX, 0, BG, faceback);
-
-	V_CopyRect(ST_X, 0, BG, ST_WIDTH, ST_HEIGHT, ST_X, ST_Y, FG);
+        // draw concrete bg to aux
+        V_DrawPatch(ST_X, 0, &fb_aux, netgame ? faceback : sbar);
+        // copy concrete bg back to status fb
+        V_CopyRectFb(ST_X, 0, &fb_aux, ST_WIDTH, ST_HEIGHT, ST_X, ST_Y, &fb_status);
     }
 
 }
@@ -1095,9 +1093,6 @@ void ST_drawWidgets(boolean refresh)
 void ST_doRefresh(void)
 {
 
-    // this is not the right place for this action
-    ClearFramebuffer(&fb_hud, 0, 0);
-
     st_firsttime = false;
 
     // draw status bar background to off-screen buff
@@ -1119,6 +1114,11 @@ void ST_Drawer (boolean fullscreen, boolean refresh)
   
     st_statusbaron = (!fullscreen) || automapactive;
     st_firsttime = st_firsttime || refresh;
+
+    if (!st_statusbaron && fb_status.dirty) {
+        ClearFramebuffer(&fb_status, 0, 0);
+        fb_status.dirty = false;
+    }
 
     // Do red-/gold-shifts from damage/items
     ST_doPaletteStuff();

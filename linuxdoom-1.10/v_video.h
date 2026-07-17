@@ -69,18 +69,22 @@ V_CopyRect
   int		desty,
   int		destscrn );
 
+void V_CopyRectFb(
+    int srcx, int srcy, struct framebuffer *fbsrc, int width, int height,
+    int dstx, int dsty, struct framebuffer *fbdst
+);
+
 void
 V_DrawPatch
 ( int		x,
   int		y,
-  int		scrn,
+  struct framebuffer *fb,
   patch_t*	patch);
 
 void
 V_DrawPatchDirect
 ( int		x,
   int		y,
-  int		scrn,
   patch_t*	patch );
 
 

@@ -50,8 +50,8 @@ static Color current_palette[256];
 
 static Texture screen_tex;
 static Image screen_img;
-static Texture foundation_tex;
-static Image foundation_img;
+static Texture status_tex;
+static Image status_img;
 static Texture hud_tex;
 static Image hud_img;
 
@@ -66,6 +66,8 @@ static bool window_focused = 1;
 static bool mouse_affinity = 0; // capture the mouse if you have the chance
 static bool mouse_residual = 0; // mouse was captured at some point
 static bool mouse_captured = 0;
+
+bool show_layer[10] = {0,1,1,1,1}; // zero unused
 
 // updated at a distance by m_misc.c "defaults"
 bool mouse_walk = true;
@@ -213,6 +215,11 @@ void I_GetEvent(void) {
 
     PollInputEvents();
 
+    if (IsKeyPressed(KEY_ONE) && IsKeyDown(KEY_LEFT_CONTROL)) show_layer[1] = !show_layer[1];
+    if (IsKeyPressed(KEY_TWO) && IsKeyDown(KEY_LEFT_CONTROL)) show_layer[2] = !show_layer[2];
+    if (IsKeyPressed(KEY_THREE) && IsKeyDown(KEY_LEFT_CONTROL)) show_layer[3] = !show_layer[3];
+    if (IsKeyPressed(KEY_FOUR) && IsKeyDown(KEY_LEFT_CONTROL)) show_layer[4] = !show_layer[4];
+
     for (int i = 0; i < 8; i++) {
         if (IsGamepadAvailable(i) && gamepads[i]==NULL) {
             printf("NOTICE gamepad %d = \"%s\" appeared!\n", i, GetGamepadName(i));
@@ -316,6 +323,39 @@ void I_UpdateNoBlit (void) {
     // called from d_main
 }
 
+
+
+// use palette to get full color image from 8bit frame
+// if fb contains a mask layer, it becomes alpha 0 or 255
+// assumes fb and image have same dimensions
+void unpack_frame_masked(Color *out, byte *color_in, byte *mask_in, int N) {
+    Color transparent = {0,0,0,0};
+    while (N--) {
+        if (*mask_in++) // visible
+            { *out++ = current_palette[*color_in++]; }
+        else // see through
+            { *out++ = (color_in++, transparent); /* ignore color */ }
+    }
+}
+
+void unpack_frame_solid(Color *out, byte *color_in, int N) {
+    while (N--) { *out++ = current_palette[*color_in++]; }
+}
+
+void unpack_frame(struct framebuffer *fb, Image out) {
+    if (fb->mask) unpack_frame_masked(out.data, fb->color, fb->mask, fb->count);
+    else unpack_frame_solid(out.data, fb->color, fb->count);
+}
+
+void show_fbtex(struct framebuffer *fb, Texture tex) {
+    Rectangle src = {0, 0, tex.width, tex.height};
+    Rectangle dst = {offset_x, 0, window_w, window_h};
+    Vector2 zero = {0,0};
+    DrawTexturePro(tex, src, dst, zero, 0.0f, WHITE);
+}
+
+
+
 extern boolean noblit;
 
 double frame_times[8];
@@ -328,34 +368,21 @@ void I_FinishUpdate (void) {
 
     if (noblit) return;
 
-    Color *writing = screen_img.data;
-    for (int i = 0; i < SCREENWIDTH*SCREENHEIGHT; i++) {
-        *writing++ = current_palette[screens[0][i]];
-    }
-
-    byte *reading = fb_hud.color;
-    byte *mask = fb_hud.mask;
-    writing = hud_img.data;
-    int count = hud_img.width * hud_img.height;
-    for (int i = 0; i < count; i++) {
-        Color c = current_palette[*reading++];
-        if (*mask++ == 0) c.a = 0;
-        *writing++ = c;
-    }
+    unpack_frame(&fb_screen, screen_img);
+    unpack_frame(&fb_status, status_img);
+    unpack_frame(&fb_hud, hud_img);
 
     BeginDrawing();
 
     ClearBackground(BLACK);
     UpdateTexture(screen_tex, screen_img.data);
     UpdateTexture(hud_tex, hud_img.data);
+    UpdateTexture(status_tex, status_img.data);
 
-    Rectangle src = {0, 0, screen_tex.width, screen_tex.height};
-    Rectangle dst = {offset_x, 0, window_w, window_h};
-    Vector2 zero = {0,0};
-    DrawTexturePro(screen_tex, src, dst, zero, 0.0f, WHITE);
-
-    src = (Rectangle){0, 0, hud_tex.width, hud_tex.height};
-    DrawTexturePro(hud_tex, src, dst, zero, 0.0f, WHITE);
+    // splat the various textures on quads
+    if (show_layer[1]) show_fbtex(&fb_screen, screen_tex);
+    if (show_layer[2]) show_fbtex(&fb_status, status_tex);
+    if (show_layer[3]) show_fbtex(&fb_hud, hud_tex);
 
     if (show_debug) {
         render_netstatus(netstatus);
@@ -467,14 +494,15 @@ void I_InitGraphics(char *title) {
 
     video_initialized = true;
 
-    screen_img = GenImageColor(SCREENWIDTH, SCREENHEIGHT, GREEN);
-    screen_tex = LoadTextureFromImage(screen_img);
-
     // create full color images for each 8bit framebuffer
     hud_img = GenImageColor(fb_hud.width, fb_hud.height, GREEN);
     hud_tex = LoadTextureFromImage(hud_img);
-    foundation_img = GenImageColor(fb_foundation.width, fb_foundation.height, GREEN);
-    foundation_tex = LoadTextureFromImage(foundation_img);
+    status_img = GenImageColor(fb_status.width, fb_status.height, GREEN);
+    status_tex = LoadTextureFromImage(status_img);
+    screen_img = GenImageColor(fb_screen.width, fb_screen.height, GREEN);
+    screen_tex = LoadTextureFromImage(screen_img);
+    //foundation_img = GenImageColor(fb_foundation.width, fb_foundation.height, GREEN);
+    //foundation_tex = LoadTextureFromImage(foundation_img);
 
     SetExitKey(0);
 
