@@ -510,13 +510,14 @@ void I_InitGraphics(char *title) {
 
     SetTraceLogLevel(verbose ? LOG_INFO : LOG_NONE);
 
-    SetConfigFlags(FLAG_WINDOW_HIGHDPI);
-    InitWindow(320, 240, title);
+    int multiply_default = REZ_FACTOR;
+    int multiply = multiply_default;
+
+    InitWindow(multiply * 320, multiply * 240, title);
 
     if (!IsWindowReady())
         I_Error("I_InitGraphics: InitWindow failed\n");
 
-    int multiply = 1;
 
     if (M_CheckParm("-fullscreen")) {
         int monitor = GetCurrentMonitor();
@@ -548,10 +549,9 @@ void I_InitGraphics(char *title) {
     }
 
     // close the window we got and try again, giving WM a chance to position it better
-    if (fullscreen || multiply > 1) {
+    if (fullscreen || multiply != multiply_default) {
 
         CloseWindow();
-        SetConfigFlags(FLAG_WINDOW_HIGHDPI);
         InitWindow(window_w, window_h, title);
 
         if (!IsWindowReady())
