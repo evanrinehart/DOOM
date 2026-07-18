@@ -304,7 +304,7 @@ void DemoCore(void) {
             D_Display();
         }
 
-        I_Sleep(0.001);
+        if (!timingdemo) I_Sleep(0.001);
     }
 }
 

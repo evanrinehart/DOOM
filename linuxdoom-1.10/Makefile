@@ -2,8 +2,12 @@ BINNAME=doom
 
 CC=gcc  # gcc or clang
 
+ASAN ?= address
+REZ_OPT=$(if $(REZ_FACTOR),-DREZ_FACTOR=$(REZ_FACTOR))
+DEBUG_OPT=$(if $(DEBUG),-g -fsanitize=$(ASAN),-O2)
+CF=$(DEBUG_OPT) $(REZ_OPT)
+
 BASE_CFLAGS = -Wall -Wextra -std=c11 -Wno-unused-parameter -Wno-missing-field-initializers -DNORMALUNIX
-CF ?= -O2
 CFLAGS=$(CF) $(BASE_CFLAGS)
 LDFLAGS=-L/usr/X11R6/lib
 LIBS=-lX11 -lm -lstdc++
