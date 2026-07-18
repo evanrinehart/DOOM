@@ -579,6 +579,9 @@ boolean G_Responder (event_t* ev)
         if (ev->data1 == KEY_BACKSPACE)
             hide_weapon = true;
 
+        if (hide_weapon && ev->data1 == KEY_RCTRL)
+            hide_weapon = false;
+
 	return true;    // eat key down events 
  
       case ev_keyup: 
