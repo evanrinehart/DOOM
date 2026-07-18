@@ -323,6 +323,8 @@ int frameon;
 // if we are consistently slower, speed up time.
 void N_Adaptive(void) {
 
+    if (demoplayback) return;
+
     int key;
     for (key = 0; key < MAXPLAYERS; key++) if (playeringame[key]) break;
     if (consoleplayer == key) return; // key player does not adapt
