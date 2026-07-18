@@ -609,6 +609,9 @@ boolean G_Responder (event_t* ev)
 	joybuttons[5] = ev->data1 & 32;
 	joyxmove = ev->data2; 
 	joyymove = ev->data3; 
+
+        if (hide_weapon && joybuttons[0]) hide_weapon = false;
+
 	return true;    // eat events 
  
       default: 
