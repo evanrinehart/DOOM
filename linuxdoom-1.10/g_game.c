@@ -1367,7 +1367,7 @@ void G_DoNewGame (void)
     playeringame[1] = playeringame[2] = playeringame[3] = 0;
     respawnparm = false;
     fastparm = false;
-    nomonsters = false;
+    nomonsters = gameclosed ? true : false;
     pistolstart = false;
     consoleplayer = 0;
     G_InitNew (d_skill, d_episode, d_map); 

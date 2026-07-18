@@ -51,6 +51,8 @@ extern  boolean	fastparm;	// checkparm of -fast
 extern  boolean	pistolstart;	// checkparm of -pistolstart
 extern  boolean	spthings;	// checkparm of -spthings
 
+extern boolean gameclosed;      // game is closed today
+
 
 
 // -----------------------------------------------------

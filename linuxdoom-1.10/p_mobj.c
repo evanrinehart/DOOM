@@ -774,6 +774,10 @@ void P_SpawnMapThing (mapthing_t* mthing)
     {
 	return;
     }
+
+    if ((i == MT_BOSSBRAIN || i == MT_BOSSSPIT) && gameclosed) {
+        return;
+    }
     
     // spawn it
     x = mthing->x * FRACUNIT;

@@ -126,6 +126,7 @@ boolean nomusic = false;
 boolean nosound = false;
 boolean nostartup = false;
 boolean noconfig = false;
+boolean gameclosed = false;
 extern bool show_endoom;
 
 char		wadfile[1024];		// primary wad file
@@ -680,6 +681,12 @@ void D_DoomMain (void)
         P_SetTimeLimit(20);
     }
 
+    if (M_CheckParm("-closed")) {
+        nomusic = true;
+        nomonsters = true;
+        gameclosed = true;
+    }
+
     // get skill / episode / map from parms
     startskill = sk_medium;
     startepisode = 1;
@@ -1005,6 +1012,7 @@ void D_PrintHelp(void) {
 
     printf("Hacks:\n");
     pr("-dumplevel <dirname>", "dump map geometry to named directory");
+    pr("-closed", "no music, no monsters or spawners");
     printf("\n");
 
     printf("Miscellaneous:\n");
