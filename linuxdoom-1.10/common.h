@@ -3,7 +3,11 @@
 // So there.
 #define BASEWIDTH  320
 #define BASEHEIGHT 200
+
+#ifndef REZ_FACTOR
 #define REZ_FACTOR 2
+#endif
+
 #define SCREENWIDTH  (REZ_FACTOR * BASEWIDTH)
 #define SCREENHEIGHT (REZ_FACTOR * BASEHEIGHT)
 
