@@ -213,6 +213,8 @@ wipe_doMelt
 	}
     }
 
+    fb_wipe.dirty = true;
+
     return done;
 
 }

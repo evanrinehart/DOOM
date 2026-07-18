@@ -375,23 +375,11 @@ void show_fbtex(struct framebuffer *fb, Texture tex) {
     DrawTexturePro(tex, src, dst, zero, 0.0f, WHITE);
 }
 
-void upload_layer(struct framebuffer *fb, Image img, Texture tex) {
-    // ideally we can skip this if dirty is false
-    // which would mean nothing has changed in the buffer.
-
-    // however status bar is using dirty for something else and
-    // unsetting dirty here breaks it
-
-    // the main issue is not every place framebuffers are written
-    // set the dirty flag. E.g. fb_screen is written by the
-    // renderer via screen[0]. Wipe effect doMelt, etc.
-
-    // for now it's an unnecessary optimization
-
-    //if (!fb->dirty) return;
+void upload_layer(struct framebuffer *fb, Image img, Texture tex, bool canskip) {
+    if (canskip && fb->dirty==false) return;
     unpack_frame(fb, img);
     UpdateTexture(tex, img.data);
-    //fb->dirty = false;
+    if (canskip) fb->dirty = false;
 }
 
 
@@ -407,12 +395,12 @@ void I_FinishUpdate (void) {
 
     if (noblit) return;
 
-    upload_layer(&fb_backwall, backwall_img, backwall_tex);
-    upload_layer(&fb_screen, screen_img, screen_tex);
-    upload_layer(&fb_status, status_img, status_tex);
-    upload_layer(&fb_hud, hud_img, hud_tex);
-    upload_layer(&fb_wipe, wipe_img, wipe_tex);
-    upload_layer(&fb_menu, menu_img, menu_tex);
+    upload_layer(&fb_backwall, backwall_img, backwall_tex, true);
+    upload_layer(&fb_screen, screen_img, screen_tex, false);
+    upload_layer(&fb_status, status_img, status_tex, false);
+    upload_layer(&fb_hud, hud_img, hud_tex, true);
+    upload_layer(&fb_wipe, wipe_img, wipe_tex, true);
+    upload_layer(&fb_menu, menu_img, menu_tex, true);
 
     BeginDrawing();
 
