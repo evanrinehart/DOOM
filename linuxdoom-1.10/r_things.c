@@ -35,6 +35,7 @@
 
 #include "doomstat.h"
 
+extern boolean hide_weapon;
 
 
 #define MINZ				(FRACUNIT*4)
@@ -742,6 +743,8 @@ void R_DrawPlayerSprites (void)
     int		i;
     int		lightnum;
     pspdef_t*	psp;
+
+    if (hide_weapon) return;
     
     // get light level
     lightnum =

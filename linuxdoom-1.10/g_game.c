@@ -107,6 +107,7 @@ boolean         noblit;                 // for comparative timing purposes
 int             starttime;          	// for comparative timing purposes  	 
  
 boolean         viewactive; 
+boolean         hide_weapon;
  
 boolean         deathmatch;           	// only if started as net death 
 boolean         netgame;                // only true if packets are broadcast 
@@ -574,6 +575,10 @@ boolean G_Responder (event_t* ev)
 	} 
 	if (ev->data1 <NUMKEYS) 
 	    gamekeydown[ev->data1] = true; 
+
+        if (ev->data1 == KEY_BACKSPACE)
+            hide_weapon = true;
+
 	return true;    // eat key down events 
  
       case ev_keyup: 
@@ -587,6 +592,9 @@ boolean G_Responder (event_t* ev)
 	mousebuttons[2] = ev->data1 & 4; 
 	mousex = ev->data2*(mouseSensitivity+5)/10; 
 	mousey = ev->data3*(mouseSensitivity+5)/10; 
+
+        if (hide_weapon && mousebuttons[0]) hide_weapon = false;
+
 	return true;    // eat events 
  
       case ev_joystick: 

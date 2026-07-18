@@ -143,6 +143,7 @@ void D_PrintStartup(char *title, char *custom_startup);
 void P_SetTimeLimit(int count);
 void D_PrintHelp(void);
 
+extern boolean hide_weapon;
 
 //
 // EVENT HANDLING
@@ -685,6 +686,7 @@ void D_DoomMain (void)
         nomusic = true;
         nomonsters = true;
         gameclosed = true;
+        hide_weapon = true;
     }
 
     // get skill / episode / map from parms
