@@ -31,6 +31,8 @@
 // Needed because we are refering to patches.
 #include "r_data.h"
 
+#include "v_framebuffer.h"
+
 //
 // VIDEO
 //
@@ -56,29 +58,22 @@ extern	int	usegamma;
 void V_Init (void);
 
 
-void
-V_CopyRect
-( int		srcx,
-  int		srcy,
-  int		srcscrn,
-  int		width,
-  int		height,
-  int		destx,
-  int		desty,
-  int		destscrn );
+void V_CopyRectFb(
+    int srcx, int srcy, struct framebuffer *fbsrc, int width, int height,
+    int dstx, int dsty, struct framebuffer *fbdst
+);
 
 void
 V_DrawPatch
 ( int		x,
   int		y,
-  int		scrn,
+  struct framebuffer *fb,
   patch_t*	patch);
 
 void
 V_DrawPatchDirect
 ( int		x,
   int		y,
-  int		scrn,
   patch_t*	patch );
 
 
@@ -110,4 +105,5 @@ V_MarkRect
   int		width,
   int		height );
 
+void ClearFramebuffer(struct framebuffer *fb, byte color, byte mask);
 #endif

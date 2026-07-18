@@ -82,9 +82,6 @@
 #define GRIDRANGE	0
 #define XHAIRCOLORS	GRAYS
 
-// drawing stuff
-#define	FB		0
-
 #define AM_PANDOWNKEY	KEY_DOWNARROW
 #define AM_PANUPKEY	KEY_UPARROW
 #define AM_PANRIGHTKEY	KEY_RIGHTARROW
@@ -288,7 +285,6 @@ static cheatseq_t cheat_amap = { cheat_amap_seq, 0 };
 static boolean stopped = true;
 
 extern boolean viewactive;
-//extern byte screens[][SCREENWIDTH*SCREENHEIGHT];
 
 
 
@@ -1313,7 +1309,7 @@ void AM_drawMarks(void)
 	    fx = CXMTOF(markpoints[i].x);
 	    fy = CYMTOF(markpoints[i].y);
 	    if (fx >= f_x && fx <= f_w - w && fy >= f_y && fy <= f_h - h)
-		V_DrawPatch(fx, fy, FB, marknums[i]);
+		V_DrawPatch(fx, fy, &fb_screen, marknums[i]);
 	}
     }
 

@@ -668,14 +668,14 @@ void R_DrawPSprite (pspdef_t* psp)
     tx = psp->sx-160*FRACUNIT;
 	
     tx -= spriteoffset[lump];	
-    x1 = (centerxfrac + FixedMul (tx,pspritescale) ) >>FRACBITS;
+    x1 = (centerxfrac + FixedMul (tx,REZ_FACTOR*pspritescale) ) >>FRACBITS;
 
     // off the right side
     if (x1 > viewwidth)
 	return;		
 
     tx +=  spritewidth[lump];
-    x2 = ((centerxfrac + FixedMul (tx, pspritescale) ) >>FRACBITS) - 1;
+    x2 = ((centerxfrac + FixedMul (tx, REZ_FACTOR*pspritescale) ) >>FRACBITS) - 1;
 
     // off the left side
     if (x2 < 0)
@@ -687,8 +687,8 @@ void R_DrawPSprite (pspdef_t* psp)
     vis->texturemid = (BASEYCENTER<<FRACBITS)+FRACUNIT/2-(psp->sy-spritetopoffset[lump]);
     vis->x1 = x1 < 0 ? 0 : x1;
     vis->x2 = x2 >= viewwidth ? viewwidth-1 : x2;	
-    vis->scale = pspritescale;
-    
+    vis->scale = REZ_FACTOR*pspritescale;
+
     if (flip)
     {
 	vis->xiscale = -pspriteiscale;
@@ -699,6 +699,8 @@ void R_DrawPSprite (pspdef_t* psp)
 	vis->xiscale = pspriteiscale;
 	vis->startfrac = 0;
     }
+
+    vis->xiscale /= REZ_FACTOR;
     
     if (vis->x1 > x1)
 	vis->startfrac += vis->xiscale*(vis->x1-x1);

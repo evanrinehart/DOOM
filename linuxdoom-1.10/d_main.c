@@ -205,12 +205,9 @@ extern int netgame_prevtime;
 
 void D_Display (void)
 {
-    static  boolean		viewactivestate = false;
-    static  boolean		menuactivestate = false;
     static  boolean		inhelpscreensstate = false;
     static  boolean		fullscreen = false;
     static  gamestate_t		oldgamestate = -1;
-    static  int			borderdrawcount;
     int				nowtime;
     int				tics;
     int				wipestart;
@@ -229,20 +226,23 @@ void D_Display (void)
     {
 	R_ExecuteSetViewSize ();
 	oldgamestate = -1;                      // force background redraw
-	borderdrawcount = 3;
     }
 
     // save the current screen if about to wipe
     if (gamestate != wipegamestate)
     {
 	wipe = true;
-	wipe_StartScreen(0, 0, SCREENWIDTH, SCREENHEIGHT);
+	wipe_StartScreen(0, 0, BASEWIDTH, BASEHEIGHT);
     }
     else
+    {
 	wipe = false;
+    }
 
-    if (gamestate == GS_LEVEL && gametic)
+    if (gamestate == GS_LEVEL && gametic) {
+	ClearFramebuffer(&fb_hud, 0, 0);
 	HU_Erase();
+    }
     
     // do buffered drawing
     switch (gamestate)
@@ -252,12 +252,12 @@ void D_Display (void)
 	    break;
 	if (automapactive)
 	    AM_Drawer ();
-	if (wipe || (viewheight != 200 && fullscreen) )
+	if (wipe || (viewheight != SCREENHEIGHT && fullscreen) )
 	    redrawsbar = true;
 	if (inhelpscreensstate && !inhelpscreens)
 	    redrawsbar = true;              // just put away the help screen
-	ST_Drawer (viewheight == 200, redrawsbar );
-	fullscreen = viewheight == 200;
+	ST_Drawer (viewheight == SCREENHEIGHT, redrawsbar );
+	fullscreen = viewheight == SCREENHEIGHT;
 	break;
 
       case GS_INTERMISSION:
@@ -299,25 +299,9 @@ void D_Display (void)
     // see if the border needs to be initially drawn
     if (gamestate == GS_LEVEL && oldgamestate != GS_LEVEL)
     {
-	viewactivestate = false;        // view was not active
 	R_FillBackScreen ();    // draw the pattern into the back screen
     }
 
-    // see if the border needs to be updated to the screen
-    if (gamestate == GS_LEVEL && !automapactive && scaledviewwidth != 320)
-    {
-	if (menuactive || menuactivestate || !viewactivestate)
-	    borderdrawcount = 3;
-	if (borderdrawcount)
-	{
-	    R_DrawViewBorder ();    // erase old menu stuff
-	    borderdrawcount--;
-	}
-
-    }
-
-    menuactivestate = menuactive;
-    viewactivestate = viewactive;
     inhelpscreensstate = inhelpscreens;
     oldgamestate = wipegamestate = gamestate;
     
@@ -328,8 +312,13 @@ void D_Display (void)
 	    y = 4;
 	else
 	    y = viewwindowy+4;
-	V_DrawPatchDirect(viewwindowx+(scaledviewwidth-68)/2,
-			  y,0,W_CacheLumpName ("M_PAUSE", PU_CACHE));
+        // the PAUSE indicator drawn to screen here will be small
+        // technically wrong
+        V_DrawPatch(
+            viewwindowx+(scaledviewwidth-68)/2,
+            y,
+            &fb_screen,
+            W_CacheLumpName ("M_PAUSE", PU_CACHE));
     }
 
 
@@ -345,9 +334,11 @@ void D_Display (void)
     }
     
     // wipe update
-    wipe_EndScreen(0, 0, SCREENWIDTH, SCREENHEIGHT);
+    wipe_EndScreen(0, 0, BASEWIDTH, BASEHEIGHT);
 
     wipestart = I_GetTime () - 1;
+
+    wipe_ongoing = true; // see V_DrawPatchDirect
 
     do
     {
@@ -358,11 +349,14 @@ void D_Display (void)
 	} while (!tics);
 	wipestart = nowtime;
 	done = wipe_ScreenWipe(wipe_Melt
-			       , 0, 0, SCREENWIDTH, SCREENHEIGHT, tics);
+			       , 0, 0, BASEWIDTH, BASEHEIGHT, tics);
 	I_UpdateNoBlit ();
 	M_Drawer ();                            // menu is drawn even on top of wipes
 	I_FinishUpdate ();                      // page flip or blit buffer
     } while (!done);
+
+    wipe_ongoing = false;
+    ClearFramebuffer(&fb_menu, 0, 0);
 
     // fix netgame's clock state so we don't do 40 gametics suddenly
     netgame_prevtime = I_GetTime() / ticdup;
@@ -422,7 +416,7 @@ void D_PageTicker (void)
 //
 void D_PageDrawer (void)
 {
-    V_DrawPatch (0,0, 0, W_CacheLumpName(pagename, PU_CACHE));
+    V_DrawPatch (0,0, &fb_hud, W_CacheLumpName(pagename, PU_CACHE));
 }
 
 

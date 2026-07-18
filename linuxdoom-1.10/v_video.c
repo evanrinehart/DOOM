@@ -22,6 +22,8 @@
 //
 //-----------------------------------------------------------------------------
 
+#include <stdlib.h>
+
 #include "i_system.h"
 #include "r_local.h"
 
@@ -32,6 +34,7 @@
 #include "m_swap.h"
 
 #include "v_video.h"
+#include "f_wipe.h"
 
 
 // Each screen is [SCREENWIDTH*SCREENHEIGHT]; 
@@ -39,6 +42,18 @@ byte*				screens[5];
  
 int				dirtybox[4]; 
 
+struct framebuffer fb_hud;
+struct framebuffer fb_status;
+struct framebuffer fb_screen;
+
+struct framebuffer fb_aux;
+struct framebuffer fb_backwall;
+
+struct framebuffer fb_wipe;
+struct framebuffer fb_wipesrc;
+struct framebuffer fb_wipeaux;
+
+struct framebuffer fb_menu;
 
 
 // Now where did these came from?
@@ -145,49 +160,28 @@ V_MarkRect
 } 
  
 
-//
-// V_CopyRect 
-// 
-void
-V_CopyRect
-( int		srcx,
-  int		srcy,
-  int		srcscrn,
-  int		width,
-  int		height,
-  int		destx,
-  int		desty,
-  int		destscrn ) 
-{ 
-    byte*	src;
-    byte*	dest; 
-	 
-#ifdef RANGECHECK 
-    if (srcx<0
-	||srcx+width >SCREENWIDTH
-	|| srcy<0
-	|| srcy+height>SCREENHEIGHT 
-	||destx<0||destx+width >SCREENWIDTH
-	|| desty<0
-	|| desty+height>SCREENHEIGHT 
-	|| (unsigned)srcscrn>4
-	|| (unsigned)destscrn>4)
-    {
-	I_Error ("Bad V_CopyRect");
-    }
-#endif 
-    V_MarkRect (destx, desty, width, height); 
-	 
-    src = screens[srcscrn]+SCREENWIDTH*srcy+srcx; 
-    dest = screens[destscrn]+SCREENWIDTH*desty+destx; 
+void V_CopyRectFb(
+    int srcx, int srcy, struct framebuffer *fbsrc, int width, int height,
+    int dstx, int dsty, struct framebuffer *fbdst
+) {
 
-    for ( ; height>0 ; height--) 
-    { 
-	memcpy (dest, src, width); 
-	src += SCREENWIDTH; 
-	dest += SCREENWIDTH; 
-    } 
-} 
+    if (fbdst->mask == NULL) I_Error("V_CopyRectFb: destination fb must have a mask because");
+    if (height < 0) I_Error("V_CopyRectFb: height = %d (negative)", height);
+
+    byte* src = fbsrc->color + srcy * fbsrc->width + srcx;
+    byte* dst = fbdst->color + dsty * fbdst->width + dstx;
+    byte* msk = fbdst->mask  + dsty * fbdst->width + dstx;
+
+    fbdst->dirty = true;
+
+    while (height--) {
+        memcpy(dst, src, width);
+        memset(msk, 255, width);
+        src += fbsrc->width;
+        dst += fbdst->width;
+        msk += fbdst->width;
+    }
+}
  
 
 //
@@ -198,7 +192,7 @@ void
 V_DrawPatch
 ( int		x,
   int		y,
-  int		scrn,
+  struct framebuffer *fb,
   patch_t*	patch ) 
 { 
 
@@ -213,11 +207,13 @@ V_DrawPatch
     y -= SHORT(patch->topoffset); 
     x -= SHORT(patch->leftoffset); 
 #ifdef RANGECHECK 
+    if (fb == NULL) {
+        I_Error("V_DrawPatch: bad target fb\n");
+    }
     if (x<0
-	||x+SHORT(patch->width) >SCREENWIDTH
+	||x+SHORT(patch->width) > fb->width
 	|| y<0
-	|| y+SHORT(patch->height)>SCREENHEIGHT 
-	|| (unsigned)scrn>4)
+	|| y+SHORT(patch->height) > fb->height)
     {
       fprintf( stderr, "Patch at %d,%d exceeds LFB\n", x,y );
       // No I_Error abort - what is up with TNT.WAD?
@@ -226,11 +222,13 @@ V_DrawPatch
     }
 #endif 
  
-    if (!scrn)
-	V_MarkRect (x, y, SHORT(patch->width), SHORT(patch->height)); 
+    fb->dirty = true;
 
     col = 0; 
-    desttop = screens[scrn]+y*SCREENWIDTH+x; 
+
+    desttop = fb->color + y*fb->width + x;
+    byte *masktop = NULL;
+    if (fb->mask) masktop = fb->mask + y*fb->width + x;
 	 
     w = SHORT(patch->width); 
 
@@ -242,17 +240,24 @@ V_DrawPatch
 	while (column->topdelta != 0xff ) 
 	{ 
 	    source = (byte *)column + 3; 
-	    dest = desttop + column->topdelta*SCREENWIDTH; 
+	    dest = desttop + column->topdelta * fb->width;
+            byte *dmask = NULL;
+            if (masktop) dmask = masktop + column->topdelta * fb->width;
 	    count = column->length; 
 			 
 	    while (count--) 
 	    { 
 		*dest = *source++; 
-		dest += SCREENWIDTH; 
+                dest += fb->width;
+                if (dmask) {
+                    *dmask = 255;
+                    dmask += fb->width;
+                }
 	    } 
 	    column = (column_t *)(  (byte *)column + column->length 
 				    + 4 ); 
 	} 
+	if (masktop) masktop++;
     }			 
 } 
  
@@ -265,7 +270,7 @@ void
 V_DrawPatchFlipped
 ( int		x,
   int		y,
-  int		scrn,
+  struct framebuffer *fb,
   patch_t*	patch ) 
 { 
 
@@ -280,22 +285,25 @@ V_DrawPatchFlipped
     y -= SHORT(patch->topoffset); 
     x -= SHORT(patch->leftoffset); 
 #ifdef RANGECHECK 
+    if (fb == NULL) {
+        I_Error("V_DrawPatchFlipped: bad target fb\n");
+    }
     if (x<0
-	||x+SHORT(patch->width) >SCREENWIDTH
+	||x+SHORT(patch->width) > fb->width
 	|| y<0
-	|| y+SHORT(patch->height)>SCREENHEIGHT 
-	|| (unsigned)scrn>4)
+	|| y+SHORT(patch->height) > fb->height)
     {
       fprintf( stderr, "Patch origin %d,%d exceeds LFB\n", x,y );
       I_Error ("Bad V_DrawPatch in V_DrawPatchFlipped");
     }
 #endif 
- 
-    if (!scrn)
-	V_MarkRect (x, y, SHORT(patch->width), SHORT(patch->height)); 
 
+    fb->dirty = true;
+
+    int width = fb->width;
     col = 0; 
-    desttop = screens[scrn]+y*SCREENWIDTH+x; 
+    desttop = fb->color + y*width + x;
+    // FIXME flipped doesn't write mask
 	 
     w = SHORT(patch->width); 
 
@@ -307,13 +315,13 @@ V_DrawPatchFlipped
 	while (column->topdelta != 0xff ) 
 	{ 
 	    source = (byte *)column + 3; 
-	    dest = desttop + column->topdelta*SCREENWIDTH; 
+	    dest = desttop + column->topdelta*fb->width;
 	    count = column->length; 
 			 
 	    while (count--) 
 	    { 
 		*dest = *source++; 
-		dest += SCREENWIDTH; 
+		dest += fb->width;
 	    } 
 	    column = (column_t *)(  (byte *)column + column->length 
 				    + 4 ); 
@@ -331,62 +339,9 @@ void
 V_DrawPatchDirect
 ( int		x,
   int		y,
-  int		scrn,
   patch_t*	patch ) 
 {
-    V_DrawPatch (x,y,scrn, patch); 
-
-    /*
-    int		count;
-    int		col; 
-    column_t*	column; 
-    byte*	desttop;
-    byte*	dest;
-    byte*	source; 
-    int		w; 
-	 
-    y -= SHORT(patch->topoffset); 
-    x -= SHORT(patch->leftoffset); 
-
-#ifdef RANGECHECK 
-    if (x<0
-	||x+SHORT(patch->width) >SCREENWIDTH
-	|| y<0
-	|| y+SHORT(patch->height)>SCREENHEIGHT 
-	|| (unsigned)scrn>4)
-    {
-	I_Error ("Bad V_DrawPatchDirect");
-    }
-#endif 
- 
-    //	V_MarkRect (x, y, SHORT(patch->width), SHORT(patch->height)); 
-    desttop = destscreen + y*SCREENWIDTH/4 + (x>>2); 
-	 
-    w = SHORT(patch->width); 
-    for ( col = 0 ; col<w ; col++) 
-    { 
-	outp (SC_INDEX+1,1<<(x&3)); 
-	column = (column_t *)((byte *)patch + LONG(patch->columnofs[col])); 
- 
-	// step through the posts in a column 
-	 
-	while (column->topdelta != 0xff ) 
-	{ 
-	    source = (byte *)column + 3; 
-	    dest = desttop + column->topdelta*SCREENWIDTH/4; 
-	    count = column->length; 
- 
-	    while (count--) 
-	    { 
-		*dest = *source++; 
-		dest += SCREENWIDTH/4; 
-	    } 
-	    column = (column_t *)(  (byte *)column + column->length 
-				    + 4 ); 
-	} 
-	if ( ((++x)&3) == 0 ) 
-	    desttop++;	// go to next byte, not next plane 
-    }*/ 
+    V_DrawPatch(x, y, wipe_ongoing ? &fb_menu : &fb_hud, patch);
 } 
  
 
@@ -468,6 +423,28 @@ V_GetBlock
 } 
 
 
+void ClearFramebuffer(struct framebuffer *fb, byte color, byte mask) {
+    memset(fb->color, color, fb->count);
+    if (fb->mask) memset(fb->mask, mask, fb->count);
+    fb->dirty = true;
+}
+
+void AllocFramebuffer(struct framebuffer *fb, int w, int h, bool mask) {
+    fb->color = malloc(w*h);
+    fb->mask = mask ? malloc(w*h) : NULL;
+    fb->width = w;
+    fb->height = h;
+    fb->count = w*h;
+    fb->dirty = true;
+
+    fb->left = 0;
+    fb->top = 0;
+    fb->right = w;
+    fb->bottom = h;
+
+    ClearFramebuffer(fb, 0, 0);
+}
+
 
 
 //
@@ -484,4 +461,33 @@ void V_Init (void)
 
     for (i=0 ; i<4 ; i++)
 	screens[i] = base + i*SCREENWIDTH*SCREENHEIGHT;
+
+    // what shows if you shrink the screen with -
+    AllocFramebuffer(&fb_backwall, 320, 200, false);
+
+    // main view screen may be high rez (e.g. 640 x 400)
+    AllocFramebuffer(&fb_screen, SCREENWIDTH, SCREENHEIGHT, false);
+
+    // status bar uses an offscreen buffer to stash concrete bg
+    AllocFramebuffer(&fb_status, 320, 200, true);
+    AllocFramebuffer(&fb_aux, 320, 200, false);
+
+    // the HUD shows messages and is also used for intermission and finales
+    AllocFramebuffer(&fb_hud, 320, 200, true);
+
+    // wipe effect needs at least one buffer for itself
+    AllocFramebuffer(&fb_wipe, 320, 200, true);
+    AllocFramebuffer(&fb_wipesrc, 320, 200, false);
+    AllocFramebuffer(&fb_wipeaux, 320, 200, false);
+
+    // "the menu shows even during wipe effect"
+    // the truth is the menu is usually drawn to the HUD layer
+    // this layer is temporarily used during a screen wipe
+    AllocFramebuffer(&fb_menu, 320, 200, true);
+
+
+
+    // hax
+    free(fb_screen.color);
+    fb_screen.color = screens[0];
 }

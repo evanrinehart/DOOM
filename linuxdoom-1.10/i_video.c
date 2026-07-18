@@ -28,6 +28,8 @@
 #include "hooks.h"
 #include "netscope.h"
 
+#include "v_framebuffer.h"
+
 #define MIN(A,B) ((A) < (B) ? (A) : (B))
 #define MAX(A,B) ((A) > (B) ? (A) : (B))
 
@@ -45,8 +47,19 @@ extern byte gammatable[5][256];
 extern int usegamma;
 
 static Color current_palette[256];
+
 static Texture screen_tex;
 static Image screen_img;
+static Texture status_tex;
+static Image status_img;
+static Texture hud_tex;
+static Image hud_img;
+static Texture backwall_tex;
+static Image backwall_img;
+static Texture wipe_tex;
+static Image wipe_img;
+static Texture menu_tex;
+static Image menu_img;
 
 static int window_w;
 static int window_h;
@@ -59,6 +72,8 @@ static bool window_focused = 1;
 static bool mouse_affinity = 0; // capture the mouse if you have the chance
 static bool mouse_residual = 0; // mouse was captured at some point
 static bool mouse_captured = 0;
+
+bool show_layer[10] = {0,1,1,1,1,1,1};
 
 // updated at a distance by m_misc.c "defaults"
 bool mouse_walk = true;
@@ -206,6 +221,13 @@ void I_GetEvent(void) {
 
     PollInputEvents();
 
+    if (IsKeyPressed(KEY_ONE) && IsKeyDown(KEY_RIGHT_ALT)) show_layer[1] = !show_layer[1];
+    if (IsKeyPressed(KEY_TWO) && IsKeyDown(KEY_RIGHT_ALT)) show_layer[2] = !show_layer[2];
+    if (IsKeyPressed(KEY_THREE) && IsKeyDown(KEY_RIGHT_ALT)) show_layer[3] = !show_layer[3];
+    if (IsKeyPressed(KEY_FOUR) && IsKeyDown(KEY_RIGHT_ALT)) show_layer[4] = !show_layer[4];
+    if (IsKeyPressed(KEY_FIVE) && IsKeyDown(KEY_RIGHT_ALT)) show_layer[5] = !show_layer[5];
+    if (IsKeyPressed(KEY_SIX) && IsKeyDown(KEY_RIGHT_ALT)) show_layer[6] = !show_layer[6];
+
     for (int i = 0; i < 8; i++) {
         if (IsGamepadAvailable(i) && gamepads[i]==NULL) {
             printf("NOTICE gamepad %d = \"%s\" appeared!\n", i, GetGamepadName(i));
@@ -309,6 +331,58 @@ void I_UpdateNoBlit (void) {
     // called from d_main
 }
 
+
+
+// use palette to get full color image from 8bit frame
+// if fb contains a mask layer, it becomes alpha 0 or 255
+// assumes fb and image have same dimensions
+void unpack_frame_masked(Color *out, byte *color_in, byte *mask_in, int N) {
+    Color transparent = {0,0,0,0};
+    while (N--) {
+        if (*mask_in++) // visible
+            { *out++ = current_palette[*color_in++]; }
+        else // see through
+            { *out++ = (color_in++, transparent); /* ignore color */ }
+    }
+}
+
+void unpack_frame_solid(Color *out, byte *color_in, int N) {
+    while (N--) { *out++ = current_palette[*color_in++]; }
+}
+
+void unpack_frame(struct framebuffer *fb, Image out) {
+    if (fb->mask) unpack_frame_masked(out.data, fb->color, fb->mask, fb->count);
+    else unpack_frame_solid(out.data, fb->color, fb->count);
+}
+
+void show_fbtex(struct framebuffer *fb, Texture tex) {
+    int fw = fb->right - fb->left;
+    int fh = fb->bottom - fb->top;
+
+    int fscale = fb->width / BASEWIDTH;
+    int wscale = window_w / BASEWIDTH;
+    int left = fb->left / fscale;
+    int top = fb->top / fscale;
+    int right = fb->right / fscale;
+    int bottom = fb->bottom / fscale;
+    int width = right - left;
+    int height = bottom - top;
+
+    Rectangle src = {fb->left, fb->top, fw, fh};
+    Rectangle dst = {offset_x + wscale*left, 1.2*wscale*top, wscale*width, 1.2*wscale*height};
+
+    Vector2 zero = {0,0};
+    DrawTexturePro(tex, src, dst, zero, 0.0f, WHITE);
+}
+
+void upload_layer(struct framebuffer *fb, Image img, Texture tex, bool canskip) {
+    if (canskip && fb->dirty==false) return;
+    unpack_frame(fb, img);
+    UpdateTexture(tex, img.data);
+    if (canskip) fb->dirty = false;
+}
+
+
 extern boolean noblit;
 
 double frame_times[8];
@@ -321,20 +395,24 @@ void I_FinishUpdate (void) {
 
     if (noblit) return;
 
-    Color *writing = screen_img.data;
-    for (int i = 0; i < SCREENWIDTH*SCREENHEIGHT; i++) {
-        *writing++ = current_palette[screens[0][i]];
-    }
+    upload_layer(&fb_backwall, backwall_img, backwall_tex, true);
+    upload_layer(&fb_screen, screen_img, screen_tex, false);
+    upload_layer(&fb_status, status_img, status_tex, false);
+    upload_layer(&fb_hud, hud_img, hud_tex, true);
+    upload_layer(&fb_wipe, wipe_img, wipe_tex, true);
+    upload_layer(&fb_menu, menu_img, menu_tex, true);
 
     BeginDrawing();
 
     ClearBackground(BLACK);
-    UpdateTexture(screen_tex, screen_img.data);
 
-    Rectangle src = {0, 0, screen_tex.width, screen_tex.height};
-    Rectangle dst = {offset_x, 0, window_w, window_h};
-    Vector2 zero = {0,0};
-    DrawTexturePro(screen_tex, src, dst, zero, 0.0f, WHITE);
+    // splat the various textures on quads
+    if (show_layer[1]) show_fbtex(&fb_backwall, backwall_tex);
+    if (show_layer[2]) show_fbtex(&fb_screen, screen_tex);
+    if (show_layer[3]) show_fbtex(&fb_status, status_tex);
+    if (show_layer[4]) show_fbtex(&fb_hud, hud_tex);
+    if (show_layer[5]) show_fbtex(&fb_wipe, wipe_tex);
+    if (show_layer[6]) show_fbtex(&fb_menu, menu_tex);
 
     if (show_debug) {
         render_netstatus(netstatus);
@@ -352,9 +430,51 @@ void I_FinishUpdate (void) {
     fps = 7.0 / (max_time - min_time);
 }
 
-void I_ReadScreen (byte* scr) {
+
+
+void maskedcpy(byte *out, byte *color, byte *mask, int n) {
+    while (n--) {
+        if (*mask++) { *out++ = *color++; }
+        else { out++; color++; }
+    }
+}
+
+void downscalecpy(byte *out, struct framebuffer *src) {
+    int W = src->width;
+    int H = src->height;
+    int left = src->left;
+    int top = src->top;
+    int right = src->right;
+    int bottom = src->bottom;
+    int mult = src->width / 320;
+    for (int j = 0; j < H; j += mult) {
+        if (j < top) continue;
+        if (j >= bottom) continue;
+        byte *reading = src->color + j * W;
+        byte *writing = out + (j/mult) * 320;
+        for (int i = 0; i < W; i += mult) {
+            if (left < i && i < right) *writing = *reading;
+            reading += mult;
+            writing++;
+        }
+    }
+}
+
+
+void I_ReadScreen (struct framebuffer *out) {
     // called from f_wipe to read the screen
-    memcpy (scr, screens[0], SCREENWIDTH*SCREENHEIGHT);
+    // since we have separate layers we composite them on demand
+    // assuming that target buffer is 320x200 bytes.
+    int N = 320 * 200;
+
+    if (out->count != N) I_Error("I_ReadScreen: unacceptable target size");
+
+    memset(out->color, 0, N);
+    if (out->mask) memset(out->mask, 255, N);
+    memcpy(out->color, fb_backwall.color, N);
+    downscalecpy(out->color, &fb_screen); // dubious
+    maskedcpy(out->color, fb_status.color, fb_status.mask, N);
+    maskedcpy(out->color, fb_hud.color, fb_hud.mask, N);
 }
 
 void I_SetPalette (byte* palette) {
@@ -446,8 +566,25 @@ void I_InitGraphics(char *title) {
 
     video_initialized = true;
 
-    screen_img = GenImageColor(SCREENWIDTH, SCREENHEIGHT, GREEN);
+    // preliminary present frame to clear out the dust
+    BeginDrawing();
+    ClearBackground(BLACK);
+    EndDrawing();
+    SwapScreenBuffer();
+
+    // create full color images for each 8bit framebuffer
+    screen_img = GenImageColor(fb_screen.width, fb_screen.height, GREEN);
     screen_tex = LoadTextureFromImage(screen_img);
+    hud_img = GenImageColor(fb_hud.width, fb_hud.height, GREEN);
+    hud_tex = LoadTextureFromImage(hud_img);
+    status_img = GenImageColor(fb_status.width, fb_status.height, GREEN);
+    status_tex = LoadTextureFromImage(status_img);
+    backwall_img = GenImageColor(fb_backwall.width, fb_backwall.height, GREEN);
+    backwall_tex = LoadTextureFromImage(backwall_img);
+    wipe_img = GenImageColor(fb_wipe.width, fb_wipe.height, GREEN);
+    wipe_tex = LoadTextureFromImage(wipe_img);
+    menu_img = GenImageColor(fb_menu.width, fb_menu.height, GREEN);
+    menu_tex = LoadTextureFromImage(menu_img);
 
     SetExitKey(0);
 

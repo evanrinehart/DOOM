@@ -25,7 +25,11 @@
 #include <stdio.h>
 
 #include "i_system.h"
+
+// Needs access to LFB.
+#include "v_video.h"
 #include "i_video.h"
+
 #include "z_zone.h"
 #include "m_random.h"
 #include "w_wad.h"
@@ -46,8 +50,6 @@
 
 #include "s_sound.h"
 
-// Needs access to LFB.
-#include "v_video.h"
 
 // State.
 #include "doomstat.h"
@@ -258,7 +260,7 @@
     (strlen(mapnames[(gameepisode-1)*9+(gamemap-1)]))
 
 #define ST_MAPTITLEX \
-    (SCREENWIDTH - ST_MAPWIDTH * ST_CHATFONTWIDTH)
+    (BASEWIDTH - ST_MAPWIDTH * ST_CHATFONTWIDTH)
 
 #define ST_MAPTITLEY		0
 #define ST_MAPHEIGHT		1
@@ -499,12 +501,15 @@ void ST_refreshBackground(void)
 
     if (st_statusbaron)
     {
-	V_DrawPatch(ST_X, 0, BG, sbar);
+        // draw concrete bg to aux
+        V_DrawPatch(ST_X, 0, &fb_aux, sbar);
 
-	if (netgame)
-	    V_DrawPatch(ST_FX, 0, BG, faceback);
+        // draw colored background for netgame face to aux
+        if (netgame)
+            V_DrawPatch(ST_FX, 0, &fb_aux, faceback);
 
-	V_CopyRect(ST_X, 0, BG, ST_WIDTH, ST_HEIGHT, ST_X, ST_Y, FG);
+        // copy concrete bg back to status fb
+        V_CopyRectFb(ST_X, 0, &fb_aux, ST_WIDTH, ST_HEIGHT, ST_X, ST_Y, &fb_status);
     }
 
 }
@@ -1116,6 +1121,11 @@ void ST_Drawer (boolean fullscreen, boolean refresh)
   
     st_statusbaron = (!fullscreen) || automapactive;
     st_firsttime = st_firsttime || refresh;
+
+    if (!st_statusbaron && fb_status.dirty) {
+        ClearFramebuffer(&fb_status, 0, 0);
+        fb_status.dirty = false;
+    }
 
     // Do red-/gold-shifts from damage/items
     ST_doPaletteStuff();

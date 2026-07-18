@@ -26,6 +26,8 @@
 //                       SCREEN WIPE PACKAGE
 //
 
+extern boolean wipe_ongoing;
+
 enum
 {
     // simple gradual pixel change for 8-bit only

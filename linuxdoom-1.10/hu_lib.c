@@ -103,7 +103,7 @@ boolean HUlib_delCharFromTextLine(hu_textline_t* t)
 int splat_glyph(hu_textline_t *l, int x, unsigned char c) {
     patch_t *patch = l->f[c - l->sc];
     int w = SHORT(patch->width);
-    V_DrawPatchDirect(x, l->y, FG, patch);
+    V_DrawPatchDirect(x, l->y, patch);
     return x + w;
 }
 
@@ -130,7 +130,7 @@ HUlib_drawTextLine
         else
             x = splat_glyph(l, x, c);
 
-        if (x >= SCREENWIDTH) break;
+        if (x >= BASEWIDTH) break;
         if (left <= n) break;
         i += n;
         left -= n;
@@ -138,9 +138,9 @@ HUlib_drawTextLine
 
     // draw the cursor if requested
     if (drawcursor
-	&& x + SHORT(l->f['_' - l->sc]->width) <= SCREENWIDTH)
+	&& x + SHORT(l->f['_' - l->sc]->width) <= BASEWIDTH)
     {
-	V_DrawPatchDirect(x, l->y, FG, l->f['_' - l->sc]);
+	V_DrawPatchDirect(x, l->y, l->f['_' - l->sc]);
     }
 }
 
@@ -160,10 +160,10 @@ void HUlib_eraseTextLine(hu_textline_t* l)
 	viewwindowx && l->needsupdate)
     {
 	lh = SHORT(l->f[0]->height) + 1;
-	for (y=l->y,yoffset=y*SCREENWIDTH ; y<l->y+lh ; y++,yoffset+=SCREENWIDTH)
+	for (y=l->y,yoffset=y*BASEWIDTH ; y<l->y+lh ; y++,yoffset+=BASEWIDTH)
 	{
 	    if (y < viewwindowy || y >= viewwindowy + viewheight)
-		R_VideoErase(yoffset, SCREENWIDTH); // erase entire line
+		R_VideoErase(yoffset, BASEWIDTH); // erase entire line
 	    else
 	    {
 		R_VideoErase(yoffset, viewwindowx); // erase left border

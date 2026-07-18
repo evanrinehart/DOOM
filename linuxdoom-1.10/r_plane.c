@@ -44,7 +44,7 @@ planefunction_t		ceilingfunc;
 //
 
 // Here comes the obnoxious "visplane".
-#define MAXVISPLANES	160
+#define MAXVISPLANES	250
 visplane_t		visplanes[MAXVISPLANES];
 visplane_t*		lastvisplane;
 visplane_t*		floorplane;
@@ -242,7 +242,7 @@ R_FindPlane
 	return check;
 		
     if (lastvisplane - visplanes == MAXVISPLANES)
-	I_Error ("R_FindPlane: no more visplanes");
+	I_Error ("R_FindPlane: no more visplanes (%d/%d)", lastvisplane-visplanes, MAXVISPLANES);
 		
     lastvisplane++;
 
@@ -252,7 +252,7 @@ R_FindPlane
     check->minx = SCREENWIDTH;
     check->maxx = -1;
     
-    memset (check->top_store + 1, 0xff, sizeof check->top_store - 2);
+    memset (check->top_store + 1, 0xffff, sizeof check->top_store - 2);
 		
     return check;
 }
@@ -296,7 +296,7 @@ R_CheckPlane
     }
 
     for (x=intrl ; x<= intrh ; x++)
-	if (pl->top[x] != 0xff)
+	if (pl->top[x] != 0xffff)
 	    break;
 
     if (x > intrh)
@@ -317,7 +317,7 @@ R_CheckPlane
     pl->minx = start;
     pl->maxx = stop;
 
-    memset (pl->top_store + 1, 0xff, sizeof pl->top_store - 2);
+    memset (pl->top_store + 1, 0xffff, sizeof pl->top_store - 2);
 		
     return pl;
 }
@@ -394,7 +394,7 @@ void R_DrawPlanes (void)
 	// sky flat
 	if (pl->picnum == skyflatnum)
 	{
-	    dc_iscale = pspriteiscale;
+	    dc_iscale = pspriteiscale / REZ_FACTOR;
 	    
 	    // Sky is allways drawn full bright,
 	    //  i.e. colormaps[0] is used.
@@ -434,8 +434,8 @@ void R_DrawPlanes (void)
 
 	planezlight = zlight[light];
 
-	pl->top[pl->maxx+1] = 0xff;
-	pl->top[pl->minx-1] = 0xff;
+	pl->top[pl->maxx+1] = 0xffff;
+	pl->top[pl->minx-1] = 0xffff;
 		
 	stop = pl->maxx + 1;
 
