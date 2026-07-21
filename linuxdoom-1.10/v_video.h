@@ -98,12 +98,5 @@ V_GetBlock
   byte*		dest );
 
 
-void
-V_MarkRect
-( int		x,
-  int		y,
-  int		width,
-  int		height );
-
 void ClearFramebuffer(struct framebuffer *fb, byte color, byte mask);
 #endif

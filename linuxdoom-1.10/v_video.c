@@ -40,8 +40,6 @@
 // Each screen is [SCREENWIDTH*SCREENHEIGHT]; 
 byte*				screens[5];	
  
-int				dirtybox[4]; 
-
 struct framebuffer fb_hud;
 struct framebuffer fb_status;
 struct framebuffer fb_screen;
@@ -145,21 +143,6 @@ byte gammatable[5][256] =
 
 int	usegamma;
 			 
-//
-// V_MarkRect 
-// 
-void
-V_MarkRect
-( int		x,
-  int		y,
-  int		width,
-  int		height ) 
-{ 
-    M_AddToBox (dirtybox, x, y); 
-    M_AddToBox (dirtybox, x+width-1, y+height-1); 
-} 
- 
-
 void V_CopyRectFb(
     int srcx, int srcy, struct framebuffer *fbsrc, int width, int height,
     int dstx, int dsty, struct framebuffer *fbdst
@@ -371,8 +354,6 @@ V_DrawBlock
 	I_Error ("Bad V_DrawBlock");
     }
 #endif 
- 
-    V_MarkRect (x, y, width, height); 
  
     dest = screens[scrn] + y*SCREENWIDTH+x; 
 

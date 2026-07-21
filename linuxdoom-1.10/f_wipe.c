@@ -281,8 +281,6 @@ wipe_ScreenWipe
 	wipe_initMelt, wipe_doMelt, wipe_exitMelt
     };
 
-    void V_MarkRect(int, int, int, int);
-
     // initial stuff
     if (!go)
     {
@@ -293,7 +291,6 @@ wipe_ScreenWipe
     }
 
     // do a piece of wipe-in
-    V_MarkRect(0, 0, width, height);
     rc = (*wipes[wipeno*3+1])(width, height, ticks);
 
     // final stuff
