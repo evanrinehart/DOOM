@@ -267,6 +267,8 @@ void F_TextWrite (void)
     int		c;
     int		cx;
     int		cy;
+
+    fb_hud.dirty = true;
     
     // erase the entire screen to a tiled background
     src = W_CacheLumpName ( finaleflat , PU_CACHE);
