@@ -908,7 +908,7 @@ void D_CheckForFakes(void) {
 	    "                      press enter to continue\n"
 	    "===========================================================================\n"
 	    );
-	getchar ();
+	if (M_CheckParm("-nag")) getchar ();
 }
 
 
