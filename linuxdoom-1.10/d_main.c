@@ -74,6 +74,8 @@
 
 #include "d_main.h"
 
+#include "x_mapinfo.h"
+
 #include "hooks.h"
 
 //
@@ -761,6 +763,8 @@ void D_DoomMain (void)
         int len = W_LumpLength(dehacked_num);
         F_SetCustomFinale(dehacked, len);
     }
+
+    X_InitMapinfo();
 
     // announce DOOM
     if (!nostartup) D_PrintStartup(game_title, F_GetString("STARTUP5"));
