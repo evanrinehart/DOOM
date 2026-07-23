@@ -38,8 +38,11 @@
 
 #include "x_mapinfo.h"
 
+#include "mus_file.h"
+
 extern boolean nosound;
 extern boolean nomusic;
+extern boolean dumpmusic;
 
 // Purpose?
 const char snd_prefixen[]
@@ -568,7 +571,25 @@ void S_ChangeMusicTo(char *name, int looping) {
     if (num < 0) I_Error("S_ChangeMusicTo: can't find music %s\n", name);
 
     void *data = W_CacheLumpNum(num, PU_CACHE);
-    int handle = I_RegisterSong(data, W_LumpLength(num));
+    int size = W_LumpLength(num);
+
+    if (dumpmusic) {
+        char filename[64];
+        sprintf(filename, "%s.mus", name);
+        printf("S_ChangeMusicTo: dumping music to %s\n", filename);
+
+        struct mus_data md;
+        if (ReadMUS(&md, data, size) < 0) {
+            fprintf(stderr, "S_ChangeMusicTo: failed to decode MUS data\n");
+        }
+        else {
+            FILE *file = fopen(filename, "w");
+            DumpMUS(file, md);
+            fclose(file);
+        }
+    }
+
+    int handle = I_RegisterSong(data, size);
     I_PlaySong(handle, looping);
 
     musname_playing = name;

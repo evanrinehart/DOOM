@@ -83,6 +83,7 @@ OBJS=				\
 		$(O)/unicode.o   \
 		$(O)/x_mapinfo.o   \
 		$(O)/x_info.o   \
+		$(O)/mus_file.o   \
 		$(O)/i_endoom.o
 
 all:	 $(BINNAME)

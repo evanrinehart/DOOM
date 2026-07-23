@@ -128,6 +128,7 @@ boolean nosound = false;
 boolean nostartup = false;
 boolean noconfig = false;
 boolean gameclosed = false;
+boolean dumpmusic = false;
 extern bool show_endoom;
 
 char		wadfile[1024];		// primary wad file
@@ -658,6 +659,7 @@ void D_DoomMain (void)
     nosound = M_CheckParm("-nosound");
     nomusic = nosound || M_CheckParm("-nomusic");
     nostartup = M_CheckParm("-nostartup");
+    dumpmusic = M_CheckParm("-dumpmusic");
     if (M_CheckParm("-noendoom")) show_endoom = false;
 
     IdentifyVersion ();
@@ -1008,6 +1010,7 @@ void D_PrintHelp(void) {
 
     printf("Hacks:\n");
     pr("-dumplevel <dirname>", "dump map geometry to named directory");
+    pr("-dumpmusic", "on load music to text file D_NAME.mus");
     pr("-closed", "no music, no monsters or spawners");
     printf("\n");
 
